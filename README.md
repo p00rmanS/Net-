@@ -1,0 +1,147 @@
+# NetReady+ — CompTIA Network+ (N10-009) Mastery Course
+
+A self-paced, Udemy/Coursera-style learning platform for CompTIA Network+, built with the technique in [NETWORK_PLUS_COURSE_PROMPT.md](NETWORK_PLUS_COURSE_PROMPT.md) as the source spec. No backend, no accounts, no build tools — it runs entirely in your browser and works offline after the first load.
+
+Lessons are written in Simple English **and** natural Taglish, with everyday Philippine analogies, pro tips, exam alerts, and practice questions — matching the request for content taught the way Udemy/Coursera courses are structured, but explained the way a Filipino IT reviewer would actually explain it to you.
+
+## Project Purpose
+
+Teach a true beginner from zero networking knowledge toward CompTIA Network+ exam readiness and real help-desk/SOC-analyst competence, with everything trackable locally (progress, scores, streaks, bookmarks, notes) and zero paid tools.
+
+## Current Status — Read This First
+
+The original spec asks for 12+ modules, 100 lessons, 500 questions, and 3 full mock exams. **All 15 planned modules are now built** (86 lessons total), covering every N10-009 objective across all five exam domains, including modern-exam additions like zero trust, SASE/SSE, VXLAN, automation/orchestration/IaC, QoS, antenna types, organizational documents/policies (MOU/MSA/NDA/AUP/SOP), facilities/environmental controls (HVAC/UPS/generators/fire suppression), and vulnerability/risk-management vocabulary. The question bank (144 rich standalone + 258 inline knowledge-check questions = 402 total) is still short of the eventual 500-question target — see "Known Limitations" below for exactly what that means in practice.
+
+| Built now | Status |
+| --- | --- |
+| Full app shell: navbar, sidebar, dashboard, lesson player, search, theming, accessibility | ✅ Done |
+| Modules 0–14 (all 15 planned modules, 86 lessons total) | ✅ Fully populated |
+| Question bank | 144 rich standalone questions + 258 inline lesson knowledge checks (402 total) |
+| 7 guided labs (subnet planning ×2, VLAN assignment, static routing, Wi-Fi capacity/coverage, security hardening, troubleshooting ticket triage) | ✅ Working, with validation |
+| 3 mock exams, each drawing a distinct domain-weighted third of the question bank | ✅ Working — not yet fixed at 90 questions each (real exam length) |
+| Flashcards, Subnet Calculator, Subnetting Practice Generator, Port Trainer, OSI Layer Match, Acronym Trainer, Command Reference, Glossary | ✅ All fully functional |
+
+Every lesson follows the full 18-part template (outcomes, why it matters, Simple English, Taglish, analogy, step-by-step, visual diagram, real-world example, pro tips, exam alert, beginner mistakes, key terms, commands where relevant, 3-question knowledge check, mini scenario, recap, and "what I'd say in class"). Nothing in the learner-facing UI links to a lesson, quiz, or tool that doesn't actually work.
+
+**To keep growing the content:** use the "Suggested First Content-Expansion Prompt" at the bottom of `NETWORK_PLUS_COURSE_PROMPT.md` to add more standalone practice questions per module (toward the 500-question target), or more guided labs — the module list itself is complete, so further work is depth, not new modules.
+
+## Major Features
+
+- **Dashboard** — completion %, streak, study time, readiness meter (formula shown in-app), weakest domains, recommended lesson, recent scores.
+- **Curriculum roadmap** — all 15 planned modules with official N10-009 domain weighting; only built modules are clickable.
+- **Lesson player** — collapsible sidebar, prev/next (buttons, or swipe left/right on a touchscreen), mark complete, bookmark, personal notes (autosaved), reading-progress bar, font-size control, English/Taglish/side-by-side toggle, inline knowledge checks with per-answer feedback.
+- **Assessment engine** — filter by module/domain/difficulty, Study Mode (instant feedback) vs Exam Mode (feedback at the end), flag-for-review, question navigator, retry-missed-only, full domain score breakdown.
+- **Daily 10-Question Drill** — pulls fresh, recently-unseen questions across the whole bank.
+- **Mock exam** — timed, mixed-domain, with pass/readiness guidance that never claims an official score.
+- **Study tools** — Flashcards (Leitner-style spaced review), Subnet Calculator, Subnetting Practice Generator (unlimited randomized problems with worked solutions), Port & Protocol Trainer, OSI Layer Match game, Acronym Trainer, Command Reference (Windows/Linux filter), searchable A–Z Glossary, Bookmarks & Notes.
+- **Guided lab** — scenario, requirements, diagram, objectives, 3-level hints, automatic validation, troubleshooting tips, reflection questions, Taglish debrief, reset control.
+- **Progress engine** — everything above persists in `localStorage`; export/import as JSON; a confirmed "Reset All Progress" action.
+- **PWA / offline** — `manifest.json` + `service-worker.js` cache the whole app shell so it keeps working after the first load with no connection.
+- **Accessibility** — skip link, semantic landmarks, visible focus rings, full keyboard navigation, reduced-motion support, no color-only status indicators, accessible modals and quiz feedback.
+
+## File Structure
+
+```text
+Net+/
+├── index.html
+├── manifest.json
+├── service-worker.js
+├── README.md
+├── NETWORK_PLUS_COURSE_PROMPT.md   (the original build spec)
+├── css/
+│   ├── styles.css        (design tokens + all component styles)
+│   └── responsive.css    (breakpoints, off-canvas nav, print styles)
+├── js/
+│   ├── core.js            (namespace, DOM/storage helpers, event bus)
+│   ├── course-data.js     (exam metadata + full 15-module roadmap)
+│   ├── progress.js        (localStorage progress engine, readiness formula)
+│   ├── quiz-engine.js     (question pool, sessions, scoring)
+│   ├── flashcards.js      (deck + spaced-review scheduling)
+│   ├── subnet-tool.js     (pure IPv4 subnetting math)
+│   ├── labs.js            (lab lookup + answer validation)
+│   ├── app.js             (router, views, all UI wiring)
+│   └── content/
+│       ├── module-0.js … module-4.js   (lesson content, one file per module)
+│       ├── questions-bank.js           (standalone rich practice questions)
+│       ├── glossary-data.js
+│       ├── flashcards-data.js
+│       ├── ports-data.js
+│       └── labs-data.js
+└── assets/
+    └── icons/favicon.svg
+```
+
+**Why one file per module under `js/content/`, instead of one giant data file?** Each module is independently reviewable, diffable, and safe to hand to a future "populate the next module" prompt without touching unrelated content.
+
+**Why classic `<script>` tags instead of ES modules?** The project must also work by double-clicking `index.html` directly (`file://`), and browsers block `type="module"` scripts under `file://` due to CORS. Every file still attaches to a single `window.NetReady` namespace instead of leaking globals, which keeps the separation-of-concerns benefit of modules without the `file://` restriction.
+
+## How to Run Locally
+
+**Option 1 — just open it:**
+Double-click `index.html`. Everything works except the service worker (browsers disable service workers on `file://`), so the very first load needs internet only for... nothing, actually — there are no external dependencies. Offline caching simply won't activate under `file://`.
+
+**Option 2 — a simple local server (recommended, enables full PWA/offline behavior):**
+
+```bash
+python -m http.server 8000
+```
+
+or
+
+```bash
+npx serve .
+```
+
+Then open `http://localhost:8000`.
+
+## How to Add a New Module
+
+1. Add the module's metadata to `js/course-data.js` (`NetReady.MODULES`), and change its `status` from `'coming-soon'` to `'available'` once real lessons exist.
+2. Create `js/content/module-N.js` following the exact shape used in `module-1.js` — every lesson needs all 18 template fields (`outcomes`, `whyItMatters`, `simpleEnglish`, `taglish`, `analogy`, `howItWorks`, `visual`, `realWorldExample`, `proTips`, `examAlert`, `beginnerMistakes`, `keyTerms`, optional `commands`, `knowledgeCheck` with at least 3 questions, `miniScenario`, `recap`, `classroomAnswer`).
+3. Add a `<script src="js/content/module-N.js"></script>` line to `index.html` (before `js/progress.js`) **and** to `PRECACHE_URLS` in `service-worker.js`, then bump `CACHE_VERSION`.
+4. Add standalone practice questions for the module to `js/content/questions-bank.js` (see the existing entries for the full explanation format: correct/incorrect reasoning per option, keyword clue, Taglish note, pro tip, domain/objective/difficulty).
+5. Optional: add flashcards to `flashcards-data.js`, ports to `ports-data.js`, labs to `labs-data.js`.
+
+Everything else (dashboard stats, curriculum page, quiz filters, glossary, mock exam pool, readiness score) picks up new content automatically — no other file needs to change.
+
+## How Progress Storage Works
+
+All state lives under one `localStorage` key (`netready-plus:v1`) as a single JSON object: completed lessons, bookmarks, notes, quiz/mock-exam attempts (with per-domain breakdowns), lab progress, flashcard spaced-review state, streak, study time, and preferences (theme, font size, explanation mode). Nothing is sent anywhere. Use **Settings → Export Progress** to download a backup JSON file, and **Import Progress** to restore it on another browser/device. **Reset All Progress** requires an explicit confirmation and cannot be undone.
+
+## Updating to a Future Network+ Exam Version
+
+Everything exam-specific lives in one object: `NetReady.EXAM_META` in `js/course-data.js` (exam code, domain names, and weights). Update that object, re-verify every lesson/question's `domain`/`objective` tags against the new official objectives, and the dashboard, quiz filters, and readiness formula all update automatically.
+
+## Browser Support
+
+Any modern evergreen browser (Chrome, Edge, Firefox, Safari) from the last ~3 years. Uses standard ES2017+ JavaScript, CSS custom properties, and `color-mix()` (widely supported in current browsers; falls back gracefully to the base accent color in older engines that ignore the function).
+
+## Accessibility Notes
+
+- Skip-to-content link, semantic landmarks (`header`, `nav`, `main`), and a logical heading order on every page.
+- Every interactive control is a real `<button>`, `<a>`, or form element — nothing is a `<div>` pretending to be clickable, so full keyboard navigation and screen-reader semantics come for free.
+- Visible focus outlines on every focusable element (`:focus-visible`).
+- `prefers-reduced-motion` disables animation/transition durations globally.
+- Status is never color-only: correct/incorrect states use icons/text (✓/✗, "Correct!"/"Not quite.") alongside color.
+- Ordering questions use accessible up/down buttons instead of drag-and-drop, and the OSI matching game uses `<select>` dropdowns instead of drag targets, so both are fully keyboard-operable.
+
+## Known Limitations
+
+- The question bank (402 questions) is still short of the eventual 500-question target — it is large enough for genuine practice across every module, not for exhaustive exam-length drilling on any single one.
+- There are 3 mock exams (each a distinct, domain-weighted third of the full question bank, ~132-135 questions), not yet 3 separate fixed-at-90-question, full exam-length tests — and because they share one underlying pool, a question that appears in your knowledge-check practice can also appear in a mock exam.
+- There are 7 guided labs (subnet planning ×2, VLAN assignment, static routing, Wi-Fi capacity/coverage diagnosis, security hardening, troubleshooting ticket triage), short of the 25 the original spec envisioned — but the lab *system* itself supports three genuinely reusable interaction types (numeric/CIDR entry, multi-item matching, and checklist, each fully data-driven from `js/content/labs-data.js`), so adding more labs going forward is comparatively cheap.
+- The Subnetting Practice Generator produces effectively unlimited *generated* problems rather than 100 pre-written ones — this was a deliberate choice (see the lesson `4-5`) because a generator is strictly better practice than a fixed, eventually-memorized worksheet.
+- No drag-and-drop diagram-labeling PBQ simulation yet (ordering/ranking questions and dropdown-based matching are implemented; drag-based diagram placement is not).
+- Service worker offline caching only activates when served over `http(s)://`, not `file://` (a browser platform restriction, not a bug).
+
+## Testing Checklist
+
+- [x] All nav links, buttons, and forms lead somewhere real — no dead controls.
+- [x] Lessons, quizzes, labs, flashcards, notes, bookmarks, export/import, and reset all work end-to-end.
+- [x] Mobile (375px), tablet (768px), and desktop (1440px) layouts verified in the browser preview.
+- [x] Keyboard-only navigation verified (tab order, focus rings, Escape closes modals).
+- [x] Light and dark theme contrast checked.
+- [x] Progress persists after a full page refresh.
+- [x] Quiz scoring is correct and answer options are randomized without changing the correct answer.
+- [x] No answer is revealed before submission (Exam Mode) or before selection (Study Mode).
+- [x] No console errors during normal navigation.

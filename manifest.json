@@ -1,0 +1,16 @@
+{
+  "name": "NetReady+ — CompTIA Network+ Mastery Course",
+  "short_name": "NetReady+",
+  "description": "A self-paced, offline-capable CompTIA Network+ (N10-009) learning platform with Taglish explanations, labs, flashcards, and practice exams.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#0a0e1a",
+  "theme_color": "#0a0e1a",
+  "lang": "en",
+  "icons": [
+    { "src": "assets/icons/favicon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
+    { "src": "assets/icons/favicon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "maskable" }
+  ]
+}
