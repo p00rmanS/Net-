@@ -267,7 +267,7 @@
       'Confusing STP\'s slower convergence time with RSTP\'s much faster one when comparing the two on the exam.',
     ],
     keyTerms: [
-      { term: 'STP', def: 'Spanning Tree Protocol — prevents Layer 2 loops by electing a root bridge and blocking redundant paths.' },
+      { term: 'STP', def: 'Spanning Tree Protocol — prevents Layer 2 loops by electing a root bridge and blocking redundant paths. (Careful: "STP" also means Shielded Twisted Pair cabling in Module 3 — same acronym, completely different topic, decide from context.)' },
       { term: 'Root bridge', def: 'The switch elected as the reference point for the STP loop-free topology, chosen by lowest bridge ID.' },
       { term: 'Blocking port', def: 'A port that does not forward traffic but stands by as a backup path.' },
       { term: 'RSTP', def: 'Rapid Spanning Tree Protocol — achieves the same loop prevention as STP but converges far faster.' },

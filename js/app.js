@@ -27,6 +27,8 @@
     document.documentElement.setAttribute('data-font-size', prefs.fontSize);
     const themeBtn = qs('#theme-btn');
     if (themeBtn) themeBtn.innerHTML = NetReady.icon(prefs.theme === 'dark' ? 'sun' : 'moon', { size: 20 });
+    const themeColorMeta = qs('meta[name="theme-color"]');
+    if (themeColorMeta) themeColorMeta.setAttribute('content', prefs.theme === 'light' ? '#f5f7fb' : '#0a0e1a');
   }
 
   // ============================================================
@@ -419,7 +421,7 @@
 
         <article class="lesson-article">
           <div class="lesson-toolbar">
-            <button class="icon-btn" data-action="toggle-lesson-sidebar" aria-label="Toggle lesson list" aria-controls="lesson-sidebar">
+            <button class="icon-btn" data-action="toggle-lesson-sidebar" aria-label="Toggle lesson list" aria-controls="lesson-sidebar" aria-expanded="false">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
             </button>
             <div class="reading-progress-track"><div class="reading-progress-fill" id="reading-progress"></div></div>
@@ -775,7 +777,11 @@
         <div class="question-navigator">
           ${session.questions
             .map(
-              (qq, i) => `<button class="qnav-dot ${i === session.currentIndex ? 'is-current' : ''} ${NetReady.Quiz.isAnswered(session, qq.id) ? 'is-answered' : ''} ${session.flagged[qq.id] ? 'is-flagged' : ''}" data-action="goto-question" data-index="${i}" aria-label="Go to question ${i + 1}">${i + 1}</button>`
+              (qq, i) => {
+                const isAnswered = NetReady.Quiz.isAnswered(session, qq.id);
+                const label = `Go to question ${i + 1}${isAnswered ? ' (answered)' : ' (not answered yet)'}${session.flagged[qq.id] ? ', flagged for review' : ''}`;
+                return `<button class="qnav-dot ${i === session.currentIndex ? 'is-current' : ''} ${isAnswered ? 'is-answered' : ''} ${session.flagged[qq.id] ? 'is-flagged' : ''}" data-action="goto-question" data-index="${i}" aria-label="${label}">${i + 1}</button>`;
+              }
             )
             .join('')}
         </div>
@@ -785,7 +791,7 @@
           <h2 class="question-prompt">${escapeHtml(q.prompt)}</h2>
           ${renderQuestionInput(q, answer, showFeedback)}
           ${needsExplicitCheck && answered && !showFeedback ? '<button type="button" class="btn btn-secondary mt-sm" data-action="check-multi-answer">Check Answer</button>' : ''}
-          ${showFeedback ? renderStudyFeedback(q, answer) : ''}
+          <div aria-live="polite">${showFeedback ? renderStudyFeedback(q, answer) : ''}</div>
         </div>
 
         <div class="quiz-run-footer">
@@ -821,10 +827,11 @@
       .map((opt) => {
         const selected = answer && answer.optIds && answer.optIds.includes(opt.optId);
         const revealClass = showFeedback ? (opt.correct ? 'is-correct-answer' : selected ? 'is-wrong-answer' : '') : '';
+        const revealMark = showFeedback && opt.correct ? '<span class="option-mark" aria-hidden="true"> ✓</span>' : showFeedback && selected ? '<span class="option-mark" aria-hidden="true"> ✗</span>' : '';
         return `
         <label class="option-row ${revealClass}">
           <input type="${inputType}" name="quiz-q" data-action="quiz-answer" data-opt-id="${opt.optId}" data-input-type="${inputType}" ${selected ? 'checked' : ''} ${showFeedback ? 'disabled' : ''} />
-          <span>${escapeHtml(opt.text)}</span>
+          <span>${escapeHtml(opt.text)}${revealMark}</span>
         </label>`;
       })
       .join('')}</div>`;
@@ -1278,6 +1285,7 @@
               (name, i) => `
             <div class="osi-match-row" data-layer="${escapeHtml(name)}">
               <span class="osi-match-name">${escapeHtml(name)}</span>
+              <span class="osi-match-mark" aria-hidden="true"></span>
               <select data-action="osi-select" aria-label="Layer number for ${escapeHtml(name)}">
                 <option value="">--</option>
                 ${[1, 2, 3, 4, 5, 6, 7].map((n) => `<option value="${n}">${n}</option>`).join('')}
@@ -1287,7 +1295,7 @@
             .join('')}
         </div>
         <button class="btn btn-primary" data-action="check-osi-game">Check Answers</button>
-        <div id="osi-game-feedback"></div>
+        <div id="osi-game-feedback" aria-live="polite"></div>
       </div>
     `);
   }
@@ -1302,8 +1310,11 @@
       const correctNumber = OSI_LAYERS.indexOf(layer) + 1;
       const isCorrect = chosen === correctNumber;
       if (isCorrect) correctCount += 1;
+      const isWrong = !isCorrect && select.value !== '';
       row.classList.toggle('is-correct-answer', isCorrect);
-      row.classList.toggle('is-wrong-answer', !isCorrect && select.value !== '');
+      row.classList.toggle('is-wrong-answer', isWrong);
+      const mark = qs('.osi-match-mark', row);
+      if (mark) mark.textContent = isCorrect ? '✓' : isWrong ? '✗' : '';
     });
     qs('#osi-game-feedback').innerHTML = `<p class="quiz-feedback ${correctCount === rows.length ? 'is-correct' : 'is-incorrect'}"><strong>${correctCount} / ${rows.length} correct.</strong> ${correctCount === rows.length ? 'Perfect — the whole stack, memorized.' : 'Review the highlighted rows and try again.'}</p>`;
   }
@@ -1510,7 +1521,7 @@
       <div class="card">
         <h2>Your Plan</h2>
         ${renderLabForm(lab, progress)}
-        <div id="lab-feedback"></div>
+        <div id="lab-feedback" aria-live="polite"></div>
       </div>
       <details class="card">
         <summary>Hints (3 levels)</summary>
@@ -1824,7 +1835,10 @@
       btn.setAttribute('aria-expanded', String(open));
       if (backdrop) backdrop.hidden = !open;
     },
-    'toggle-lesson-sidebar': () => qs('#lesson-sidebar').classList.toggle('is-open'),
+    'toggle-lesson-sidebar': (target) => {
+      const open = qs('#lesson-sidebar').classList.toggle('is-open');
+      target.setAttribute('aria-expanded', String(open));
+    },
     'cycle-theme': () => {
       const prefs = NetReady.Progress.getPrefs();
       NetReady.Progress.setPref('theme', prefs.theme === 'dark' ? 'light' : 'dark');
@@ -2057,6 +2071,7 @@
     renderShell();
     applyPrefs();
     bindGlobalEvents();
+    NetReady.bus.on('progress:changed', updateStreakBadge);
     qs('#global-search').addEventListener('input', (e) => runSearch(e.target.value));
     document.addEventListener('click', (e) => {
       if (!e.target.closest('.header-search')) {

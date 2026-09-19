@@ -153,7 +153,7 @@
     ],
     keyTerms: [
       { term: 'UTP', def: 'Unshielded Twisted Pair — the standard copper cable type relying on wire twisting alone to reduce interference.' },
-      { term: 'STP', def: 'Shielded Twisted Pair — copper cable with added metallic shielding against electromagnetic interference.' },
+      { term: 'STP', def: 'Shielded Twisted Pair — copper cable with added metallic shielding against electromagnetic interference. (Careful: "STP" also means Spanning Tree Protocol in Module 7 — same acronym, completely different topic, decide from context.)' },
       { term: 'Cat rating', def: 'A category number (e.g., Cat 6, Cat 6a) indicating a copper cable\'s maximum supported speed and distance.' },
       { term: 'EMI (Electromagnetic Interference)', def: 'Unwanted electrical noise from nearby equipment that can degrade signal quality on copper cabling.' },
     ],

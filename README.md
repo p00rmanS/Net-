@@ -94,6 +94,21 @@ npx serve .
 
 Then open `http://localhost:8000`.
 
+## Deploying
+
+This is a pure static site (no build step, no server code, hash-based routing), so it deploys as-is to any static host.
+
+**Netlify:** New site from Git (or drag-and-drop the folder). Build command: *(leave empty)*. Publish directory: `.` (repo root). `_headers` is picked up automatically and keeps `service-worker.js` and `manifest.json` from being cached.
+
+**Vercel:** Import the repo. Framework Preset: **Other**. Build command: *(leave empty)*. Output directory: leave the default (serves the repo root when there is no `public/` folder). `vercel.json` applies the same no-cache headers.
+
+**Lovable is not a supported target.** Lovable only builds React (Vite / TanStack Start) projects and cannot import an existing plain-HTML repo, so this site cannot be hosted there.
+
+Things to know after deploying:
+- **Progress is stored per origin** (per domain). Progress made on `localhost` or on a Netlify/Vercel preview URL will not appear on your production domain — use Settings → Export Progress / Import Progress to move it.
+- **Every deploy that changes any precached file must bump `CACHE_VERSION` in `service-worker.js`**, otherwise returning visitors keep getting the old cached files. (If you add a file, also add it to `PRECACHE_URLS` and `index.html`.)
+- File paths are case-sensitive on Netlify/Vercel (Linux). All references were verified to match exact file-name case.
+
 ## How to Add a New Module
 
 1. Add the module's metadata to `js/course-data.js` (`NetReady.MODULES`), and change its `status` from `'coming-soon'` to `'available'` once real lessons exist.

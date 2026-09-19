@@ -119,9 +119,9 @@
     taglish:
       'Ang TCP/IP model parang "simplified version" ng OSI — mas kaunting layers pero pareho lang naman ang concept. Apat lang ang layers: Network Access, Internet, Transport, at Application. Dito rin talaga "totoong" gumagana ang internet — ang OSI mas ginagamit natin bilang teaching tool at common language, pero ang TCP/IP ang aktwal na blueprint ng modern networking.',
     analogy: {
-      title: 'Buod ng recipe book',
+      title: 'Parehong restaurant, pero mas kaunting departamento na lang sa org chart',
       text:
-        'Kung ang OSI ay isang detalyadong recipe book na may pitong hakbang, ang TCP/IP naman ay parang "quick summary card" na may apat na hakbang lang pero pareho pa rin ang resulta. Minsan pinagsasama ng summary card yung ilang steps sa isa, tulad ng pagsasama ng Session, Presentation, at Application sa isang "Application" layer na lang sa TCP/IP.',
+        'Kung ang OSI ay isang detalyadong recipe book na may pitong hakbang, ang TCP/IP naman ay parang "quick summary card" na may apat na hakbang lang pero pareho pa rin ang resulta. Balikan natin ang parehong restaurant mula sa Lesson 2-1, pero sa pagkakataong ito, isipin mo na lang bilang apat na malalaking departamento sa org chart: "Kitchen & Local Delivery" ang pinagsamang Physical at Data Link (kalan, kawali, at paghahatid sa tamang table sa loob mismo ng restaurant), "Courier Service" ang Network/Internet layer (pagpili ng ruta papunta sa ibang branch), "Order Assurance" ang Transport layer (yung waiter na nagsisiguro kumpletong dumating ang order), at "Customer Experience" na iisang malaking departamento na lang para sa dating tatlong hiwalay na istasyon — Session, Presentation, at Application — dahil mula sa pag-upo ng customer, pagbasa ng menu, hanggang sa aktwal na pag-order, iisang karanasan naman ito sa mata ng management. Parehong restaurant, parehong trabaho — mas kaunti lang ang kahon sa org chart.',
     },
     howItWorks: [
       'TCP/IP Network Access (Link) layer combines OSI Physical and Data Link (Layers 1-2).',

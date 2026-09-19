@@ -494,6 +494,8 @@
     ],
     keyTerms: [
       { term: 'Congestion', def: 'A condition where bandwidth demand exceeds available capacity, causing delays and potential packet loss.' },
+      { term: 'Latency', def: 'Delay in data delivery, caused by physical distance, congested links, or inefficient routing paths — measured directly with ping and traceroute.' },
+      { term: 'Packet loss', def: 'Data that never arrives at its destination, forcing retransmissions that further degrade performance beyond the raw loss percentage alone.' },
       { term: 'Wireless interference', def: 'Degraded Wi-Fi performance caused by channel overlap, non-Wi-Fi devices, or physical obstructions.' },
     ],
     commands: [

@@ -80,7 +80,7 @@
    ========================================================================== */
 *, *::before, *::after { box-sizing: border-box; }
 html { color-scheme: dark; }
-:root[data-theme='light'] html { color-scheme: light; }
+html[data-theme='light'] { color-scheme: light; }
 
 body {
   margin: 0;
@@ -523,9 +523,10 @@ input:focus, select:focus, textarea:focus { border-color: var(--accent-cyan); }
 .mock-timer { font-weight: 800; color: var(--accent-amber); font-variant-numeric: tabular-nums; }
 
 .question-navigator { display: flex; flex-wrap: wrap; gap: 0.35em; margin-bottom: 1.25rem; }
-.qnav-dot { width: 2em; height: 2em; border-radius: 50%; border: 1px solid var(--border-strong); background: var(--bg-surface-raised); color: var(--text-secondary); font-size: 0.78rem; font-weight: 700; cursor: pointer; }
+.qnav-dot { position: relative; width: 2em; height: 2em; border-radius: 50%; border: 1px solid var(--border-strong); background: var(--bg-surface-raised); color: var(--text-secondary); font-size: 0.78rem; font-weight: 700; cursor: pointer; }
 .qnav-dot.is-current { border-color: var(--accent-cyan); color: var(--accent-cyan); }
 .qnav-dot.is-answered { background: color-mix(in srgb, var(--accent-green) 20%, var(--bg-surface-raised)); }
+.qnav-dot.is-answered::after { content: ''; position: absolute; bottom: 0; right: 0; width: 0.6em; height: 0.6em; border-radius: 50%; background: var(--accent-green); border: 1px solid var(--bg-surface-raised); }
 .qnav-dot.is-flagged { outline: 2px solid var(--accent-amber); }
 
 .question-card .badge { margin-bottom: 0.75em; }

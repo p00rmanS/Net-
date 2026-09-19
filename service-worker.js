@@ -6,7 +6,7 @@
  * Bump CACHE_VERSION whenever any precached file changes so clients pick
  * up the update instead of serving stale content forever.
  */
-const CACHE_VERSION = 'netready-plus-v18';
+const CACHE_VERSION = 'netready-plus-v20';
 const PRECACHE_URLS = [
   './',
   './index.html',
@@ -42,13 +42,18 @@ const PRECACHE_URLS = [
   './js/labs.js',
   './js/app.js',
   './assets/icons/favicon.svg',
+  './assets/icons/icon-192.png',
+  './assets/icons/icon-512.png',
+  './assets/icons/icon-maskable-512.png',
+  './assets/icons/apple-touch-icon.png',
 ];
 
 self.addEventListener('install', (event) => {
+  // cache:'reload' bypasses the HTTP cache so a new deploy never precaches stale copies of files.
   event.waitUntil(
     caches
       .open(CACHE_VERSION)
-      .then((cache) => cache.addAll(PRECACHE_URLS))
+      .then((cache) => cache.addAll(PRECACHE_URLS.map((url) => new Request(url, { cache: 'reload' }))))
       .then(() => self.skipWaiting())
   );
 });
@@ -75,7 +80,7 @@ self.addEventListener('fetch', (event) => {
           }
           return response;
         })
-        .catch(() => caches.match('./index.html'));
+        .catch(() => (event.request.mode === 'navigate' ? caches.match('./index.html') : Response.error()));
     })
   );
 });

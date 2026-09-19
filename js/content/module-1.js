@@ -223,9 +223,9 @@
     taglish:
       'Ang internet, alam na natin lahat — bukas sa buong mundo. Ang intranet parang "family group chat" ng isang company — mga empleyado lang ang pwedeng sumali, may sariling internal portal, HR system, atbp. Ang extranet naman parang "guest access" — piniling outsiders lang (halimbawa supplier o partner company) ang bibigyan mo ng access sa specific na parte ng internal network mo, hindi lahat.',
     analogy: {
-      title: 'Bahay, sala, at guest room',
+      title: 'Bahay, sala, guest room, at ang guwardiya sa gate',
       text:
-        'Ang internet parang kalsada sa labas — bukas sa lahat. Ang intranet parang loob mismo ng bahay niyo — pamilya lang ang laya kumilos kahit saan. Ang extranet parang guest room na binuksan niyo para sa piniling bisita (partner company) — may access sila sa specific na parte, pero hindi sa buong bahay.',
+        'Ang internet parang kalsada sa labas — bukas sa lahat, kahit sino puwedeng dumaan. Ang intranet parang loob mismo ng bahay niyo — pamilya lang (mga empleyado) ang may susi at laya kumilos kahit saang kwarto. Ang extranet naman parang isang guest room na may sariling pintuan mula sa labas — binuksan niyo ito para sa piniling bisita (partner company o supplier), pero hindi basta-basta nakakapasok kahit sino: kailangan muna nilang magpakilala sa guwardiya sa gate (login/authentication), minsan may kasamang espesyal na pass o key card (VPN certificate), at ang guest room lang mismo ang puwede nilang pasukan — hindi ang sala, hindi ang kusina, hindi ang mga kwarto ng pamilya. Kapag walang tamang pass ang bisita, kahit nakatayo sila sa may pintuan, hindi pa rin sila makakapasok.',
     },
     howItWorks: [
       'An intranet typically sits entirely behind a firewall, unreachable from the public internet.',
