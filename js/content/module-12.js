@@ -336,6 +336,7 @@
       'A screened subnet places public-facing servers between two firewalls (or one firewall with multiple interfaces): one facing the internet, one facing the internal network, so traffic must pass through controlled filtering at each boundary.',
       'Trusted zones typically have looser restrictions (internal network); untrusted zones (internet, DMZ) have stricter inbound filtering — firewall policy is built around these zone relationships.',
       'NAC checks device posture (OS patch level, antivirus status, compliance with security policy) before granting network access, and can quarantine non-compliant devices to a restricted remediation network instead of full access.',
+      'NAC is enforced through concrete mechanisms: port security (limiting or locking down which MAC addresses may connect to a specific switch port), 802.1X (certificate/credential-based authentication before a port is allowed to pass regular traffic), and MAC filtering (an allow-list or deny-list of specific MAC addresses permitted on a network or port).',
     ],
     visual: {
       type: 'diagram',
@@ -364,6 +365,7 @@
       { term: 'ACL', def: 'Access Control List — an ordered list of rules permitting or denying traffic.' },
       { term: 'Screened subnet (DMZ)', def: 'An isolated network segment for public-facing servers, separated from the internal trusted network.' },
       { term: 'NAC', def: 'Network Access Control — verifies a device meets security requirements before granting network access.' },
+      { term: 'MAC filtering', def: 'A NAC enforcement mechanism that allows or denies network access based on a device\'s MAC address.' },
       { term: 'Trusted/untrusted zone', def: 'A classification of network segments by relative trust level, used to build firewall policy.' },
     ],
     knowledgeCheck: [

@@ -646,4 +646,104 @@
     classroomAnswer:
       '"Every troubleshooting question has a specific tool that answers it fastest — I start simple with ping and traceroute, and only reach for a full packet capture when those simpler tools genuinely cannot explain what I am seeing."',
   };
+
+  NetReady.LESSONS['13-7'] = {
+    id: '13-7',
+    moduleId: 13,
+    slug: 'advanced-tools-and-device-show-commands',
+    title: 'Advanced Troubleshooting Tools and Device "Show" Commands',
+    estMinutes: 13,
+    outcomes: [
+      'Identify what Nmap, LLDP/CDP, and tcpdump are each used for.',
+      'Explain the purpose of a visual fault locator, a speed tester, and a network tap.',
+      'Match a basic networking device "show" command to the information it reveals.',
+    ],
+    whyItMatters:
+      'Lesson 13-6 covered the everyday first-response tools — this lesson covers the more specialized tools and the exact device commands the exam expects you to recognize on sight, the ones you reach for only when the basics have already narrowed things down.',
+    simpleEnglish:
+      'Nmap is a network scanner that probes a range of addresses and ports to discover live hosts and identify which services are running on them. LLDP (Link Layer Discovery Protocol, vendor-neutral) and CDP (Cisco Discovery Protocol, Cisco-proprietary) let directly-connected devices automatically announce information about themselves (device type, port, capabilities) to their neighbor, which is invaluable for mapping a network you did not build yourself. Tcpdump is a command-line packet capture tool — functionally similar to Wireshark, but text-based and scriptable. A visual fault locator shines a visible laser through a fiber optic cable to reveal breaks or bad bends by literally showing where light leaks out. A speed tester measures actual, real-world throughput rather than a connection\'s theoretical rated speed. A network tap is a hardware device inserted inline between two devices that passively copies all passing traffic to a monitoring port, similar in purpose to port mirroring but implemented in dedicated hardware rather than switch configuration. On network devices themselves (mostly Cisco-style command-line interfaces), a family of "show" commands reveals different information directly from the device: show mac-address-table (the switch\'s MAC-to-port table), show route (the routing table), show interface (per-interface status, speed, and error counters), show config (the running or saved configuration), show arp (the device\'s ARP table), show vlan (VLAN-to-port assignments), and show power (PoE power budget and usage per port).',
+    taglish:
+      'Ang Nmap ay isang network scanner na sumususuri sa isang saklaw ng address at port para malaman kung aling mga host ang buhay at anong mga serbisyo ang tumatakbo sa kanila. Ang LLDP (vendor-neutral) at CDP (Cisco lang) ay nagpapahintulot sa mga direktang magkakonektang device na awtomatikong ipakilala ang sarili nila sa kapitbahay nila (klase ng device, port, kakayahan) — sobrang useful kapag hindi mo mismo ginawa ang network na iyong ina-audit. Ang tcpdump ay command-line na packet capture tool — halos pareho ng Wireshark, pero text-based at puwedeng i-script. Ang visual fault locator ay nagpapasok ng makikitang laser sa loob ng fiber optic cable para makita ang putol o baluktot na bahagi — literal mong makikita kung saan tumatagas ang liwanag. Ang speed tester ay sinusukat ang aktwal, totoong bilis, hindi lang ang teoretikal na rating ng koneksyon. Ang network tap ay hardware na inilalagay sa gitna ng dalawang device para kopyahin ang lahat ng dumadaang trapiko papunta sa isang monitoring port — kahalintulad ng port mirroring pero gamit ang dedikadong hardware sa halip na configuration lang. Sa mismong mga network device (kadalasan Cisco-style command line), may pamilya ng "show" commands na direktang nagpapakita ng impormasyon: show mac-address-table (MAC-to-port table ng switch), show route (routing table), show interface (status, bilis, at error counters bawat interface), show config (kasalukuyang o naka-save na configuration), show arp (ARP table ng device), show vlan (VLAN assignment bawat port), at show power (PoE power budget at paggamit bawat port).',
+    analogy: {
+      title: 'Ang mas sopistikadong toolbox sa likod ng service truck',
+      text:
+        'Sa Lesson 13-6, natutunan mo na ang mga pang-araw-araw na gamit — ang parang martilyo at destornilyador ng troubleshooting (ping, traceroute, arp). Pero minsan, kailangan mo ng mas sopistikadong kagamitan na nasa likod ng service truck, hindi laging dala-dala. Ang Nmap ay parang isang guwardiya na naglalakad sa buong gusali, kinakatok ang bawat pinto (port) para malaman kung alin ang bukas at anong klaseng silid (serbisyo) ang nasa likod nito. Ang LLDP at CDP naman ay parang mga device na nagbibigayan ng business card sa kapitbahay nila — awtomatiko nilang ipinapakilala ang sarili (modelo, port, kakayahan) sa direktang kausap nila, kaya kahit hindi mo alam kung ano ang nasa kabilang dulo ng kable, malalaman mo agad. Ang tcpdump ay parang Wireshark na walang graphical na interface — command-line lang, pero ganoon pa rin ka-detalyado ang nakikita. Ang visual fault locator ay parang flashlight na sinasabog mo sa loob ng fiber optic cable — kung may putol o sirang bahagi, makikita mo ang pulang liwanag na tumatagas doon. Ang speed tester ay literal na sinusukat ang aktwal na bilis, hindi lang ang teoretikal na rating. At ang network tap ay parang de-kalidad na dagdag-daanan na inilalagay sa gitna ng dalawang device para makopya ang lahat ng dumadaang trapiko papunta sa isang monitoring tool — passive lang, hindi nakikialam sa mismong daloy. At kung gusto mong marinig mismo ang sinasabi ng device tungkol sa sarili niya (sa halip na tanungin ang tao), tinatanong mo siya mismo gamit ang mga "show" command — parang hinihingi mo ang kanyang sariling logbook.',
+    },
+    howItWorks: [
+      'Nmap scans a range of IP addresses and ports to discover live hosts and identify open ports/running services — useful for network discovery and auditing what is actually reachable.',
+      'LLDP (vendor-neutral) and CDP (Cisco-only) let directly-connected devices exchange identity information automatically, making it much faster to map an unfamiliar network\'s physical topology.',
+      'Tcpdump captures packet data from the command line, useful on servers or remote systems where a graphical tool like Wireshark is not practical.',
+      'A visual fault locator shines visible laser light into fiber to reveal physical breaks or damage by sight, without needing specialized signal-testing equipment.',
+      'A speed tester measures actual achieved throughput, which can reveal a real-world bottleneck that a device\'s rated "up to" speed does not.',
+      'A network tap sits inline and passively duplicates all traffic to a monitoring device, offering a hardware-based alternative to switch-configured port mirroring.',
+      '"Show" commands query the device directly for ground-truth data: show mac-address-table for Layer 2 forwarding entries, show route for the routing table, show interface for per-port status/errors, show config for the current configuration, show arp for IP-to-MAC mappings, show vlan for VLAN port assignments, and show power for PoE budget and draw.',
+    ],
+    visual: {
+      type: 'diagram',
+      html: `<table class="lesson-table">
+        <thead><tr><th>Need To Know</th><th>Command / Tool</th></tr></thead>
+        <tbody>
+          <tr><td>Which hosts/ports are alive on a network?</td><td>Nmap</td></tr>
+          <tr><td>What device is on the other end of this cable?</td><td>LLDP / CDP</td></tr>
+          <tr><td>Command-line packet capture on a remote server?</td><td>tcpdump</td></tr>
+          <tr><td>Exactly where is this fiber cable broken?</td><td>Visual fault locator</td></tr>
+          <tr><td>What is our real, achieved throughput?</td><td>Speed tester</td></tr>
+          <tr><td>Passively copy all inline traffic to a monitor?</td><td>Network tap</td></tr>
+          <tr><td>Which port learned this MAC address?</td><td>show mac-address-table</td></tr>
+          <tr><td>What does this router's routing table say?</td><td>show route</td></tr>
+          <tr><td>Is this port up, and what are its error counters?</td><td>show interface</td></tr>
+          <tr><td>What is this device's current configuration?</td><td>show config</td></tr>
+          <tr><td>What VLAN is this port assigned to?</td><td>show vlan</td></tr>
+          <tr><td>How much PoE power is this port drawing?</td><td>show power</td></tr>
+        </tbody>
+      </table>`,
+    },
+    realWorldExample:
+      'A technician inheriting an undocumented network runs LLDP neighbor discovery on each switch to rebuild an accurate physical topology map in an afternoon, instead of manually tracing every cable by hand.',
+    proTips: [
+      'Nmap is powerful enough to look like an attack if run against a network without authorization — always confirm you have explicit permission before scanning a network you do not own or manage.',
+      'When two commands sound similar, tie them to what actually generated the entry: show mac-address-table reflects what the SWITCH learned at Layer 2, while show arp reflects what a DEVICE learned at Layer 3 — different tables, different layers.',
+    ],
+    examAlert:
+      'The exam may describe a need in plain language ("see what device is connected to this port without asking anyone," "check how much PoE power this port is using") and expect you to name the exact tool or show command — treat the visual table in this lesson as a direct answer key to memorize.',
+    beginnerMistakes: [
+      'Confusing CDP (Cisco-only) with LLDP (works across vendors) — assuming CDP will work on non-Cisco gear.',
+      'Forgetting that a network tap and port mirroring solve the same problem differently — a tap is dedicated hardware, port mirroring is a switch configuration feature.',
+      'Running Nmap against a network without authorization — treat it with the same care as any other security tool.',
+    ],
+    keyTerms: [
+      { term: 'Nmap', def: 'A network scanner that discovers live hosts and identifies open ports/services across a range of addresses.' },
+      { term: 'LLDP / CDP', def: 'Protocols that let directly-connected devices automatically exchange identity information; LLDP is vendor-neutral, CDP is Cisco-proprietary.' },
+      { term: 'Network tap', def: 'A hardware device inserted inline that passively duplicates all passing traffic to a monitoring port.' },
+      { term: 'Visual fault locator', def: 'A tool that shines visible laser light into fiber optic cable to reveal physical breaks by sight.' },
+    ],
+    knowledgeCheck: [
+      {
+        prompt: 'A technician wants to identify what device is physically connected to a given switch port without physically tracing the cable or asking anyone. What should they use?',
+        options: ['Nmap', 'LLDP or CDP neighbor information', 'A speed tester', 'show power'],
+        correct: 1,
+        explanation: 'LLDP/CDP let directly-connected devices announce their own identity automatically, revealing exactly what is on the other end.',
+      },
+      {
+        prompt: 'Which tool would most directly help locate a physical break in a fiber optic cable?',
+        options: ['tcpdump', 'A visual fault locator', 'Nmap', 'show vlan'],
+        correct: 1,
+        explanation: 'A visual fault locator shines visible light through the fiber, showing exactly where it leaks out at a break.',
+      },
+      {
+        prompt: 'Which command would show a switch\'s Layer 2 table of which MAC addresses were learned on which ports?',
+        options: ['show route', 'show power', 'show mac-address-table', 'show config'],
+        correct: 2,
+        explanation: 'show mac-address-table displays the switch\'s Layer 2 MAC-to-port forwarding table specifically.',
+      },
+    ],
+    miniScenario: {
+      prompt: 'You have just inherited management of a network with zero existing documentation, and need to find out what is actually connected to every switch port before your first change window.',
+      task: 'Name the tool or protocol you would use first, and explain what it would tell you.',
+    },
+    recap:
+      'Nmap discovers hosts/services; LLDP/CDP reveal directly-connected neighbor identity; tcpdump captures packets from the command line; a visual fault locator finds fiber breaks by sight; a speed tester measures real throughput; a network tap passively duplicates inline traffic. "Show" commands (mac-address-table, route, interface, config, arp, vlan, power) query a device directly for ground-truth data.',
+    classroomAnswer:
+      '"When I do not know a network, the very first thing I pull up is neighbor discovery and a few show commands — the devices themselves will tell you the truth faster than any diagram someone forgot to update."',
+  };
 }(window.NetReady));

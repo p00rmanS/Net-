@@ -444,6 +444,7 @@
       { term: 'MDF (Main Distribution Frame)', def: 'The central wiring point of a building where external and internal cabling connects, typically housing core network equipment.' },
       { term: 'IDF (Intermediate Distribution Frame)', def: 'A secondary wiring closet, often per floor, connecting back to the MDF.' },
       { term: 'Patch panel', def: 'A passive panel that terminates permanent building cabling, allowing flexible connections via patch cables.' },
+      { term: 'Fiber distribution panel', def: 'A patch panel variant built specifically for fiber optic connections, protecting and organizing fragile fiber terminations the same way a standard patch panel organizes copper.' },
       { term: 'Demarcation point (demarc)', def: 'The point separating ISP responsibility from customer responsibility for cabling and service.' },
       { term: 'Smart jack', def: 'An active device at the demarc supporting remote testing and diagnostics.' },
     ],

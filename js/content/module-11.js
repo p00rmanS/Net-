@@ -663,6 +663,7 @@
       'A generator takes longer to start (seconds, sometimes with an automatic transfer switch) but can sustain power for hours or days as long as fuel is supplied, making the UPS-then-generator combination the standard layered approach to power redundancy.',
       'Clean-agent fire suppression systems (like FM-200 or inert gas systems) extinguish fire by removing oxygen or interrupting the chemical reaction, without leaving residue or conductive liquid that would destroy electronics — unlike a traditional water sprinkler system.',
       'Environmental monitoring sensors (temperature, humidity, water leak detection) are often tied into alerting systems so staff are notified before a facility problem becomes an outage.',
+      'Rack-mounted equipment is described by its airflow direction — port-side exhaust (hot air blows out the port/cabled side) or port-side intake (cool air is drawn in from the port/cabled side) — and mixing the two in the same aisle defeats a hot-aisle/cold-aisle layout. A PDU (Power Distribution Unit) distributes power to everything mounted in a rack, so its power load and supported voltage must be planned before adding new equipment.',
     ],
     visual: {
       type: 'diagram',
@@ -694,6 +695,8 @@
       { term: 'UPS', def: 'Uninterruptible Power Supply — battery-backed device providing immediate, short-term power during a utility power failure.' },
       { term: 'Generator', def: 'A fuel-powered backup power source providing sustained power during extended outages.' },
       { term: 'Clean-agent fire suppression', def: 'A gas-based fire suppression system that extinguishes fire without damaging electronic equipment, unlike water sprinklers.' },
+      { term: 'Port-side exhaust/intake', def: 'A description of which side of rack-mounted equipment blows out hot air (exhaust) versus draws in cool air (intake), critical for hot-aisle/cold-aisle planning.' },
+      { term: 'PDU (Power Distribution Unit)', def: 'A device that distributes electrical power to equipment mounted in a rack, with its own power load and voltage limits to plan around.' },
     ],
     knowledgeCheck: [
       {

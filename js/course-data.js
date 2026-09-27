@@ -84,7 +84,7 @@
       title: 'Ports, Protocols, and Network Services',
       blurb: 'DNS, DHCP, HTTP/S, at ang mga "language" ng internet.',
       status: 'available',
-      lessonIds: ['6-1', '6-2', '6-3', '6-4', '6-5', '6-6'],
+      lessonIds: ['6-1', '6-2', '6-3', '6-4', '6-5', '6-6', '6-7'],
     },
     {
       id: 7,
@@ -140,7 +140,7 @@
       title: 'Troubleshooting Methodology and Tools',
       blurb: 'Ang tamang proseso kapag may sirang network.',
       status: 'available',
-      lessonIds: ['13-1', '13-2', '13-3', '13-4', '13-5', '13-6'],
+      lessonIds: ['13-1', '13-2', '13-3', '13-4', '13-5', '13-6', '13-7'],
     },
     {
       id: 14,

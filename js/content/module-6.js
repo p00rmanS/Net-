@@ -621,4 +621,121 @@
     classroomAnswer:
       '"One public IP, many devices — that\'s PAT doing the work behind the scenes, tracking everything by port number so the replies find their way back to the right device."',
   };
+
+  NetReady.LESSONS['6-7'] = {
+    id: '6-7',
+    moduleId: 6,
+    slug: 'advanced-dhcp-and-dns-scopes-relay-zones-security',
+    title: 'Leveling Up DHCP and DNS: Scopes, Relay, Exclusions, Zones, and DNS Security',
+    estMinutes: 14,
+    outcomes: [
+      'Explain DHCP scope, exclusions, and common option types beyond gateway and DNS.',
+      'Explain why DHCP relay (IP helper) is needed when clients and the DHCP server sit on different subnets.',
+      'Differentiate DNS zone types, authoritative vs. non-authoritative answers, and recursive queries.',
+      'Explain what DNSSEC, DoH, and DoT each protect against, and how DoH and DoT differ from each other.',
+    ],
+    whyItMatters:
+      'Lessons 6-2 and 6-3 taught the basic DORA handshake and lookup chain — this lesson covers the exact vocabulary the exam uses for the more advanced, real-world configuration and security details of both services.',
+    simpleEnglish:
+      'A DHCP scope is the range of addresses a server is allowed to hand out on a given subnet; an exclusion is a specific address inside that range deliberately withheld (often because it is assigned statically to something like a printer or server). DHCP options are extra settings delivered alongside the address — common examples include option 3 (default gateway), option 6 (DNS servers), and option 66/67 (used for network booting). When the DHCP client and the DHCP server are on different subnets, a router or Layer 3 switch must be configured with DHCP relay (often called an "IP helper") to forward the client\'s broadcast to the real server as a unicast, since ordinary broadcasts do not cross routers. On the DNS side, a forward zone maps names to addresses while a reverse zone maps addresses back to names (using PTR records); a primary zone is the editable, authoritative copy of a domain\'s records, while a secondary zone is a read-only replica kept in sync for redundancy. An authoritative answer comes directly from the zone\'s own server, while a non-authoritative answer comes from a resolver that is simply repeating a cached answer it looked up earlier. A recursive query asks a resolver to do all the walking (root, TLD, authoritative) and hand back only the final answer. DNSSEC adds cryptographic signatures to DNS records so a resolver can verify a response has not been tampered with, directly defending against DNS spoofing/poisoning. DoH (DNS over HTTPS) and DoT (DNS over TLS) both encrypt DNS queries in transit, but DoH tunnels them inside regular HTTPS traffic on port 443 (blending in with normal web traffic), while DoT uses its own dedicated port 853 (easier for a network administrator to specifically identify, allow, or block).',
+    taglish:
+      'Ang DHCP scope ay ang saklaw ng mga address na puwedeng ipamigay ng isang server sa isang partikular na subnet; ang exclusion naman ay isang specific na address sa loob ng saklaw na iyon na sinasadyang hindi ipinapamigay (kadalasan dahil static IP na ang nakatakda roon, tulad ng isang printer o server). Ang DHCP options ay karagdagang settings na kasabay ipinapadala ng address — halimbawa, option 3 (default gateway), option 6 (DNS servers), at option 66/67 (ginagamit para sa network booting). Kapag magkaibang subnet ang DHCP client at ang DHCP server, kailangan i-configure ang isang router o Layer 3 switch ng DHCP relay (madalas tawaging "IP helper") para ipasa ang broadcast ng client papunta sa tunay na server bilang unicast — dahil hindi tumatawid sa router ang ordinaryong broadcast. Sa DNS naman, ang forward zone ay nagmamapa ng pangalan papunta sa address, habang ang reverse zone naman ay address papunta sa pangalan (gamit ang PTR record); ang primary zone ay ang nae-edit at authoritative na kopya ng mga record ng isang domain, habang ang secondary zone ay read-only na kopya na pinapanatiling updated para sa redundancy. Ang authoritative na sagot ay direktang galing mismo sa server ng zone, habang ang non-authoritative na sagot ay galing sa isang resolver na inuulit lang ang naka-cache niyang sagot mula sa dati niyang tanong. Ang recursive query ay hinihiling sa resolver na siya na mismo ang maglakad (root, TLD, authoritative) at ibigay na lang ang final na sagot. Ang DNSSEC ay nagdaragdag ng cryptographic signature sa mga DNS record para ma-verify ng resolver na hindi ito ginalaw o binago — direktang tumutugon ito sa DNS spoofing/poisoning. Ang DoH at DoT naman, pareho nag-e-encrypt ng DNS queries habang naglalakbay, pero ang DoH ay isinasama ito sa loob ng regular na HTTPS traffic sa port 443 (nakakahalo sa normal na web traffic), habang ang DoT ay may sariling dedicated na port 853 (mas madaling makilala, i-allow, o i-block ng isang network administrator).',
+    analogy: {
+      title: 'Boarding house na may reserved na kwarto, at barangay hall na may selyo ng katunayan',
+      text:
+        'Balikan natin ang boarding house mula Lesson 6-3. Ang "scope" ay ang listahan ng mga kwartong puwedeng ipaupa ng caretaker — sabihin nating Room 1 hanggang Room 50. Pero may ilang kwarto sa loob ng listahang iyon na sinasadyang hindi ipinapaupa kahit bakante — halimbawa, permanenteng nakalaan ang Room 10 para sa printer ng opisina (static IP), kaya tinanggal ito sa listahan — ito ang "exclusion." Kung ang bagong boarder ay galing sa ibang gusali (ibang VLAN/subnet) at hindi maaabot ng kanyang sigaw ("May bakante ba?") ang caretaker dahil magkalayo sila, may isang messenger na nagpapasa ng tanong niya papunta sa caretaker — ito ang DHCP relay, o "IP helper." Ngayon, sa barangay hall naman, isipin mong may DALAWANG klase ng listahan: ang "forward" na listahan (pangalan papunta sa address) at ang "reverse" na listahan (address papunta sa pangalan) — parang directory na puwede mong hanapin sa dalawang paraan. Ang orihinal na barangay hall na gumagawa at nag-aapruba ng mga record ay ang "primary," habang may mga "secondary" na sangay na kumukuha lang ng kopya ng listahan bilang backup. Kung galing mismo sa barangay hall ang sagot, iyon ay "authoritative" — pero kung galing lang sa isang taong dati nang nagtanong at natandaan lang niya ang sagot, iyon ay "non-authoritative," parang narinig mo lang sa kapitbahay, hindi mo mismo kinumpirma sa opisina. Para masiguro namang hindi ka nililinlang ng peke na barangay hall (DNS spoofing), may DNSSEC — parang opisyal na selyo at lagda sa bawat listahan na maaari mong i-verify. At kapag gusto mong itago ang iyong tanong mula sa mga nanonood sa daan, may DoH at DoT — parang pagtatanong sa loob ng saradong sobre sa halip na sumisigaw sa bukas na kalye; ang DoH ay ipinapasok pa ang sobre sa loob ng regular na koreo (mas mahirap makilala), habang ang DoT ay may sarili niyang espesyal na daanan (mas madaling makilala kung sino ang gumagamit nito).',
+    },
+    howItWorks: [
+      'DHCP scope: the full range of addresses (e.g., 192.168.1.100-192.168.1.200) a DHCP server is allowed to lease out on a given subnet or VLAN.',
+      'DHCP exclusion: one or more specific addresses inside that scope that the server will never hand out, typically because they are already statically assigned to something (a printer, a server, a switch management interface).',
+      'DHCP options: extra configuration values delivered with the lease — option 1 (subnet mask), option 3 (default gateway/router), option 6 (DNS servers), option 51 (lease time), and option 66/67 (boot server/bootfile, used for network-booting devices like VoIP phones) are common exam-relevant examples.',
+      'DHCP relay/IP helper: a router or Layer 3 switch interface configured to forward a client\'s DHCP broadcast, as a targeted unicast, to a DHCP server that lives on a different subnet — required because broadcasts do not cross router boundaries on their own.',
+      'DNS forward zone vs. reverse zone: a forward zone resolves names to addresses (the everyday case); a reverse zone resolves addresses back to names using PTR records (used for things like verifying a mail server\'s identity).',
+      'DNS primary vs. secondary: the primary zone is the editable, authoritative source of a domain\'s records; a secondary zone is a read-only copy kept synchronized (via zone transfer) for redundancy and load distribution.',
+      'Authoritative vs. non-authoritative answers: an authoritative answer comes straight from the zone\'s own authoritative server; a non-authoritative answer comes from a resolver returning a cached result it obtained earlier.',
+      'Recursive query: the client asks its resolver to fully resolve the name and return only the final answer, with the resolver itself doing all the walking through root, TLD, and authoritative servers.',
+      'DNSSEC adds digital signatures to DNS records so a resolver can cryptographically verify a response is genuine and unaltered, directly defending against DNS spoofing/cache poisoning.',
+      'DoH (DNS over HTTPS, port 443) and DoT (DNS over TLS, port 853) both encrypt DNS queries so they cannot be read or tampered with in transit — DoH blends in with normal web traffic (harder to selectively block), while DoT runs on its own dedicated port (easier for network administrators to specifically identify and control).',
+    ],
+    visual: {
+      type: 'diagram',
+      html: `<table class="lesson-table">
+        <thead><tr><th>Term</th><th>What It Actually Means</th></tr></thead>
+        <tbody>
+          <tr><td>DHCP scope</td><td>The full range of leasable addresses on a subnet</td></tr>
+          <tr><td>DHCP exclusion</td><td>An address inside the scope that is never leased out</td></tr>
+          <tr><td>DHCP relay / IP helper</td><td>Forwards client broadcasts to a DHCP server on another subnet</td></tr>
+          <tr><td>Forward zone / Reverse zone</td><td>Name&rarr;IP lookup vs. IP&rarr;Name (PTR) lookup</td></tr>
+          <tr><td>Primary / Secondary zone</td><td>Editable authoritative copy vs. synced read-only copy</td></tr>
+          <tr><td>Authoritative / Non-authoritative</td><td>Straight from the zone's own server vs. a cached answer</td></tr>
+          <tr><td>DNSSEC</td><td>Signs records so tampering can be detected</td></tr>
+          <tr><td>DoH / DoT</td><td>Encrypts DNS in transit — inside HTTPS (443) vs. its own port (853)</td></tr>
+        </tbody>
+      </table>`,
+    },
+    realWorldExample:
+      'A company\'s VoIP phones are on a separate VLAN from its DHCP server; without a DHCP relay configured on the Layer 3 switch connecting the VLANs, every new phone would fail to get an address at all, since its DHCP broadcast could never reach the server across the VLAN boundary on its own.',
+    proTips: [
+      'When you see "IP helper-address" in a router configuration, recognize it immediately as DHCP relay — it is one of the most literal exam-to-terminology mappings in this whole topic.',
+      'If a resolver\'s answer is described as "non-authoritative," that is not a problem to fix — it is completely normal caching behavior, not an error.',
+    ],
+    examAlert:
+      'Expect a scenario describing DHCP clients on one VLAN and the DHCP server on another, with the fix being to configure DHCP relay/IP helper on the routing device between them — this is a frequently tested configuration pattern.',
+    beginnerMistakes: [
+      'Confusing a DHCP exclusion (never leased to anyone) with a DHCP reservation (always leased to one specific device by MAC address) — they solve different problems.',
+      'Assuming DoH and DoT both do the same thing in the same way — both encrypt DNS, but the port and traffic-blending behavior differ in ways that matter for network administrators trying to monitor or control DNS traffic.',
+      'Treating a non-authoritative DNS answer as suspicious or wrong — it just means the answer came from cache rather than the source zone.',
+    ],
+    keyTerms: [
+      { term: 'DHCP scope', def: 'The full range of addresses a DHCP server may lease on a given subnet.' },
+      { term: 'DHCP exclusion', def: 'A specific address inside a scope that is deliberately never leased out.' },
+      { term: 'DHCP relay (IP helper)', def: 'A router/Layer 3 switch function that forwards DHCP broadcasts to a server on a different subnet.' },
+      { term: 'Authoritative answer', def: 'A DNS response that comes directly from the zone\'s own authoritative server, not from a cache.' },
+      { term: 'DNSSEC', def: 'DNS Security Extensions — adds cryptographic signatures to DNS records so responses can be verified as untampered.' },
+      { term: 'DoH / DoT', def: 'DNS over HTTPS (port 443) and DNS over TLS (port 853) — both encrypt DNS queries in transit, differing in port and traffic-blending behavior.' },
+    ],
+    knowledgeCheck: [
+      {
+        prompt: 'What is the key difference between a DHCP exclusion and a DHCP reservation?',
+        options: [
+          'They are two names for the exact same feature.',
+          'An exclusion is never leased to anyone, while a reservation always leases the same address to one specific device by MAC address.',
+          'A reservation is never leased to anyone, while an exclusion targets one specific device.',
+          'Exclusions only apply to IPv6, reservations only apply to IPv4.',
+        ],
+        correct: 1,
+        explanation: 'An exclusion removes an address from the pool entirely; a reservation guarantees one device always gets the same address.',
+      },
+      {
+        prompt: 'DHCP clients on VLAN 20 cannot get an address from a DHCP server that lives on VLAN 30. What is most likely missing?',
+        options: [
+          'A DNS record for the DHCP server.',
+          'DHCP relay (IP helper) configured on the Layer 3 device connecting the VLANs.',
+          'A DHCP reservation for every client.',
+          'A firewall rule allowing HTTPS traffic.',
+        ],
+        correct: 1,
+        explanation: 'Since DHCP discovery broadcasts do not cross routers/VLANs, a relay (IP helper) must forward them to the server on the other subnet.',
+      },
+      {
+        prompt: 'What is the main practical difference between DoH and DoT, given that both encrypt DNS queries?',
+        options: [
+          'DoH does not actually encrypt anything.',
+          'DoH blends in with normal HTTPS traffic on port 443, while DoT uses its own dedicated port 853, making DoT easier to specifically identify and control.',
+          'DoT is only usable on wireless networks.',
+          'There is no difference at all between them.',
+        ],
+        correct: 1,
+        explanation: 'The encryption goal is the same, but DoH\'s use of the shared HTTPS port makes it harder to selectively block than DoT\'s dedicated port.',
+      },
+    ],
+    miniScenario: {
+      prompt: 'A network administrator wants to be able to easily see and separately block DNS traffic on the firewall, distinct from regular web browsing traffic.',
+      task: 'Explain which of DoH or DoT better supports that goal, and why.',
+    },
+    recap:
+      'DHCP scope defines what can be leased; exclusions remove specific addresses from that pool; options deliver extra settings; relay/IP helper bridges DHCP across subnets. DNS zones split into forward/reverse and primary/secondary; answers are authoritative or cached (non-authoritative); DNSSEC verifies integrity; DoH and DoT both encrypt DNS but differ in port and how easily they can be identified/controlled.',
+    classroomAnswer:
+      '"Once you see \'IP helper\' as just DHCP relay, and \'non-authoritative\' as just \'this came from cache, not the source,\' this whole lesson stops sounding like new material and starts sounding like vocabulary for things you already understood."',
+  };
 }(window.NetReady));
