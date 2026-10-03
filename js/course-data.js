@@ -60,7 +60,7 @@
       title: 'Ethernet, Cabling, and Physical Infrastructure',
       blurb: 'Mga kable, konektor, at ang mismong "kalsada" ng data.',
       status: 'available',
-      lessonIds: ['3-1', '3-2', '3-3', '3-4', '3-5', '3-6'],
+      lessonIds: ['3-1', '3-2', '3-3', '3-4', '3-5', '3-6', '3-7'],
     },
     {
       id: 4,
@@ -108,7 +108,7 @@
       title: 'Wireless Networking',
       blurb: 'Wi-Fi standards, channels, at pagpaplano ng coverage.',
       status: 'available',
-      lessonIds: ['9-1', '9-2', '9-3', '9-4', '9-5', '9-6', '9-7'],
+      lessonIds: ['9-1', '9-2', '9-3', '9-4', '9-5', '9-6', '9-7', '9-8'],
     },
     {
       id: 10,
@@ -116,7 +116,7 @@
       title: 'Cloud, Virtualization, and Modern Architecture',
       blurb: 'IaaS/PaaS/SaaS, SDN, at ang "network sa cloud".',
       status: 'available',
-      lessonIds: ['10-1', '10-2', '10-3', '10-4', '10-5', '10-6', '10-7'],
+      lessonIds: ['10-1', '10-2', '10-3', '10-4', '10-5', '10-6', '10-7', '10-8'],
     },
     {
       id: 11,
@@ -124,7 +124,7 @@
       title: 'Network Operations and Documentation',
       blurb: 'Diagrams, baselines, change management, disaster recovery.',
       status: 'available',
-      lessonIds: ['11-1', '11-2', '11-3', '11-4', '11-5', '11-6', '11-7'],
+      lessonIds: ['11-1', '11-2', '11-3', '11-4', '11-5', '11-6', '11-7', '11-8', '11-9'],
     },
     {
       id: 12,

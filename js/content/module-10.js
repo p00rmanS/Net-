@@ -727,4 +727,96 @@
     classroomAnswer:
       '"IaC makes configuration reviewable like code, automation removes the human from one task, orchestration lines up many of those tasks in the right order, and zero-touch provisioning means the new device does its own first-day setup without anyone plugging in a console cable."',
   };
+  NetReady.LESSONS['10-8'] = {
+    id: '10-8',
+    moduleId: 10,
+    slug: 'data-center-topologies-and-traffic-flows',
+    title: 'Data Center Topologies and Traffic Flows: Spine-Leaf, Three-Tier, and North-South vs. East-West',
+    estMinutes: 14,
+    outcomes: [
+      'Compare three-tier hierarchical, collapsed core, and spine-leaf topologies.',
+      'Explain why spine-leaf predictably supports east-west traffic in modern data centers.',
+      'Differentiate north-south traffic from east-west traffic and identify which one dominates in virtualized environments.',
+    ],
+    whyItMatters:
+      'The topology decides how fast two servers can talk to each other, how easily you can add capacity, and what happens when a link fails — and the exam expects you to match a network design to the traffic pattern it must carry.',
+    simpleEnglish:
+      'A three-tier hierarchical design uses three layers: the access layer connects end devices, the distribution layer aggregates access switches and applies policy (including inter-VLAN routing), and the core layer provides a high-speed backbone between distribution blocks. A collapsed core combines the core and distribution functions into a single layer of switches, which is simpler and cheaper for smaller networks. Spine-leaf is a flat, two-layer design common in data centers: every leaf switch (where servers and storage connect) links to every spine switch, and there are no links between leaves or between spines, so any two servers are always the same predictable number of hops apart. Capacity grows by adding spines (more bandwidth between leaves) or leaves (more server ports). Traffic flow direction matters too. North-south traffic moves between the data center and the outside world, such as a user request arriving from the internet and the response going back out. East-west traffic moves between servers and virtual machines inside the data center, such as an application server querying a database server. Virtualization, containers, and distributed applications have made east-west traffic the dominant pattern in most modern data centers, which is why spine-leaf, with its predictable server-to-server paths, has become the common choice.',
+    taglish:
+      'Ang three-tier hierarchical design ay may tatlong layer: ang access layer na kumokonekta sa mga end device, ang distribution layer na nag-aaggregate ng access switch at nag-aapply ng policy (kasama ang inter-VLAN routing), at ang core layer na nagbibigay ng mabilis na backbone sa pagitan ng mga distribution block. Ang collapsed core naman ay pinagsasama ang core at distribution sa iisang layer ng switch, mas simple at mas mura para sa maliliit na network. Ang spine-leaf ay flat na two-layer design na karaniwan sa data center: bawat leaf switch (kung saan kumokonekta ang mga server at storage) ay konektado sa bawat spine switch, at walang direktang link sa pagitan ng mga leaf o ng mga spine, kaya palaging pare-pareho ang bilang ng hop sa pagitan ng dalawang server. Lumalaki ang capacity sa pamamagitan ng pagdaragdag ng spine (mas maraming bandwidth sa pagitan ng leaf) o leaf (mas maraming server port). Mahalaga rin ang direksyon ng traffic: ang north-south ay traffic papasok at palabas ng data center, tulad ng request mula sa internet at sagot pabalik; ang east-west naman ay traffic sa pagitan ng mga server at virtual machine sa loob mismo ng data center, tulad ng application server na nagtatanong sa database server. Dahil sa virtualization at containers, ang east-west na ang nangingibabaw sa karamihan ng modernong data center, kaya popular ang spine-leaf dahil predictable ang server-to-server na daan.',
+    analogy: {
+      title: 'Mall na may gitnang palengke: bawat tindahan konektado sa lahat ng bodega',
+      text:
+        'Isipin mo ang three-tier design parang isang malaking mall na may tatlong antas ng pamamahala: ang mga tindahan sa unahan (access), ang mga supervisor ng bawat sektor na nagkokontrol kung paano dumadaloy ang paninda (distribution), at ang central warehouse na nagbibigay ng bilis sa buong mall (core). Ang collapsed core ay parang maliit na palengke kung saan ang iisang tao na ang namamahala sa bodega at sa mga supervisor — mas mabilis at mas mura, pero mas malaking panganib kung siya ang mawala. Ang spine-leaf naman parang isang palengke kung saan bawat stall (leaf) ay may direktang daan papunta sa bawat central bodega (spine), kaya kahit saang stall ka galing o pupunta, palaging parehong bilang ng hakbang ang dadaanan mo — walang ibang stall na hahadlang. Ang north-south ay parang mga mamimiling galing sa labas ng mall na pumapasok at lumalabas; ang east-west ay parang paninda na inililipat ng mga tindera mismo sa pagitan ng stall nila — at sa mga modernong palengke, ito na ang pinakamaraming galaw.',
+    },
+    howItWorks: [
+      'Three-tier hierarchical: access (end devices), distribution (aggregation, policy, inter-VLAN routing), and core (high-speed backbone) — a classic campus and enterprise design that scales by adding distribution blocks.',
+      'Collapsed core: core and distribution combined into a single layer, which reduces cost and cabling for smaller sites at the expense of a larger failure domain.',
+      'Spine-leaf: every leaf connects to every spine, with no leaf-to-leaf or spine-to-spine links, so any two endpoints are a consistent number of hops apart and performance is predictable.',
+      'Scaling spine-leaf: add spine switches to increase bandwidth between leaves, or add leaf switches to increase the number of server or storage ports.',
+      'North-south traffic: flows between the data center and external clients or the internet, typically passing through edge firewalls, load balancers, and routers.',
+      'East-west traffic: flows between servers, VMs, and containers inside the data center, which in virtualized and microservice environments often carries the majority of total traffic.',
+      'Mesh, star/hub-and-spoke, point-to-point, and hybrid designs are also valid topologies; the exam expects you to choose among them based on redundancy, cost, and the traffic pattern a scenario describes.',
+    ],
+    visual: {
+      type: 'diagram',
+      html: `<table class="lesson-table">
+        <thead><tr><th>Design</th><th>Layers / Structure</th><th>Best Fit</th></tr></thead>
+        <tbody>
+          <tr><td>Three-tier hierarchical</td><td>Access, distribution, core</td><td>Large campus / enterprise LANs</td></tr>
+          <tr><td>Collapsed core</td><td>Core and distribution combined</td><td>Small to medium sites</td></tr>
+          <tr><td>Spine-leaf</td><td>Every leaf to every spine; no leaf-leaf links</td><td>Modern data centers, east-west heavy</td></tr>
+        </tbody>
+      </table>
+      <p class="diagram-caption">North-south = data center &harr; outside world. East-west = server &harr; server inside the data center.</p>`,
+    },
+    realWorldExample:
+      'A cloud provider builds its data center on spine-leaf so that a web application server on one rack reaches its database server on another rack through exactly the same predictable number of hops every time, and adding a new rack of servers only means adding leaf switches.',
+    proTips: [
+      'In a scenario asking which design handles lots of server-to-server traffic predictably, spine-leaf is almost always the correct answer — the "every leaf to every spine" rule is what makes that predictability possible.',
+      'To tell north-south from east-west, ask whether the traffic is crossing the data center boundary (north-south) or staying inside it between internal systems (east-west).',
+    ],
+    examAlert:
+      'Expect a question asking which topology minimizes and standardizes hop count between servers, or which traffic pattern dominates modern virtualized data centers — spine-leaf and east-west are the expected answers.',
+    beginnerMistakes: [
+      'Assuming spine-leaf includes links between leaf switches — it does not; traffic between leaves always transits a spine.',
+      'Describing east-west traffic as "internet traffic" — east-west never leaves the data center; it moves between internal servers and VMs.',
+      'Confusing collapsed core with a single switch — a collapsed core still has access switches; it only merges the core and distribution layers.',
+    ],
+    keyTerms: [
+      { term: 'Three-tier hierarchical design', def: 'A network design with access, distribution, and core layers, common in large campus and enterprise LANs.' },
+      { term: 'Collapsed core', def: 'A design where the core and distribution functions are combined into one layer, suited to smaller networks.' },
+      { term: 'Spine-leaf', def: 'A flat, two-layer data center topology where every leaf switch connects to every spine switch.' },
+      { term: 'North-south traffic', def: 'Traffic moving between a data center and external clients or the internet.' },
+      { term: 'East-west traffic', def: 'Traffic moving between servers, VMs, or containers inside the same data center.' },
+    ],
+    knowledgeCheck: [
+      {
+        prompt: 'In a spine-leaf topology, which connections are present?',
+        options: ['Every leaf connects to every other leaf', 'Every leaf connects to every spine, with no leaf-to-leaf links', 'Every spine connects to every other spine only', 'Each leaf connects only to one spine'],
+        correct: 1,
+        explanation: 'The defining rule of spine-leaf is that every leaf links to every spine, and no direct leaf-to-leaf or spine-to-spine links exist.',
+      },
+      {
+        prompt: 'A web request arrives from a customer on the internet and is served by an application server inside the data center. Which traffic direction is the customer request?',
+        options: ['East-west', 'North-south', 'Broadcast', 'Multicast'],
+        correct: 1,
+        explanation: 'Traffic entering and leaving the data center from external clients is north-south.',
+      },
+      {
+        prompt: 'A small branch office wants a simple, lower-cost LAN design and accepts a larger failure domain. Which design fits best?',
+        options: ['Spine-leaf', 'Collapsed core', 'Full mesh', 'Three-tier with four distribution blocks'],
+        correct: 1,
+        explanation: 'A collapsed core merges core and distribution into one layer, which is simpler and cheaper for small sites.',
+      },
+    ],
+    miniScenario: {
+      prompt: 'A data center is hosting hundreds of virtual machines that constantly exchange data with each other, and the team wants predictable latency between any two servers.',
+      task: 'Name the topology that best fits, and state whether the dominant traffic pattern is north-south or east-west.',
+    },
+    recap:
+      'Three-tier separates access, distribution, and core; collapsed core merges the top two layers for smaller sites; spine-leaf connects every leaf to every spine for predictable server-to-server paths. North-south traffic crosses the data center boundary; east-west traffic stays inside it and dominates in virtualized environments.',
+    classroomAnswer:
+      '"For a modern data center, I design spine-leaf for predictable east-west paths, and I always separate the north-south edge traffic from the internal server-to-server traffic when I plan capacity."',
+  };
 }(window.NetReady));

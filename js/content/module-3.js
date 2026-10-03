@@ -593,4 +593,96 @@
     classroomAnswer:
       '"Before I mount any PoE device, I check its power draw against the switch\'s PoE standard — and when I need to find one cable in a messy bundle, the toner probe is the tool for that, not the cable tester."',
   };
+  NetReady.LESSONS['3-7'] = {
+    id: '3-7',
+    moduleId: 3,
+    slug: 'transceivers-dac-twinaxial-and-fibre-channel',
+    title: 'Transceivers, DAC/Twinaxial Cable, and Fibre Channel',
+    estMinutes: 13,
+    outcomes: [
+      'Differentiate SFP, SFP+, and QSFP transceiver form factors by speed and lane count.',
+      'Explain what direct attach copper (DAC) and twinaxial cable are, and when to use them over fiber.',
+      'Distinguish a transceiver protocol (Ethernet vs. Fibre Channel) from its physical form factor.',
+    ],
+    whyItMatters:
+      'Buying the wrong optic or cable is one of the most expensive and most common mistakes in a data center — a mismatched transceiver simply will not link, and the exam tests this exact form-factor-versus-protocol distinction.',
+    simpleEnglish:
+      'A transceiver is the small module that converts electrical signals into light (for fiber) or passes them along (for copper) at a switch or server port. Its form factor is its physical shape and how many lanes it carries: SFP (Small Form-factor Pluggable) is a single-lane module, SFP+ is an enhanced single-lane version commonly used for 10 Gbps, and QSFP (Quad Small Form-factor Pluggable) carries four lanes in one module for higher speeds such as 40 or 100 Gbps. Separately, a transceiver\'s protocol defines what it carries: Ethernet for general LAN and data traffic, or Fibre Channel (FC) for storage area networks, where storage traffic has strict requirements for reliability. Direct attach copper (DAC) is a short-distance copper cable with transceivers permanently attached at both ends, built using twinaxial cable — two inner conductors surrounded by shielding — which is cheap and low-latency for links typically only a few meters long. Twinaxial is a construction, not a speed; coaxial cable, by contrast, has a single center conductor and is a different technology used mainly for cable television and older Ethernet.',
+    taglish:
+      'Ang transceiver ay maliit na module na nagko-convert ng signal sa ilaw (para sa fiber) o nagpapasa lang ng signal (para sa copper) sa port ng switch o server. Ang form factor ay ang pisikal na hugis at kung ilang lane ang dala nito: ang SFP ay single-lane, ang SFP+ ay pinahusay na single-lane na karaniwang para sa 10 Gbps, at ang QSFP (Quad SFP) ay apat na lane sa iisang module para sa mas mataas na bilis tulad ng 40 o 100 Gbps. Hiwalay dito ang protocol ng transceiver, na nagsasabi kung anong klaseng data ang dala nito: Ethernet para sa karaniwang LAN, o Fibre Channel (FC) para sa storage area networks, kung saan mahigpit ang pangangailangan sa reliability ng storage traffic. Ang DAC (direct attach copper) ay maikling copper cable na may transceiver na permanenteng nakakabit sa magkabilang dulo, gawa sa twinaxial cable — dalawang inner conductor na nakabalot sa shielding — mura at mabilis para sa mga link na ilang metro lang ang haba. Ang twinaxial ay isang construction, hindi bilis; ang coaxial naman ay may iisang center conductor at ibang teknolohiya, karaniwang ginagamit para sa cable TV at lumang Ethernet.',
+    analogy: {
+      title: 'Adapter ng kuryente: iisang plug na magkakaiba ang laki, at iisang sasakyan na magkakaiba ang kargamento',
+      text:
+        'Isipin mo ang transceiver parang adapter na nakasaksak sa port — ang hugis at laki nito ay ang form factor, kung paano ito kumakasya sa butas. Ang SFP ay parang isang adapter na may isang daluyan ng kuryente; ang QSFP ay parang multi-outlet na may apat na daluyan nang sabay-sabay, kaya mas maraming dumadaloy na enerhiya (bilis). Pero hiwalay pa rin ang tanong kung ANONG klase ng kuryente ang dumadaan — iyon ang protocol. Ang Ethernet ay parang karaniwang kuryente sa bahay para sa lahat ng gamit; ang Fibre Channel ay parang espesyal na linya na nakalaan lang para sa mga makinang pang-industriya ng storage. Ang DAC cable naman ay parang extension cord na permanenteng may plug sa magkabilang dulo — mura at maayos kapag maikli ang distansya lang, pero hindi ito ginawa para sa mahabang layo tulad ng fiber.',
+    },
+    howItWorks: [
+      'SFP: single-lane transceiver, commonly used for 1 Gbps Ethernet; SFP+: enhanced single-lane form factor, commonly used for 10 Gbps Ethernet.',
+      'QSFP: four-lane transceiver form factor used for higher aggregate speeds (for example QSFP+ at 40 Gbps or QSFP28 at 100 Gbps).',
+      'Transceiver protocol is separate from form factor: the same physical SFP+ slot can carry Ethernet or Fibre Channel, depending on the module and the device.',
+      'Direct attach copper (DAC) uses twinaxial cable with the transceivers pre-attached at both ends; it is inexpensive and low-latency, but only practical over short distances (typically a few meters, commonly up to around 7 m for passive copper).',
+      'Twinaxial cable is a construction with two inner conductors and shielding, used inside DAC assemblies; coaxial cable has a single center conductor and is a different design entirely.',
+      'For longer runs and for higher density or better distance, fiber optic transceivers paired with fiber cabling are used instead of copper DAC.',
+    ],
+    visual: {
+      type: 'diagram',
+      html: `<table class="lesson-table">
+        <thead><tr><th>Module</th><th>Typical Use</th><th>Lanes / Speed (common)</th></tr></thead>
+        <tbody>
+          <tr><td>SFP</td><td>Gigabit Ethernet ports</td><td>1 lane, 1 Gbps</td></tr>
+          <tr><td>SFP+</td><td>10 Gbps Ethernet / fiber or DAC</td><td>1 lane, 10 Gbps</td></tr>
+          <tr><td>QSFP+ / QSFP28</td><td>High-speed uplinks, data center</td><td>4 lanes, 40 / 100 Gbps</td></tr>
+          <tr><td>DAC (twinaxial)</td><td>Short top-of-rack links within a rack/row</td><td>Copper, short distance only</td></tr>
+        </tbody>
+      </table>`,
+    },
+    realWorldExample:
+      'A data center technician connects two switches in the same rack with a short SFP+ DAC cable instead of two fiber transceivers and a fiber patch cord — the copper DAC costs less and adds almost no latency, and the distance is short enough that copper is perfectly suitable.',
+    proTips: [
+      'Form factor (SFP vs. QSFP) tells you the physical shape and lane count; protocol (Ethernet vs. Fibre Channel) tells you what the traffic is. Keep those two questions separate when reading an exam scenario.',
+      'If a question says "short distance, same rack, lowest cost," think DAC. If it says "long distance" or "high density over a long run," think fiber transceivers.',
+    ],
+    examAlert:
+      'Expect a scenario asking which transceiver or cable to buy for a specific speed, distance, or storage-versus-LAN purpose — the exam often hides the key clue in the words "storage" (Fibre Channel) or "short run in the same rack" (DAC).',
+    beginnerMistakes: [
+      'Assuming a QSFP and an SFP+ are interchangeable because both "fit" a similar-looking slot — the form factor and lane count must match the port.',
+      'Confusing twinaxial with coaxial — both are types of shielded cable, but twinaxial has two inner conductors and is used in DAC, while coaxial has one.',
+      'Treating DAC as a long-distance solution — passive copper DAC is practical only over short runs, and fiber takes over beyond that.',
+    ],
+    keyTerms: [
+      { term: 'SFP / SFP+', def: 'Small Form-factor Pluggable (1 Gbps typical) and its enhanced SFP+ version (10 Gbps typical) — single-lane transceiver form factors.' },
+      { term: 'QSFP', def: 'Quad Small Form-factor Pluggable — a four-lane transceiver form factor for higher-speed links such as 40 or 100 Gbps.' },
+      { term: 'Form factor vs. protocol', def: 'Form factor is the physical shape and lane count of a transceiver; protocol is the traffic type it carries, such as Ethernet or Fibre Channel.' },
+      { term: 'Fibre Channel (FC)', def: 'A protocol designed for storage area networks, prioritizing reliable, lossless delivery of storage traffic.' },
+      { term: 'DAC (direct attach copper)', def: 'A short copper cable with transceivers permanently attached at both ends, used for low-cost, low-latency links over short distances.' },
+      { term: 'Twinaxial cable', def: 'Shielded copper cable with two inner conductors, used in DAC assemblies — distinct from coaxial cable, which has a single center conductor.' },
+    ],
+    knowledgeCheck: [
+      {
+        prompt: 'Which transceiver form factor carries four lanes in a single module, typically used for 40 or 100 Gbps links?',
+        options: ['SFP', 'SFP+', 'QSFP', 'RJ45'],
+        correct: 2,
+        explanation: 'QSFP (Quad Small Form-factor Pluggable) carries four lanes in one module, which is how it reaches higher aggregate speeds.',
+      },
+      {
+        prompt: 'A storage team needs a link carrying block-level storage traffic between a server and a SAN. Which transceiver protocol is designed for this purpose?',
+        options: ['Ethernet', 'Fibre Channel', 'Twinaxial', 'Coaxial'],
+        correct: 1,
+        explanation: 'Fibre Channel is a storage-networking protocol built around reliable, lossless delivery of storage traffic.',
+      },
+      {
+        prompt: 'Two switches sit in the same rack, about 2 meters apart, and the team wants the lowest-cost, lowest-latency link. What is the best choice?',
+        options: ['Long-distance single-mode fiber', 'DAC (direct attach copper) with twinaxial construction', 'Coaxial cable with a BNC connector', 'A wireless point-to-point bridge'],
+        correct: 1,
+        explanation: 'Short-distance DAC with twinaxial cable is inexpensive and low-latency, exactly suited to a two-meter link in the same rack.',
+      },
+    ],
+    miniScenario: {
+      prompt: 'A data center is adding a new 100 Gbps uplink between two core switches in different rows, about 30 meters apart, and it also needs a separate dedicated link between a server and a SAN.',
+      task: 'Choose the transceiver form factor and cabling for the 100 Gbps uplink, and name the protocol the SAN link must use.',
+    },
+    recap:
+      'Form factor (SFP, SFP+, QSFP) describes the physical shape and lane count; protocol (Ethernet, Fibre Channel) describes what traffic it carries. DAC uses twinaxial copper with pre-attached transceivers for short, low-cost links; twinaxial and coaxial are different constructions.',
+    classroomAnswer:
+      '"Form factor answers how it plugs in, protocol answers what it carries — and for short runs in the same rack, DAC is usually the smart, cheap answer."',
+  };
 }(window.NetReady));

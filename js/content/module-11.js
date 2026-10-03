@@ -742,4 +742,199 @@
     classroomAnswer:
       '"The network only stays up if the room around it does too — UPS for the instant gap, generator for the long haul, HVAC so nothing overheats, and clean-agent suppression so a fire response doesn\'t finish the job a fire started."',
   };
+  NetReady.LESSONS['11-8'] = {
+    id: '11-8',
+    moduleId: 11,
+    slug: 'secure-remote-management-jump-hosts-and-vpn-tunnels',
+    title: 'Secure Remote Management: Jump Hosts, In-Band vs. Out-of-Band, and VPN Tunnel Types',
+    estMinutes: 14,
+    outcomes: [
+      'Explain what a jump host does and why it centralizes administrative access.',
+      'Differentiate in-band management from out-of-band management and explain when out-of-band is essential.',
+      'Compare site-to-site and client-to-site VPNs, clientless VPNs, and split versus full tunnel configurations.',
+    ],
+    whyItMatters:
+      'Remote administration is how most network changes actually happen — and how a well-meaning admin can accidentally lock themselves out, or leave a management interface exposed to the internet. The exam tests the exact vocabulary for these access and VPN choices.',
+    simpleEnglish:
+      'A jump host (also called a jump box) is a hardened system that administrators must connect to first; from there, they reach internal devices, so access is funneled through one controlled, logged point instead of being spread across many machines. In-band management means managing a device over the same network that carries user traffic, such as SSH to a switch on its normal IP address. Out-of-band management uses a separate, dedicated path, such as a console port or a dedicated management network, so administrators can still reach a device when the production network is down. Connection methods include SSH (encrypted command line), a graphical user interface, an API, and the physical console. For VPNs: a site-to-site VPN permanently links two networks, usually gateway to gateway, such as a headquarters and a branch. A client-to-site VPN lets an individual remote user connect into the corporate network. A clientless VPN gives access through a web browser without installing dedicated client software, usually limited to specific web-based applications. In a split tunnel, only traffic destined for the corporate network travels through the VPN while internet traffic goes directly out; in a full tunnel, all of the user\'s traffic goes through the VPN, giving the organization more control and inspection at the cost of extra latency and bandwidth.',
+    taglish:
+      'Ang jump host (o jump box) ay isang hardened na system na kailangang unahin ng administrator bago makarating sa mga internal na device; mula roon, doon lang dumadaan ang access kaya isang kontroladong, naka-log na punto lang ang kailangang bantayan. Ang in-band management ay pamamahala ng device sa parehong network na dinadaanan ng user traffic, tulad ng SSH sa switch gamit ang normal nitong IP. Ang out-of-band management naman ay gumagamit ng hiwalay at dedicated na daanan, tulad ng console port o dedicated management network, kaya nakakapasok ka pa rin kahit down ang production network. Kabilang sa connection methods ang SSH (encrypted na command line), GUI, API, at ang pisikal na console. Para sa VPN: ang site-to-site VPN ay permanenteng nagkokonekta ng dalawang network, karaniwang gateway-to-gateway, halimbawa ang headquarters at branch. Ang client-to-site VPN ay nagpapapasok ng isang indibidwal na remote user sa corporate network. Ang clientless VPN ay nagbibigay ng access sa pamamagitan ng web browser nang hindi nag-i-install ng client software, kadalasan para lang sa mga specific na web-based na application. Sa split tunnel, tanging traffic papunta sa corporate network ang dumadaan sa VPN habang diretsong lumalabas ang internet traffic; sa full tunnel naman, lahat ng traffic ng user ay dumadaan sa VPN, mas kontrolado at mas na-iinspect ng organisasyon pero may dagdag na latency at bandwidth na nagagamit.',
+    analogy: {
+      title: 'Pintuan ng bahay: guwardiya sa labas, may hiwalay na daanan kapag sira ang pangunahing pinto',
+      text:
+        'Isipin mo ang jump host parang guwardiya sa gate ng isang subdibisyon — bago ka makapasok sa loob ng mga bahay, dadaan ka muna sa iisang checkpoint na mahigpit na binabantayan at tinatala ang bawat pumapasok. Ang in-band management ay parang pagpasok sa bahay gamit ang pangunahing pinto na ginagamit din ng lahat ng nakatira — gumagana ito, pero kapag na-block ang pinto dahil sa trapiko, hindi ka na makapasok. Ang out-of-band ay parang may hiwalay na service entrance na gamit lang ng technician — kaya kahit na-jam ang pangunahing pinto, makakapasok pa rin ang tao para ayusin ang problema. Ang VPN naman ay parang lagusan papunta sa bahay ng kamag-anak: ang site-to-site ay permanenteng tunnel na nag-uugnay ng dalawang bahay; ang client-to-site ay pansariling susi ng isang bisita; ang clientless ay parang pagtawag gamit ang intercom sa browser; at ang split vs. full tunnel ay kung ang lahat ng galaw mo ay dadaan sa lagusang iyon, o ang papunta lang sa bahay ng kamag-anak ang dadaan doon habang ang ibang lakad mo ay diretsong lumalabas.',
+    },
+    howItWorks: [
+      'Jump host: administrators first authenticate to a hardened intermediary system in a secure or management zone, then connect from there to internal devices, centralizing logging and limiting the number of systems exposed to admin traffic.',
+      'In-band management: the management session uses the same network path as production traffic — convenient, but unavailable if that path fails.',
+      'Out-of-band management: a dedicated management network, console server, or cellular backup provides a separate path so devices remain reachable during production outages.',
+      'Connection methods: SSH (encrypted CLI), GUI (web or graphical interface), API (programmatic access), and console (direct physical or serial connection, often used for initial setup or recovery).',
+      'Site-to-site VPN: a persistent gateway-to-gateway tunnel connecting two networks, commonly between a headquarters and a branch.',
+      'Client-to-site VPN: an individual device or user connects into the corporate network, typically with VPN client software.',
+      'Clientless VPN: access is delivered through a web browser, usually to a limited set of web-based applications, with no dedicated client installed on the endpoint.',
+      'Split tunnel sends only corporate-destined traffic through the VPN; full tunnel routes all client traffic through the VPN, enabling inspection and policy at the cost of extra latency.',
+    ],
+    visual: {
+      type: 'diagram',
+      html: `<table class="lesson-table">
+        <thead><tr><th>Option</th><th>What It Means</th></tr></thead>
+        <tbody>
+          <tr><td>Jump host / jump box</td><td>One hardened, logged admin entry point into a secure zone</td></tr>
+          <tr><td>In-band management</td><td>Management shares the production network path</td></tr>
+          <tr><td>Out-of-band management</td><td>Separate path (console, dedicated management network) for when production is down</td></tr>
+          <tr><td>Site-to-site VPN</td><td>Permanent tunnel between two networks</td></tr>
+          <tr><td>Client-to-site VPN</td><td>Individual user or device connects into the corporate network</td></tr>
+          <tr><td>Clientless VPN</td><td>Browser-based access, no dedicated client installed</td></tr>
+          <tr><td>Split tunnel</td><td>Only corporate traffic goes through the VPN</td></tr>
+          <tr><td>Full tunnel</td><td>All user traffic goes through the VPN</td></tr>
+        </tbody>
+      </table>`,
+    },
+    realWorldExample:
+      'A network engineer loses SSH access to a branch router after a bad routing change cuts the in-band path — the out-of-band console server connected to the router\'s console port still provides a working management session, so the engineer rolls back the change without dispatching someone on site.',
+    proTips: [
+      'If a question describes needing to reach a device even when its production network is down, the answer is out-of-band management — in-band is by definition unavailable in that failure.',
+      'For a remote employee who needs only the internal web-based HR system, a clientless VPN is a lighter-weight fit than a full client-to-site VPN; for general corporate network access, a client-to-site VPN is the standard answer.',
+    ],
+    examAlert:
+      'Expect a scenario asking which VPN type fits a specific need — site-to-site for two offices, client-to-site for remote staff, clientless for browser-only access — and whether split or full tunnel meets a stated security or bandwidth requirement.',
+    beginnerMistakes: [
+      'Thinking a jump host is just any server — it is a deliberately hardened, tightly controlled intermediary, not a general-purpose machine.',
+      'Choosing in-band management for a device you need to reach during an outage — in-band depends on the same network that just failed.',
+      'Assuming split tunnel is always the wrong choice — it is a tradeoff: better bandwidth and performance, but less centralized inspection than a full tunnel.',
+    ],
+    keyTerms: [
+      { term: 'Jump host (jump box)', def: 'A hardened intermediary system that administrators access first to reach internal devices, centralizing logging and control.' },
+      { term: 'In-band management', def: 'Managing a device over the same network path that carries production traffic.' },
+      { term: 'Out-of-band management', def: 'Managing a device over a separate, dedicated path such as a console or management network, available even during production outages.' },
+      { term: 'Clientless VPN', def: 'Browser-based VPN access that requires no dedicated client software on the endpoint.' },
+      { term: 'Split tunnel', def: 'A VPN configuration where only corporate-bound traffic is tunneled, while other traffic exits directly.' },
+      { term: 'Full tunnel', def: 'A VPN configuration where all of a client\'s traffic is routed through the VPN.' },
+    ],
+    knowledgeCheck: [
+      {
+        prompt: 'A technician needs to reach a core switch even when the production network is completely down. Which management approach should be in place?',
+        options: ['In-band management over the production VLAN', 'Out-of-band management using a console server or dedicated management network', 'A clientless VPN', 'Split tunnel'],
+        correct: 1,
+        explanation: 'Out-of-band management uses a separate path that does not depend on the production network that just failed.',
+      },
+      {
+        prompt: 'Two branch offices need a permanent, always-on link between their networks. Which VPN type fits?',
+        options: ['Client-to-site VPN', 'Clientless VPN', 'Site-to-site VPN', 'Split tunnel'],
+        correct: 2,
+        explanation: 'A site-to-site VPN connects two networks gateway-to-gateway in a persistent tunnel.',
+      },
+      {
+        prompt: 'A security team wants every remote employee\'s internet traffic inspected by corporate policy. Which tunnel configuration should they use?',
+        options: ['Split tunnel', 'Full tunnel', 'In-band tunnel', 'Clientless tunnel only'],
+        correct: 1,
+        explanation: 'A full tunnel routes all client traffic through the VPN, letting corporate inspection and policy apply to everything.',
+      },
+    ],
+    miniScenario: {
+      prompt: 'An administrator needs to reach a branch router to fix a routing mistake that has cut off the normal management path, and the branch is not reachable by the usual SSH session.',
+      task: 'Name the management method that would still provide access, and describe briefly how it differs from the failed path.',
+    },
+    recap:
+      'A jump host centralizes admin access through one hardened, logged system. In-band management shares the production path; out-of-band uses a separate path that survives outages. Site-to-site VPNs connect networks; client-to-site VPNs connect individuals; clientless VPNs use the browser; split tunnels send only corporate traffic through the VPN, while full tunnels send everything.',
+    classroomAnswer:
+      '"I never let the management path depend on the same network I might break — jump host for controlled access, out-of-band for when production goes down, and I pick split or full tunnel based on how much inspection the business actually requires."',
+  };
+
+  NetReady.LESSONS['11-9'] = {
+    id: '11-9',
+    moduleId: 11,
+    slug: 'snmp-versions-community-strings-mibs-and-traps',
+    title: 'SNMP Deep Dive: Versions, Community Strings, MIBs, and Traps',
+    estMinutes: 13,
+    outcomes: [
+      'Explain the roles of an SNMP manager, an SNMP agent, and a MIB.',
+      'Differentiate SNMP traps from polling requests, and identify the ports each uses.',
+      'Compare SNMPv2c community strings with SNMPv3 authentication and encryption, and explain why v3 is preferred.',
+    ],
+    whyItMatters:
+      'SNMP is the classic way monitoring systems watch network devices — and one of the most commonly misconfigured services in real networks, because weak community strings and v2c defaults are a frequent route into devices. The exam expects precise vocabulary for each piece.',
+    simpleEnglish:
+      'SNMP (Simple Network Management Protocol) lets a central monitoring system, the manager, collect status and statistics from devices, which run an agent. The data each device exposes is organized in a MIB (Management Information Base), a structured catalog of objects that can be queried, such as interface counters or CPU load. The manager can poll an agent with GET requests (typically sent to UDP port 161), and an agent can proactively send a trap (an unsolicited alert, typically sent to UDP port 162 on the manager) when something important happens, such as a link going down. SNMPv1 and v2c identify access using community strings, which act as shared passwords; in v2c they are transmitted in plaintext, so anyone who can capture traffic can read them. SNMPv3 replaces community strings with user-based security: it adds authentication, so the manager and agent verify each other, and encryption, so data is not readable in transit. SNMPv3 is strongly preferred in any environment where security matters, and default or weak community strings like "public" are a classic misconfiguration to avoid.',
+    taglish:
+      'Ang SNMP (Simple Network Management Protocol) ay nagpapahintulot sa isang central monitoring system, ang manager, na kumolekta ng status at statistics mula sa mga device, na tumatakbo ng agent. Ang data na ibinubunyag ng bawat device ay nakaayos sa MIB (Management Information Base), isang structured na katalogo ng mga object na puwedeng i-query, tulad ng interface counter o CPU load. Puwedeng magtanong ang manager sa agent gamit ang GET request (karaniwang nasa UDP port 161), at puwede rin namang magpadala ang agent ng trap — isang unsolicited na alerto, karaniwang nasa UDP port 162 sa manager — kapag may mahalagang nangyari, tulad ng link na nag-down. Ang SNMPv1 at v2c ay gumagamit ng community string bilang pag-access, na parang shared password; sa v2c, plaintext ito kaya sinumang makakakuha ng traffic ay makakabasa nito. Ang SNMPv3 naman ay pinalitan ito ng user-based security: may authentication para magkumpirma ang manager at agent sa isa\'t isa, at may encryption para hindi mabasa ang data habang dumadaan. Mas mainam ang SNMPv3 sa anumang environment na mahalaga ang seguridad, at ang default o mahinang community string tulad ng "public" ay klasikong maling configuration na dapat iwasan.',
+    analogy: {
+      title: 'Kalihim ng barangay na nagtatanong, at ang sekretarya na nagbibigay ng ulat',
+      text:
+        'Isipin mo ang SNMP parang isang barangay captain (ang manager) na gustong malaman ang kalagayan ng bawat purok (ang device). Ang bawat purok ay may kanya-kanyang tagapagsalita (ang agent) na may hawak na listahan ng mga bagay na puwedeng sagutin — ang MIB, parang talaan ng mga istatistika ng purok. Puwedeng tanungin ng captain ang bawat tagapagsalita, "Ilan ang tao ngayon?" (GET polling). Pero puwede ring tumawag ang isang tagapagsalita nang kusa kapag may nangyaring malaki, tulad ng sunog — iyon ang trap. Ang community string ay parang password ng sumasagot: sa v2c, binibigkas ito nang malakas sa buong plaza, kaya kahit sino ay makakarinig; sa v3, may tunay na pagkakakilanlan at lihim na linya, kaya ang captain at ang purok ay talagang nagkakakilala bago magpalitan ng impormasyon.',
+    },
+    howItWorks: [
+      'SNMP manager: the central system (for example, a monitoring platform) that sends queries and receives alerts.',
+      'SNMP agent: software on the monitored device that responds to queries and generates traps.',
+      'MIB (Management Information Base): the structured collection of objects an agent exposes, each uniquely identified by a numeric address (OID) so the manager knows exactly what to request.',
+      'Polling: the manager sends GET requests to the agent, typically over UDP 161, to retrieve values such as interface counters or CPU utilization.',
+      'Traps: the agent sends unsolicited alerts to the manager, typically over UDP 162, when a notable event occurs — such as a link going down or a threshold being crossed.',
+      'SNMPv2c: uses community strings for access; they are sent in plaintext, so they offer no real confidentiality and are a common weakness if left at defaults.',
+      'SNMPv3: adds user-based authentication and encryption, letting the manager and agent verify each other and protect data in transit — the recommended version for secure environments.',
+    ],
+    visual: {
+      type: 'diagram',
+      html: `<table class="lesson-table">
+        <thead><tr><th>Element / Version</th><th>What It Means</th></tr></thead>
+        <tbody>
+          <tr><td>Manager</td><td>Central system that polls devices and receives traps</td></tr>
+          <tr><td>Agent</td><td>Software on the device that answers queries and sends traps</td></tr>
+          <tr><td>MIB</td><td>Structured catalog of queryable objects on a device</td></tr>
+          <tr><td>GET / polling (UDP 161)</td><td>Manager asks the agent for a value</td></tr>
+          <tr><td>Trap (UDP 162)</td><td>Agent sends an unsolicited alert to the manager</td></tr>
+          <tr><td>SNMPv2c</td><td>Community strings in plaintext; no real encryption</td></tr>
+          <tr><td>SNMPv3</td><td>User-based authentication plus encryption; preferred</td></tr>
+        </tbody>
+      </table>`,
+    },
+    realWorldExample:
+      'A monitoring server polls every switch every five minutes for interface counters, but a switch also sends a trap immediately when its uplink goes down, so the operations team gets alerted in seconds rather than waiting for the next poll.',
+    proTips: [
+      'Remember the ports: polling uses 161 (the manager asks, the agent answers), and traps use 162 (the agent calls the manager). Mixing those up is a classic exam trap.',
+      'Never leave an SNMP community string at a default like "public" or "private" — and prefer SNMPv3 with authentication and encryption whenever the device supports it.',
+    ],
+    examAlert:
+      'Expect a question contrasting SNMPv2c with SNMPv3 — the key answer is that v3 adds authentication and encryption, while v2c relies on plaintext community strings — or asking which port a trap uses.',
+    beginnerMistakes: [
+      'Assuming SNMPv2c community strings are encrypted — they are not; they are plaintext.',
+      'Swapping the trap and polling ports, or assuming traps are solicited responses — traps are unsolicited alerts sent from the agent.',
+      'Confusing the MIB with the manager — the MIB is the catalog of objects the agent exposes, not the monitoring software itself.',
+    ],
+    keyTerms: [
+      { term: 'SNMP manager', def: 'The central monitoring system that queries devices and receives their alerts.' },
+      { term: 'SNMP agent', def: 'Software on a monitored device that answers SNMP queries and generates traps.' },
+      { term: 'MIB (Management Information Base)', def: 'The structured catalog of objects an SNMP agent exposes for querying.' },
+      { term: 'SNMP trap', def: 'An unsolicited alert sent from an agent to a manager (typically UDP 162) when a notable event occurs.' },
+      { term: 'Community string', def: 'A shared access string used by SNMPv1 and v2c; transmitted in plaintext in v2c.' },
+      { term: 'SNMPv3', def: 'The SNMP version that adds user-based authentication and encryption, recommended for secure environments.' },
+    ],
+    knowledgeCheck: [
+      {
+        prompt: 'Which SNMP version uses plaintext community strings and offers no real encryption?',
+        options: ['SNMPv3', 'SNMPv2c', 'SNMP over TLS', 'NTP'],
+        correct: 1,
+        explanation: 'SNMPv2c relies on community strings sent in plaintext; SNMPv3 is the version that adds authentication and encryption.',
+      },
+      {
+        prompt: 'A switch sends an unsolicited alert to the monitoring server the moment a link goes down. What is this message called?',
+        options: ['A GET request', 'An SNMP trap', 'A MIB walk', 'A DHCP offer'],
+        correct: 1,
+        explanation: 'An unsolicited alert from an agent to a manager is an SNMP trap, typically sent over UDP 162.',
+      },
+      {
+        prompt: 'Which element is the structured catalog of objects that an SNMP agent exposes for querying?',
+        options: ['The manager', 'The MIB', 'The community string', 'The trap receiver port'],
+        correct: 1,
+        explanation: 'The MIB is the structured catalog of objects a device exposes, each identified by a unique OID.',
+      },
+    ],
+    miniScenario: {
+      prompt: 'A security audit finds that every switch in a network still uses the SNMP community string "public" with SNMPv2c, and that traffic from the monitoring server is captured on a shared segment.',
+      task: 'Name the two security weaknesses this configuration creates, and state the version and feature that resolves them.',
+    },
+    recap:
+      'The manager polls agents with GET requests (UDP 161), and agents send unsolicited traps to the manager (UDP 162). Data is organized in a MIB. SNMPv2c uses plaintext community strings; SNMPv3 adds authentication and encryption and is the recommended version.',
+    classroomAnswer:
+      '"I know exactly what each SNMP piece does, I know the trap and poll ports cold, and I never trust a default community string — v3 with authentication and encryption, every time."',
+  };
 }(window.NetReady));

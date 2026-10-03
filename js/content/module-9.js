@@ -714,4 +714,97 @@
     classroomAnswer:
       '"Pick the antenna shape that matches the space — wide and even for an open room, narrow and focused for a hallway or a long-distance link — and always double-check polarization before blaming the hardware for a weak point-to-point connection."',
   };
+  NetReady.LESSONS['9-8'] = {
+    id: '9-8',
+    moduleId: 9,
+    slug: 'wireless-deployment-models-band-steering-regulatory-channels',
+    title: 'Wireless Deployment Models, Band Steering, and Regulatory Channels',
+    estMinutes: 13,
+    outcomes: [
+      'Compare autonomous and lightweight (controller-based) access points and when each fits.',
+      'Explain band steering and why it improves performance on dual-band networks.',
+      'Explain why 802.11h (DFS and transmit power control) matters on 5 GHz channels, and how channel width affects capacity.',
+    ],
+    whyItMatters:
+      'A small office and a 500-seat campus can both have "Wi-Fi," but they are built on completely different deployment models — and the exam expects you to recognize which architecture a scenario is describing, along with the 5 GHz rules that keep radar and Wi-Fi from fighting each other.',
+    simpleEnglish:
+      'An autonomous access point is a standalone AP that is configured and managed individually — each AP handles its own authentication, encryption settings, and channel choice. A lightweight access point is a simpler AP that is centrally managed by a wireless LAN controller (WLC), which pushes configuration to all APs, coordinates roaming, and manages radio settings across the whole building; the AP and controller communicate through CAPWAP tunnels. Autonomous APs suit a single small location, while lightweight APs suit larger deployments that need consistent policy. Band steering is a technique where a dual-band AP or controller encourages clients that support 5 GHz to connect there instead of the crowded 2.4 GHz band, typically by delaying or withholding 2.4 GHz responses to those clients. 802.11h adds two features to 5 GHz operation: Dynamic Frequency Selection (DFS), which makes an AP vacate a channel when it detects radar signals that share the band, and Transmit Power Control (TPC), which limits transmit power to reduce interference. Channel width also matters: 20 MHz channels are the most interference-resistant and leave more non-overlapping channels available, while 40, 80, and 160 MHz channels are faster but consume more spectrum and leave fewer independent channels to reuse.',
+    taglish:
+      'Ang autonomous access point ay standalone — bawat AP ay sarili ang nagma-manage ng authentication, encryption, at channel. Ang lightweight access point naman ay simple lang at pinamamahalaan ng isang wireless LAN controller (WLC) na nagpapadala ng config sa lahat ng AP, nagko-coordinate ng roaming, at nagmamanage ng radio settings sa buong gusali; nag-uusap sila sa pamamagitan ng CAPWAP tunnel. Angkop ang autonomous sa isang maliit na lugar, at ang lightweight naman sa mas malalaking deployment na kailangan ng iisang policy. Ang band steering ay technique kung saan hinihikayat ng dual-band AP o controller ang mga client na sumusuporta sa 5 GHz na doon kumonekta sa halip na sa siksik na 2.4 GHz, kadalasan sa pamamagitan ng pag-antala o pagtanggi ng 2.4 GHz response sa mga iyon. Nagdaragdag ang 802.11h ng dalawang feature sa 5 GHz: ang DFS (Dynamic Frequency Selection), na nagpapalipat ng channel kapag may nakitang radar signal na nagshe-share ng band, at ang TPC (Transmit Power Control), na nililimitahan ang transmit power para mabawasan ang interference. Mahalaga rin ang channel width: ang 20 MHz ang pinaka-matatag laban sa interference at may mas maraming non-overlapping channel, habang ang 40, 80, at 160 MHz ay mas mabilis pero kumokonsumo ng mas maraming spectrum at mas kaunting independent channel.',
+    analogy: {
+      title: 'Sangay ng bangko: bawat sangay na may sariling manager, o isang punong tanggapan na nagdidikta ng lahat',
+      text:
+        'Isipin mo ang autonomous access point parang isang maliit na sangay ng bangko na may sariling manager — bawat sangay ay nagdedesisyon nang mag-isa kung paano haharapin ang kliyente. Ang lightweight access point at ang controller naman parang punong tanggapan na nagpapadala ng iisang patakaran sa lahat ng sangay, kaya pare-pareho ang serbisyo kahit saan ka pumunta sa loob ng malaking gusali (roaming). Ang band steering parang receptionist na tahimik na nagtuturo sa mga kliyente sa mas malawak at mas maluwag na counter (5 GHz) sa halip na sa siksik na pila (2.4 GHz). At ang 802.11h ay parang patakaran ng bangko na kailangang lumipat ng opisina kapag may paparating na pagsasaayos sa gusali (radar) — at ang channel width naman ay parang laki ng counter: mas malapad ang counter, mas maraming serbisyo ang kaya, pero mas kaunti ang counter na puwede mong ilagay sa iisang palapag nang hindi nagbabanggaan.',
+    },
+    howItWorks: [
+      'Autonomous AP: each unit is configured individually (SSIDs, encryption, channels, authentication) and works on its own — manageable at small scale, but tedious and inconsistent across many APs.',
+      'Lightweight AP: the AP handles real-time radio functions while a wireless LAN controller centrally manages configuration, policy, roaming, and RF optimization; the two communicate through CAPWAP tunnels.',
+      'Band steering: a dual-band AP or controller nudges capable clients toward 5 GHz (or 6 GHz) by withholding or delaying 2.4 GHz responses, relieving the more crowded 2.4 GHz band.',
+      'Non-overlapping channels: 2.4 GHz has only a few truly non-overlapping channels (1, 6, and 11 in common regional plans), while 5 GHz offers many more — which is why dual-band planning leans on 5 GHz for capacity.',
+      '802.11h on 5 GHz: Dynamic Frequency Selection (DFS) moves the AP off a channel when radar is detected on that shared band, and Transmit Power Control (TPC) limits power to reduce interference with other systems.',
+      'Channel width tradeoff: 20 MHz is the most robust and leaves the most independent channels, while 40, 80, and 160 MHz increase throughput at the cost of spectrum and reuse capacity.',
+    ],
+    visual: {
+      type: 'diagram',
+      html: `<table class="lesson-table">
+        <thead><tr><th>Deployment / Feature</th><th>What It Does</th><th>Best Fit</th></tr></thead>
+        <tbody>
+          <tr><td>Autonomous AP</td><td>Each AP configured and managed individually</td><td>Small single-site deployment</td></tr>
+          <tr><td>Lightweight AP + WLC</td><td>Central controller manages many APs via CAPWAP</td><td>Large, multi-AP or campus deployments</td></tr>
+          <tr><td>Band steering</td><td>Pushes capable clients to 5 GHz</td><td>Dual-band networks with crowded 2.4 GHz</td></tr>
+          <tr><td>802.11h (DFS + TPC)</td><td>Avoids radar and limits interference on 5 GHz</td><td>5 GHz deployments near radar-using systems</td></tr>
+          <tr><td>20 MHz vs. 80 MHz width</td><td>Robustness vs. raw throughput</td><td>Dense areas (20 MHz) vs. open areas (80 MHz)</td></tr>
+        </tbody>
+      </table>`,
+    },
+    realWorldExample:
+      'A hospital uses lightweight APs managed by one controller so that a clinician walking between floors keeps the same secure network policy and roams cleanly, while the 5 GHz channels run 802.11h so a nearby weather radar cannot knock out the wireless network mid-shift.',
+    proTips: [
+      'If a scenario mentions many APs needing identical policy and central management, the answer is lightweight APs with a controller — not autonomous APs configured one by one.',
+      'Choosing wider channels for speed in a dense office often backfires; neighboring APs end up competing for the same spectrum. Narrower channels frequently perform better in crowded environments.',
+    ],
+    examAlert:
+      'The exam likes to contrast autonomous and lightweight APs by management style (individual vs. controller-based) and asks which feature protects 5 GHz from radar — the answer is DFS, a component of 802.11h.',
+    beginnerMistakes: [
+      'Assuming more channel width always means better Wi-Fi — wider channels reduce how many independent channels exist for neighboring APs to use.',
+      'Thinking band steering forces a device onto 5 GHz — it encourages capable clients toward 5 GHz, but the client can still choose 2.4 GHz if it must.',
+      'Confusing DFS (a 5 GHz radar-avoidance mechanism) with DHCP, or with general frequency hopping used by older Bluetooth-era technologies.',
+    ],
+    keyTerms: [
+      { term: 'Autonomous access point', def: 'A standalone AP configured and managed individually, without a central controller.' },
+      { term: 'Lightweight access point', def: 'An AP managed centrally by a wireless LAN controller, which handles configuration and policy for many APs.' },
+      { term: 'Wireless LAN controller (WLC)', def: 'A central device that configures, monitors, and coordinates lightweight access points.' },
+      { term: 'Band steering', def: 'Encouraging dual-band clients to connect to the less crowded 5 GHz (or 6 GHz) band instead of 2.4 GHz.' },
+      { term: 'DFS (Dynamic Frequency Selection)', def: 'An 802.11h feature that moves an AP off a 5 GHz channel when radar is detected on it.' },
+      { term: 'TPC (Transmit Power Control)', def: 'An 802.11h feature that limits transmit power to reduce interference with other systems.' },
+    ],
+    knowledgeCheck: [
+      {
+        prompt: 'A company has 80 access points that must all share the same security policy and be managed from one place. Which deployment model fits best?',
+        options: ['Autonomous APs configured individually', 'Lightweight APs managed by a wireless LAN controller', 'Ad hoc peer-to-peer wireless links', 'Repeaters daisy-chained from one AP'],
+        correct: 1,
+        explanation: 'Lightweight APs with a controller centralize configuration and policy across a large number of APs.',
+      },
+      {
+        prompt: 'Which 802.11h feature makes an access point vacate a 5 GHz channel when radar is detected?',
+        options: ['Band steering', 'DFS (Dynamic Frequency Selection)', 'Channel bonding', 'WPA3-SAE'],
+        correct: 1,
+        explanation: 'DFS monitors for radar on shared 5 GHz channels and forces the AP to switch away when it is detected.',
+      },
+      {
+        prompt: 'In a dense office with many neighboring APs, which channel width usually performs best for overall reliability?',
+        options: ['160 MHz, for maximum speed', '80 MHz, for a good balance', '20 MHz, for more independent channels and better interference resistance', 'There is no tradeoff at all'],
+        correct: 2,
+        explanation: 'Narrower channels leave more non-overlapping channels for neighbors, reducing contention in crowded environments.',
+      },
+    ],
+    miniScenario: {
+      prompt: 'A dual-band office has many older 2.4 GHz-only devices plus newer dual-band laptops, and the 2.4 GHz band is congested even though the 5 GHz band is mostly empty.',
+      task: 'Name the feature that encourages the capable laptops to move to 5 GHz, and explain why the older devices cannot be forced the same way.',
+    },
+    recap:
+      'Autonomous APs are configured individually; lightweight APs are centrally managed by a WLC over CAPWAP. Band steering pushes capable clients to 5 GHz. 802.11h on 5 GHz adds DFS (radar avoidance) and TPC (power control). Channel width trades throughput for spectrum reuse.',
+    classroomAnswer:
+      '"Single site with few APs, I configure each one. Many APs with one policy, I manage them from a controller — and on 5 GHz, I always check 802.11h so radar doesn\'t take the network down."',
+  };
 }(window.NetReady));
