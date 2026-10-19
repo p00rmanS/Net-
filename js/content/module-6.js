@@ -738,4 +738,201 @@
     classroomAnswer:
       '"Once you see \'IP helper\' as just DHCP relay, and \'non-authoritative\' as just \'this came from cache, not the source,\' this whole lesson stops sounding like new material and starts sounding like vocabulary for things you already understood."',
   };
+
+  NetReady.LESSONS['6-8'] = {
+    id: '6-8',
+    moduleId: 6,
+    slug: 'multicast-and-igmp',
+    title: 'Multicast and IGMP: Sending One Stream to Many Receivers',
+    estMinutes: 12,
+    outcomes: [
+      `Explain what multicast is and how it differs from unicast and broadcast.`,
+      `Recognize the IPv4 multicast range and common reserved addresses.`,
+      `Describe what IGMP and IGMP snooping do.`,
+      `Name common multicast use cases and the IPv6 equivalent.`,
+    ],
+    whyItMatters: `Video streaming inside a company, IPTV, and many routing protocols depend on multicast. Without IGMP snooping, a multicast stream can flood a whole VLAN, and that shows up on the exam and in real outages.`,
+    simpleEnglish: `Unicast is one sender to one receiver. Broadcast is one sender to everyone. Multicast is one sender to a chosen group of receivers who asked to join. IPv4 multicast uses addresses from 224.0.0.0 to 239.255.255.255 (224.0.0.0/4). Hosts use the Internet Group Management Protocol (IGMP) to tell the local router they want to join a group. A switch does not understand IP by default, so it would flood multicast to every port like a broadcast. IGMP snooping lets the switch listen to those join messages and send the stream only to the ports with interested receivers.`,
+    taglish: `Ang unicast ay one-to-one, ang broadcast ay one-to-all, at ang multicast ay one-to-many na pumili — parang radio station: lahat puwedeng makinig, pero yung mga naka-tune in lang ang nakakatanggap. Ang IPv4 multicast ay 224.0.0.0 hanggang 239.255.255.255. Para sumali sa grupo, gumagamit ang host ng IGMP. Kung walang IGMP snooping ang switch, ibubuhos niya ang multicast sa lahat ng port. Kapag naka-enable, sa mga port lang na may nagpa-subscribe niya ipapadala.`,
+    analogy: {
+      title: 'Radio station at FM frequency',
+      text: `Ang radio station ay nagbo-broadcast sa isang frequency (multicast group address), pero mga radyong naka-tune lang ang nakakarinig. Ang pag-tune ay ang IGMP join. Kapag walang nakatutok sa kapitbahayan (walang miyembro sa port), hindi na kailangang ipadala ang signal doon — yan ang ginagawa ng IGMP snooping.`,
+    },
+    howItWorks: [
+      `Address range: IPv4 multicast is 224.0.0.0/4 (first octet 224 to 239). Well-known examples: 224.0.0.1 all hosts on the subnet, 224.0.0.2 all routers, 224.0.0.5 and 224.0.0.6 OSPF, 224.0.0.9 RIPv2, 224.0.0.251 mDNS.`,
+      `Multicast MAC addresses: IPv4 multicast maps to Ethernet MAC addresses beginning 01:00:5E.`,
+      `Joining: a host sends an IGMP membership report for the group it wants. A router acting as the IGMP querier periodically asks which groups are still wanted; hosts leaving stop reporting (IGMPv2 and later also send an explicit leave).`,
+      `IGMP versions: v1 basic, v2 adds leave messages, v3 adds source-specific multicast (receivers choose which sources they accept).`,
+      `IGMP snooping: the switch inspects IGMP messages and builds a table of which ports want which group. Multicast is then forwarded only to those ports instead of flooded across the VLAN.`,
+      `Routing multicast between subnets needs a multicast routing protocol, most commonly PIM (Protocol Independent Multicast).`,
+      `IPv6: no broadcast at all; multicast (ff00::/8) takes its place, and hosts join groups using MLD (Multicast Listener Discovery) rather than IGMP.`,
+      `Typical uses: IPTV and live video, corporate all-hands streaming, financial market data feeds, software image distribution, and routing protocol hellos.`,
+    ],
+    visual: {
+      type: 'diagram',
+      html: `<div class="lesson-diagram" role="img" aria-label="Comparison of unicast, broadcast, and multicast">
+        <div class="table-scroll"><table class="lesson-table">
+          <thead><tr><th>Type</th><th>Who receives</th><th>Example address</th></tr></thead>
+          <tbody>
+            <tr><td>Unicast</td><td>One specific host</td><td>192.168.1.25</td></tr>
+            <tr><td>Broadcast</td><td>Every host in the broadcast domain</td><td>192.168.1.255 / FF:FF:FF:FF:FF:FF</td></tr>
+            <tr><td>Multicast</td><td>Only hosts that joined the group</td><td>239.1.1.1</td></tr>
+            <tr><td>Anycast</td><td>Nearest of several hosts sharing one address</td><td>Public DNS resolvers</td></tr>
+          </tbody>
+        </table></div>
+      </div>`,
+    },
+    realWorldExample: `A company streams its monthly town hall video by multicast. After a new switch is installed without IGMP snooping, every PC on the floor sees 8 Mbps of video it never requested, and Wi-Fi users on the same VLAN complain of slowness. Turning on IGMP snooping restricts the stream to the few ports with viewers.`,
+    proTips: [
+      `If multicast works within a subnet but not across routers, check that multicast routing (PIM) is enabled and that TTL on the stream is greater than 1.`,
+      `Heavy unexplained traffic hitting every port in a VLAN is a classic symptom of multicast flooding without IGMP snooping.`,
+    ],
+    examAlert: `Remember 224.0.0.0 to 239.255.255.255 for IPv4 multicast, IGMP for joining, IGMP snooping for switches, and that IPv6 uses MLD and has no broadcast.`,
+    beginnerMistakes: [
+      `Confusing multicast with broadcast. Multicast only reaches hosts that joined.`,
+      `Assuming a switch automatically limits multicast; it only does so with IGMP snooping.`,
+      `Forgetting that IPv6 replaced broadcast with multicast.`,
+    ],
+    keyTerms: [
+      { term: 'Multicast', def: `One-to-many delivery to a group of receivers that joined.` },
+      { term: 'IGMP', def: `Protocol hosts use to join and leave IPv4 multicast groups.` },
+      { term: 'IGMP snooping', def: `Switch feature that forwards multicast only to ports with group members.` },
+      { term: 'PIM', def: `Protocol Independent Multicast, used to route multicast between networks.` },
+      { term: 'MLD', def: `Multicast Listener Discovery, the IPv6 counterpart to IGMP.` },
+    ],
+    knowledgeCheck: [
+      {
+        prompt: 'Which range is reserved for IPv4 multicast?',
+        options: ['10.0.0.0 - 10.255.255.255', '169.254.0.0 - 169.254.255.255', '224.0.0.0 - 239.255.255.255', '240.0.0.0 - 255.255.255.255'],
+        correct: 2,
+        explanation: 'IPv4 multicast is 224.0.0.0/4, which spans first octets 224 through 239.',
+      },
+      {
+        prompt: 'What does IGMP snooping prevent?',
+        options: [
+          'ARP spoofing',
+          'Multicast traffic being flooded to every port in a VLAN',
+          'Rogue DHCP servers',
+          'Duplicate IP addresses',
+        ],
+        correct: 1,
+        explanation: 'The switch learns which ports joined each group and forwards multicast only there.',
+      },
+      {
+        prompt: 'Which protocol takes the place of IGMP in IPv6?',
+        options: ['ICMPv4', 'MLD', 'DHCPv6', 'ARP'],
+        correct: 1,
+        explanation: 'Multicast Listener Discovery handles group membership in IPv6.',
+      },
+    ],
+    miniScenario: {
+      prompt: 'A video stream plays fine for viewers in the same VLAN as the server but nobody on another subnet can receive it.',
+      task: 'Name one thing to check first on the routers.',
+    },
+    recap: `Multicast delivers one stream to the hosts that joined a group. IPv4 uses 224.0.0.0/4 and IGMP, IPv6 uses ff00::/8 and MLD. IGMP snooping keeps switches from flooding multicast; PIM routes it between subnets.`,
+    classroomAnswer: `"Multicast is a radio station: one transmission, only the tuned-in listeners get it. IGMP is the tuning, snooping keeps the switch from broadcasting it to everyone."`,
+  };
+
+  NetReady.LESSONS['6-9'] = {
+    id: '6-9',
+    moduleId: 6,
+    slug: 'arp-and-icmp',
+    title: 'ARP and ICMP: The Helper Protocols Behind Ping and Traceroute',
+    estMinutes: 13,
+    outcomes: [
+      `Explain how ARP maps an IPv4 address to a MAC address on a local segment.`,
+      `Describe what happens when the destination is on a different subnet.`,
+      `Identify common ICMP message types and which tools use them.`,
+      `Explain ARP spoofing and why blocking all ICMP can cause problems.`,
+    ],
+    whyItMatters: `Ping, traceroute, "Destination host unreachable", and ARP tables show up constantly in troubleshooting questions. Understanding the two helper protocols behind them makes those tools easy to interpret.`,
+    simpleEnglish: `IP addresses are for getting a packet across networks, but on the final local hop a frame needs a MAC address. The Address Resolution Protocol (ARP) finds it: a host broadcasts "Who has 192.168.1.1? Tell 192.168.1.50." The owner replies with its MAC address by unicast, and the asker caches the answer in its ARP table. If the destination is on a different subnet, the host does not ARP for the far-away machine; it ARPs for its default gateway and sends the frame there. The Internet Control Message Protocol (ICMP) is the network's error and diagnostic messenger. Ping uses ICMP echo request and echo reply. Traceroute relies on ICMP Time Exceeded messages. ICMP is carried directly in IP (protocol number 1) and has no ports.`,
+    taglish: `Kailangan ng MAC address para sa huling hakbang ng padala, kaya ginagamit ang ARP: nagsisigaw ang PC ng "Sino ang may 192.168.1.1?" (broadcast), sasagot ang may-ari ng MAC niya (unicast). Itatabi ang sagot sa ARP cache. Kapag nasa ibang subnet ang pupuntahan, hindi ARP ang destination mismo kundi ang default gateway. Ang ICMP naman ay parang mensahero ng mga ulat: "Echo request/reply" para sa ping, "Destination unreachable" kapag hindi maabot, at "Time Exceeded" kapag naubos ang TTL. Walang port number ang ICMP.`,
+    analogy: {
+      title: 'Pagtatanong sa barangay hall',
+      text: `Ang ARP ay parang pagtatanong sa kalye ng "Sino dito si Mang Berto?" Lahat nakakarinig (broadcast), pero si Mang Berto lang ang sasagot (unicast) ng kanyang pinto (MAC). Ang ICMP ay ang sulat ng postmaster na nagsasabing "Hindi mahanap ang address" o "Naubos ang oras ng padala."`,
+    },
+    howItWorks: [
+      `ARP request: broadcast to FF:FF:FF:FF:FF:FF asking for the MAC that owns a given IPv4 address on the local subnet.`,
+      `ARP reply: unicast back to the requester containing the owner's MAC. The requester stores it in its ARP cache for a short time (often minutes).`,
+      `Off-subnet traffic: the host compares the destination with its own subnet. If it is remote, it ARPs for the default gateway's MAC, and the router repeats the process on the next network.`,
+      `Gratuitous ARP: a host announces its own IP-to-MAC mapping without being asked, used when an address changes, at failover (such as FHRP), or to detect duplicate IP addresses.`,
+      `ARP spoofing / poisoning: an attacker sends forged ARP replies so victims associate the gateway's IP with the attacker's MAC, enabling an on-path attack. Dynamic ARP Inspection is the switch-level defense.`,
+      `IPv6 has no ARP; it uses Neighbor Discovery (ICMPv6) for the same job.`,
+      `ICMP types worth knowing: type 8 echo request, type 0 echo reply, type 3 destination unreachable (with codes such as network, host, port unreachable or fragmentation needed), type 11 time exceeded, type 5 redirect.`,
+      `Tools: ping uses echo request/reply. Traceroute (tracert) sends packets with increasing TTL and reads the Time Exceeded replies to reveal each hop.`,
+      `Path MTU Discovery depends on ICMP "fragmentation needed" messages. Blocking all ICMP at a firewall can cause strange problems where small packets work but large transfers hang.`,
+    ],
+    visual: {
+      type: 'diagram',
+      html: `<div class="lesson-diagram" role="img" aria-label="Table of ICMP message types and what uses them">
+        <div class="table-scroll"><table class="lesson-table">
+          <thead><tr><th>ICMP type</th><th>Meaning</th><th>Seen with</th></tr></thead>
+          <tbody>
+            <tr><td>8 / 0</td><td>Echo request / echo reply</td><td>ping</td></tr>
+            <tr><td>3</td><td>Destination unreachable</td><td>Missing route, closed port, DF set but too big</td></tr>
+            <tr><td>11</td><td>Time exceeded (TTL hit 0)</td><td>traceroute, routing loops</td></tr>
+            <tr><td>5</td><td>Redirect</td><td>Router suggests a better gateway</td></tr>
+          </tbody>
+        </table></div>
+      </div>`,
+    },
+    realWorldExample: `Users can ping the file server by IP but a few of them intermittently lose it. The ARP table on a PC shows the server's IP mapped to two different MAC addresses over time. A forgotten test machine with a duplicate IP address was answering ARP requests, and gratuitous ARP messages revealed the conflict.`,
+    proTips: [
+      `Use arp -a to view the ARP cache on Windows and Linux. Clearing it (arp -d) forces a fresh lookup after a NIC replacement.`,
+      `"Request timed out" means no reply arrived; "Destination host unreachable" means a device actually reported back that it could not deliver. The wording points to different causes.`,
+      `Do not block ICMP entirely. Permit at least echo, time exceeded, and fragmentation needed where practical.`,
+    ],
+    examAlert: `Be ready to say: ARP resolves IP to MAC (Layer 2/3 boundary), request is a broadcast, reply is unicast; ICMP has no ports; ping = echo; traceroute = TTL and Time Exceeded; IPv6 replaces ARP with NDP.`,
+    beginnerMistakes: [
+      `Thinking a host ARPs for a remote server's MAC. It ARPs for the default gateway.`,
+      `Calling ICMP a TCP or UDP protocol. It rides directly on IP.`,
+      `Treating a ping failure as proof the host is down; many hosts block echo replies.`,
+    ],
+    keyTerms: [
+      { term: 'ARP', def: `Resolves an IPv4 address to a MAC address on the local network.` },
+      { term: 'ARP cache', def: `Temporary table of IP-to-MAC mappings a host has learned.` },
+      { term: 'Gratuitous ARP', def: `Unsolicited ARP announcing a host's own IP-to-MAC mapping.` },
+      { term: 'ICMP', def: `Network-layer protocol for error reporting and diagnostics such as ping.` },
+      { term: 'Echo request/reply', def: `ICMP messages used by ping.` },
+      { term: 'Time Exceeded', def: `ICMP message sent when a packet's TTL reaches 0.` },
+    ],
+    commands: [
+      { os: 'Windows', cmd: 'arp -a', desc: 'Displays the ARP cache of learned IP-to-MAC mappings.' },
+      { os: 'Linux', cmd: 'ip neigh', desc: 'Shows the neighbor (ARP) table.' },
+      { os: 'Windows', cmd: 'ping -n 4 192.168.1.1', desc: 'Sends four ICMP echo requests to test reachability.' },
+      { os: 'Windows', cmd: 'tracert 8.8.8.8', desc: 'Maps the hops to a destination using TTL and ICMP.' },
+    ],
+    knowledgeCheck: [
+      {
+        prompt: 'A PC wants to send data to a server on a different subnet. Whose MAC address does it ARP for?',
+        options: ['The remote server', 'The default gateway', 'The DNS server', 'The DHCP server'],
+        correct: 1,
+        explanation: `For off-subnet destinations the host sends the frame to its default gateway, so it resolves the gateway's MAC.`,
+      },
+      {
+        prompt: 'Which ICMP message type does traceroute depend on to discover each hop?',
+        options: ['Echo reply only', 'Time exceeded', 'Redirect', 'Source quench'],
+        correct: 1,
+        explanation: 'Each router that drops a packet at TTL 0 returns Time Exceeded, exposing its address.',
+      },
+      {
+        prompt: 'Which statement about ICMP is true?',
+        options: [
+          'It uses TCP port 7.',
+          'It uses UDP port 53.',
+          'It has no port numbers and runs directly over IP.',
+          'It is only used in IPv6.',
+        ],
+        correct: 2,
+        explanation: 'ICMP is IP protocol number 1 and does not use TCP or UDP ports.',
+      },
+    ],
+    miniScenario: {
+      prompt: 'Your PC shows two different MAC addresses for the gateway IP in arp -a within a few minutes, and users report slow browsing.',
+      task: 'What attack or misconfiguration could this indicate, and which switch feature helps defend against it?',
+    },
+    recap: `ARP maps IP to MAC on the local segment (broadcast request, unicast reply) and targets the gateway for remote destinations. ICMP carries diagnostics: echo for ping, time exceeded for traceroute, unreachable for delivery failures. ARP spoofing is countered by DAI; blocking all ICMP can break Path MTU Discovery.`,
+    classroomAnswer: `"ARP asks who owns this IP so I can build the frame; ICMP is how the network tells me what went wrong or whether you are there."`,
+  };
 }(window.NetReady));

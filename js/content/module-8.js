@@ -614,4 +614,104 @@
     classroomAnswer:
       '"Two offices that always need each other — site-to-site. One traveling employee who needs in sometimes — remote-access. Either way, the tunnel is just an encrypted wrapper around the trip across the internet."',
   };
+
+  NetReady.LESSONS['8-7'] = {
+    id: '8-7',
+    moduleId: 8,
+    slug: 'routing-loops-convergence-metrics',
+    title: 'Routing Loops, Convergence, and Metrics: TTL, Split Horizon, and Route Poisoning',
+    estMinutes: 14,
+    outcomes: [
+      `Explain what a routing loop is and how TTL / hop limit limits the damage.`,
+      `Describe split horizon, route poisoning, poison reverse, and hold-down timers.`,
+      `Define convergence and explain why slow convergence hurts users.`,
+      `Compare the metrics used by RIP, OSPF, EIGRP, and BGP.`,
+    ],
+    whyItMatters: `Dynamic routing is only useful if routers agree quickly and never send packets in circles. Network+ questions about "why did packets loop?" or "which protocol uses hop count?" all come from this topic.`,
+    simpleEnglish: `A routing loop happens when routers have conflicting information and keep passing the same packet back and forth. Every IP packet carries a Time To Live (TTL) counter, called Hop Limit in IPv6. Each router subtracts 1; at 0 the router discards the packet and sends back an ICMP Time Exceeded message. So loops do not last forever, but they waste bandwidth. Distance-vector protocols add rules to avoid loops in the first place: split horizon (never advertise a route back out the interface you learned it from), route poisoning (advertise a dead route with an "infinite" metric so everyone drops it), poison reverse, and hold-down timers (ignore new info about a recently failed route for a while). Convergence is the time it takes all routers to agree on the new topology after a change. Each protocol picks the best path using a metric.`,
+    taglish: `Ang routing loop ay parang mga taong nagtuturo ng direksyon na paikot-ikot — "Dun po sa kabila," "hindi, dito po" — kaya umiikot lang ang packet. Para hindi forever, may TTL ang bawat packet; bawat router, binabawasan ng 1. Kapag 0, itatapon at magpapadala ng ICMP Time Exceeded. Ang split horizon: huwag mong sabihin sa pinagkunan mo ng balita ang balitang galing din sa kanya. Ang route poisoning: kapag patay na ang ruta, ipahayag na "infinite" ang metric para alisin agad ng lahat. Ang convergence ay yung oras bago magkasundo ulit ang lahat ng router pagkatapos ng pagbabago. Mas mabilis, mas maganda.`,
+    analogy: {
+      title: 'Tsismis na bumabalik sa pinanggalingan',
+      text: `Kapag sinabi sa iyo ni Ana na sarado ang kalsada, at ibinalita mo ulit kay Ana na "sarado daw ang kalsada," pabalik-balik na lang ang tsismis kahit wala nang totoo. Ang split horizon ay ang rule na "huwag ibalita kay Ana ang galing kay Ana." Ang route poisoning ay malakas na anunsyo: "SARADO NA TALAGA, kalimutan na ninyo."`,
+    },
+    howItWorks: [
+      `TTL / Hop Limit: set by the sender (commonly 64, 128, or 255). Every Layer 3 hop decrements it. At 0 the packet is dropped and the router returns ICMP Time Exceeded (type 11). traceroute exploits this by sending packets with TTL 1, 2, 3 ... to discover each hop.`,
+      `Layer 2 contrast: Ethernet frames have NO TTL. A switching loop therefore causes a broadcast storm that never expires, which is why spanning tree exists.`,
+      `Split horizon: a router does not advertise a route out the same interface it learned that route from.`,
+      `Route poisoning: when a network fails, the router advertises it with an unreachable metric (in RIP, 16 hops). Poison reverse sends that poisoned route back toward the neighbor that told you about it.`,
+      `Hold-down timer: after hearing a route is bad, a router refuses to accept worse-looking updates for that route for a set time, preventing flapping and loops.`,
+      `Convergence: all routers have a consistent, correct view of the topology. Link-state protocols (OSPF) converge faster than classic distance-vector (RIP) because every router floods the topology change and recomputes paths.`,
+      `Metrics: RIP uses hop count (max 15; 16 means unreachable). OSPF uses cost, usually derived from interface bandwidth. EIGRP uses a composite metric, by default bandwidth and delay. BGP does not use a simple metric; it selects paths using attributes such as AS-path length and local preference.`,
+      `Tie-breakers: first the longest prefix match chooses the route, then administrative distance chooses between protocols, then the metric chooses between routes learned by the same protocol.`,
+    ],
+    visual: {
+      type: 'diagram',
+      html: `<div class="lesson-diagram" role="img" aria-label="Table of routing protocol metrics">
+        <div class="table-scroll"><table class="lesson-table">
+          <thead><tr><th>Protocol</th><th>Type</th><th>Metric</th><th>Notes</th></tr></thead>
+          <tbody>
+            <tr><td>RIP v2</td><td>Distance-vector</td><td>Hop count</td><td>16 = unreachable</td></tr>
+            <tr><td>OSPF</td><td>Link-state</td><td>Cost (bandwidth-based)</td><td>Fast convergence</td></tr>
+            <tr><td>EIGRP</td><td>Advanced distance-vector</td><td>Bandwidth + delay</td><td>Cisco-originated</td></tr>
+            <tr><td>BGP</td><td>Path-vector</td><td>Path attributes</td><td>Between autonomous systems</td></tr>
+          </tbody>
+        </table></div>
+      </div>`,
+    },
+    realWorldExample: `A traceroute shows the same two router IPs alternating until the hops hit 30 and stop. That pattern is a routing loop: two routers each believe the other is the next hop for the destination, often after a bad static route or a redistribution mistake. TTL is the only thing that eventually ends the loop.`,
+    proTips: [
+      `A traceroute that bounces between two addresses means a loop; a traceroute that stops with * * * means a drop or a filtered ICMP, not necessarily a loop.`,
+      `Slow convergence shows up as short outages after a link fails, while the network "figures itself out".`,
+    ],
+    examAlert: `Know the order of path choice: longest prefix, then administrative distance, then metric. RIP = hop count, OSPF = cost, EIGRP = bandwidth and delay, BGP = path attributes. TTL expiry returns ICMP Time Exceeded.`,
+    beginnerMistakes: [
+      `Believing TTL is a time in seconds; in practice it is a hop counter.`,
+      `Comparing metrics from different protocols directly. Administrative distance decides between protocols first.`,
+      `Thinking spanning tree and TTL solve the same problem. STP prevents Layer 2 loops; TTL limits Layer 3 loops.`,
+    ],
+    keyTerms: [
+      { term: 'TTL / Hop Limit', def: 'Per-packet counter decremented by each router; the packet is dropped at 0.' },
+      { term: 'Split horizon', def: 'Rule against advertising a route back out the interface it was learned on.' },
+      { term: 'Route poisoning', def: 'Advertising a failed route with an unreachable metric.' },
+      { term: 'Hold-down timer', def: 'Delay before accepting changes to a route that recently failed.' },
+      { term: 'Convergence', def: 'State where all routers agree on the topology after a change.' },
+      { term: 'Metric', def: 'Value a routing protocol uses to rank paths to the same destination.' },
+    ],
+    commands: [
+      { os: 'Windows', cmd: 'tracert 8.8.8.8', desc: 'Shows each hop; repeated addresses can reveal a loop.' },
+      { os: 'Linux', cmd: 'traceroute 8.8.8.8', desc: 'Same idea using increasing TTL values.' },
+      { os: 'Cisco IOS', cmd: 'show ip route', desc: 'Displays routes with their administrative distance and metric.' },
+    ],
+    knowledgeCheck: [
+      {
+        prompt: `What happens when a packet's TTL reaches 0?`,
+        options: [
+          'The router doubles it.',
+          'The router discards it and typically sends an ICMP Time Exceeded message.',
+          'The packet is sent back to the source unchanged.',
+          'The packet is forwarded to the default gateway.',
+        ],
+        correct: 1,
+        explanation: 'Routers drop expired packets and signal the sender with ICMP Time Exceeded.',
+      },
+      {
+        prompt: 'Which technique prevents a router from advertising a route out the interface it learned it from?',
+        options: ['Route poisoning', 'Split horizon', 'Hold-down timer', 'Route summarization'],
+        correct: 1,
+        explanation: 'That is the definition of split horizon.',
+      },
+      {
+        prompt: 'Which protocol uses hop count as its metric, with 16 meaning unreachable?',
+        options: ['OSPF', 'EIGRP', 'RIP', 'BGP'],
+        correct: 2,
+        explanation: 'RIP counts hops; 15 is the maximum usable value.',
+      },
+    ],
+    miniScenario: {
+      prompt: 'After a WAN link fails, users lose access for about three minutes before connectivity returns on a backup path.',
+      task: 'Name the concept that describes this delay and one reason a link-state protocol might shorten it.',
+    },
+    recap: `TTL stops packets from circulating forever; split horizon, route poisoning, and hold-down timers stop loops from forming; convergence measures how fast routers agree again. RIP counts hops, OSPF uses cost, EIGRP uses bandwidth and delay, BGP uses path attributes.`,
+    classroomAnswer: `"TTL is the safety net, split horizon and poisoning are the prevention, and convergence is how fast the network heals."`,
+  };
 }(window.NetReady));

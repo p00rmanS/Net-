@@ -836,4 +836,207 @@
     classroomAnswer:
       '"QoS doesn\'t make the pipe bigger — it decides who goes first when the pipe is full, and whether excess traffic gets politely delayed (shaping) or turned away at the door (policing)."',
   };
+
+  NetReady.LESSONS['7-9'] = {
+    id: '7-9',
+    moduleId: 7,
+    slug: 'how-a-switch-works',
+    title: 'How a Switch Works: MAC Tables, Flooding, and Collision vs. Broadcast Domains',
+    estMinutes: 14,
+    outcomes: [
+      `Explain how a switch learns MAC addresses and builds its MAC address (CAM) table.`,
+      `Describe the difference between forwarding, flooding, and filtering.`,
+      `Tell collision domains apart from broadcast domains and name what separates each.`,
+      `Explain duplex, autonegotiation, and why a duplex mismatch causes slow, error-filled links.`,
+    ],
+    whyItMatters: `Every other Layer 2 topic (VLANs, STP, port security) assumes you already understand what a switch does with a frame the moment it arrives. Exam questions about "which device breaks up a collision domain?" or "why is this link slow with late collisions?" are really questions about this lesson.`,
+    simpleEnglish: `A switch is a device that remembers which MAC address lives behind which port. When a frame comes in, the switch writes down the SOURCE MAC and the port it came from (learning). Then it looks at the DESTINATION MAC: if it knows the port, it sends the frame out that one port only (forwarding). If it does not know the destination, or the frame is a broadcast, it sends a copy out every port except the one it arrived on (flooding). A hub never remembered anything, so it repeated every frame to everyone. That is why a hub is one big collision domain, while each switch port is its own collision domain. Broadcast domains are bigger: a switch passes broadcasts to every port in the same VLAN, and only a router (or a Layer 3 switch) stops them.`,
+    taglish: `Ang switch ay parang receptionist na may notebook. Tuwing may dumadating na frame, isinusulat niya: "Si MAC AA:AA galing sa Port 1." Yan ang learning. Kapag may frame na papunta kay AA:AA, alam na niya — Port 1 lang ang pagpapadalhan niya (forwarding). Kung hindi pa niya kilala ang destination, o kung broadcast, ipapadala niya sa lahat ng port maliban sa pinanggalingan (flooding). Ang hub, walang notebook — isinisigaw niya sa lahat. Kaya ang hub ay isang malaking collision domain, pero sa switch, bawat port ay sarili niyang collision domain. Ang broadcast domain naman ay mas malaki: ang router lang (o VLAN boundary) ang humaharang sa broadcast.`,
+    analogy: {
+      title: 'Receptionist na may notebook',
+      text: `Isipin ang receptionist ng condo. Tuwing may residenteng dumadaan, isinusulat niya sa notebook kung aling unit sila (source MAC → port). Kapag may bisitang naghahanap kay "Aling Nena", tinitingnan niya ang notebook at itinuturo ang tamang unit. Kung wala pa sa notebook, tinatawag niya ang bawat palapag para itanong (flood). Kapag may announcement para sa lahat ng nasa building, yun ang broadcast — hanggang hindi hinaharang ng guard sa gate (router), aabot sa lahat.`,
+    },
+    howItWorks: [
+      `Learn: a frame arrives on port 3 with source MAC AAAA. The switch records "AAAA is on port 3" in its MAC address table (also called the CAM table, for content-addressable memory). Entries age out after a timeout (commonly 300 seconds on many switches) if the device stays silent.`,
+      `Forward: if the destination MAC is in the table, the frame leaves only through that port. This is what makes switches efficient and also gives a modest privacy benefit compared with a hub.`,
+      `Flood: if the destination is unknown unicast, or the frame is a broadcast (FF:FF:FF:FF:FF:FF), the switch sends it out every port in the same VLAN except the ingress port. Multicast is flooded too unless IGMP snooping is enabled.`,
+      `Filter: if the destination is on the same port the frame arrived on, the switch drops the frame instead of sending it back.`,
+      `Collision domain: the set of devices that can have their transmissions collide. A hub (or a shared coax bus) puts everyone in one collision domain. Each switch port is its own collision domain, and a full-duplex link has no collisions at all.`,
+      `Broadcast domain: the set of devices that receive a Layer 2 broadcast. Switch ports in the same VLAN share one; a router interface or a different VLAN starts a new one. Rule of thumb: switches cut collision domains, routers cut broadcast domains.`,
+      `CSMA/CD (Carrier Sense Multiple Access with Collision Detection) is how half-duplex Ethernet shares a wire: listen first, send, and if a collision is detected, back off for a random time. Full duplex does not need it. Wi-Fi uses CSMA/CA (Collision Avoidance) because a radio cannot listen while it transmits.`,
+      `Duplex and autonegotiation: two ends of a link negotiate speed and duplex. If one side is hard-coded to full duplex and the other is left on auto, the auto side may fall back to half duplex. The result is a duplex mismatch: the link comes up but is slow, with late collisions and CRC errors climbing on the half-duplex side.`,
+    ],
+    visual: {
+      type: 'diagram',
+      html: `<div class="lesson-diagram" role="img" aria-label="Table comparing hub, switch and router by collision and broadcast domains">
+        <div class="table-scroll"><table class="lesson-table">
+          <thead><tr><th>Device</th><th>Collision domains</th><th>Broadcast domains</th></tr></thead>
+          <tbody>
+            <tr><td>Hub (4 ports)</td><td>1 shared by all ports</td><td>1</td></tr>
+            <tr><td>Switch (4 ports, one VLAN)</td><td>4, one per port</td><td>1</td></tr>
+            <tr><td>Switch (4 ports, two VLANs)</td><td>4, one per port</td><td>2</td></tr>
+            <tr><td>Router (3 interfaces)</td><td>3, one per interface</td><td>3, one per interface</td></tr>
+          </tbody>
+        </table></div>
+        <p class="diagram-caption">Switches cut collision domains. Routers (and VLANs) cut broadcast domains.</p>
+      </div>`,
+    },
+    realWorldExample: `A small office complains that a new IP camera link is "slow", yet the link light is green. On the switch, the technician sees climbing late collisions and CRC errors on that port. The port was hard-set to 100/full, but the camera was on auto and fell back to 100/half. Setting both ends the same (or both to auto) clears the errors immediately.`,
+    proTips: [
+      `Best practice: leave both ends on autonegotiation, or hard-code BOTH ends identically. Never hard-code just one side.`,
+      `Late collisions on a modern switched network almost always mean a duplex mismatch, not a "real" collision problem.`,
+      `If a switch runs out of CAM table space (a MAC flooding attack), it starts flooding everything like a hub. That is why port security limits MACs per port.`,
+    ],
+    examAlert: `Memorize: switch = many collision domains, one broadcast domain per VLAN. Router = separates broadcast domains. Hub = everything in one collision domain. CSMA/CD = wired half-duplex; CSMA/CA = wireless.`,
+    beginnerMistakes: [
+      `Saying a switch "breaks up broadcast domains" — it does not, unless VLANs are configured.`,
+      `Thinking collisions still happen on a full-duplex switched link — they cannot.`,
+      `Hard-coding speed/duplex on only one end of a link.`,
+    ],
+    keyTerms: [
+      { term: 'MAC address table (CAM table)', def: `The switch's learned list of MAC address → port (and VLAN) mappings.` },
+      { term: 'Flooding', def: 'Sending a frame out all ports in the VLAN except the one it arrived on, used for broadcasts and unknown unicast.' },
+      { term: 'Collision domain', def: 'A network segment where simultaneous transmissions can collide.' },
+      { term: 'Broadcast domain', def: 'The group of devices that all receive a Layer 2 broadcast.' },
+      { term: 'CSMA/CD', def: 'Listen-before-sending method with collision detection used by half-duplex Ethernet.' },
+      { term: 'Duplex mismatch', def: 'One end full duplex, the other half duplex, causing late collisions and slow throughput.' },
+    ],
+    commands: [
+      { os: 'Cisco IOS', cmd: 'show mac address-table', desc: 'Displays learned MAC addresses with their VLAN and port.' },
+      { os: 'Cisco IOS', cmd: `show interfaces status', desc: 'Shows each port's speed, duplex, and VLAN at a glance.` },
+      { os: 'Cisco IOS', cmd: 'show interfaces gi0/1', desc: 'Shows error counters such as CRC errors and late collisions.' },
+    ],
+    knowledgeCheck: [
+      {
+        prompt: 'A switch receives a frame whose destination MAC is not in its MAC table. What does it do?',
+        options: [
+          'Drops the frame.',
+          'Floods it out every port in the VLAN except the ingress port.',
+          'Sends it only to the default gateway.',
+          'Sends it back out the port it arrived on.',
+        ],
+        correct: 1,
+        explanation: 'Unknown unicast frames are flooded so the destination can answer, which lets the switch learn its location.',
+      },
+      {
+        prompt: 'Which device separates broadcast domains?',
+        options: ['Hub', 'Unmanaged switch within a single VLAN', 'Router', 'Repeater'],
+        correct: 2,
+        explanation: 'Routers (or Layer 3 interfaces) do not forward Layer 2 broadcasts, so each interface is its own broadcast domain.',
+      },
+      {
+        prompt: 'A switch port shows rising late collisions and CRC errors, though the link is up. What is the most likely cause?',
+        options: ['Duplex mismatch', 'Expired DHCP lease', 'Wrong DNS server', 'Spanning tree root change'],
+        correct: 0,
+        explanation: 'Late collisions on a switched link point to one end running half duplex while the other runs full duplex.',
+      },
+    ],
+    miniScenario: {
+      prompt: 'You replace a switch with a hub in a lab "just for testing" and packet captures on one PC suddenly show traffic between two other PCs.',
+      task: 'Explain why this happens and what it says about collision domains.',
+    },
+    recap: `Switches learn source MACs, forward known unicast to one port, and flood unknown unicast and broadcasts within the VLAN. Each switch port is its own collision domain; broadcast domains end at routers and VLAN boundaries. Mismatched duplex settings cause late collisions and slow links.`,
+    classroomAnswer: `"Switch: learn the source, forward by the destination, flood when it doesn't know. Switches cut collision domains; routers cut broadcast domains."`,
+  };
+
+  NetReady.LESSONS['7-10'] = {
+    id: '7-10',
+    moduleId: 7,
+    slug: 'layer-2-security-features',
+    title: 'Layer 2 Security Features: DHCP Snooping, DAI, BPDU Guard, and Private VLANs',
+    estMinutes: 15,
+    outcomes: [
+      `Explain how DHCP snooping stops rogue DHCP servers and builds a binding table.`,
+      `Explain how Dynamic ARP Inspection uses that table to stop ARP spoofing.`,
+      `Describe BPDU Guard, Root Guard, and storm control and what each protects.`,
+      `Explain private VLANs and MACsec at a high level.`,
+    ],
+    whyItMatters: `Most attacks inside a network happen at Layer 2 because switches trust whatever frames arrive. The Network+ exam expects you to match each Layer 2 attack to the switch feature that stops it.`,
+    simpleEnglish: `Managed switches have built-in defenses against people who plug in a rogue device. DHCP snooping marks ports as trusted (where the real DHCP server lives) or untrusted (everything else) and drops DHCP offers that come from untrusted ports. It also records which IP, MAC, port, and VLAN each legitimate lease belongs to. Dynamic ARP Inspection (DAI) checks ARP messages against that record and drops forged ones. BPDU Guard shuts down an edge port if it ever receives a spanning tree BPDU, which means someone plugged in a switch. Root Guard stops a port from accepting a new root bridge. Storm control limits broadcast, multicast, and unknown-unicast floods. Private VLANs isolate hosts from each other inside the same subnet, and MACsec encrypts frames hop by hop.`,
+    taglish: `Ang managed switch ay may sariling "guwardiya" laban sa mga nagsaksak ng kung anu-anong device. Ang DHCP snooping: ang trusted port lang (kung nasaan ang totoong DHCP server) ang puwedeng magbigay ng DHCP offer; ang rogue router na isinaksak ng empleyado sa untrusted port ay ba-block. Nagtatala rin siya ng binding table (IP, MAC, port, VLAN). Ginagamit ng DAI ang table na yan para i-check ang ARP — kapag peke ang ARP reply, drop. Ang BPDU Guard naman: kapag may dumating na BPDU sa port na dapat ay para sa PC lang, i-shutdown ang port. Ang private VLAN ay parang hiwalay na kuwarto sa loob ng iisang bahay — hindi nagkakakitaan ang mga host kahit iisang subnet.`,
+    analogy: {
+      title: 'Guwardiya at listahan ng bisita sa condo',
+      text: `Ang DHCP snooping ay parang guard na ang may awtoridad lang magbigay ng visitor pass ay ang front desk (trusted port). Ang binding table ay ang logbook ng lahat ng nabigyan ng pass. Ang DAI ay ang guard na nagche-check kung sinasabi ng isang bisita na "ako si Mr. Santos sa Unit 5" — tinitingnan niya sa logbook kung totoo.`,
+    },
+    howItWorks: [
+      `DHCP snooping: ports are trusted (uplink to the real DHCP server or router) or untrusted (user ports). DHCP server messages (Offer, Ack) arriving on an untrusted port are dropped. This defeats rogue DHCP servers and DHCP starvation floods when combined with rate limits.`,
+      `DHCP snooping binding table: for each legitimate lease the switch stores client MAC, IP, VLAN, port, and lease time. Other features depend on it.`,
+      `Dynamic ARP Inspection (DAI): intercepts ARP on untrusted ports and compares the IP-to-MAC claim against the DHCP snooping binding table (or static ARP ACLs). Mismatches are dropped. This stops ARP spoofing / poisoning used for on-path attacks.`,
+      `IP Source Guard: also uses the binding table to block traffic from a port whose source IP or MAC does not match its lease, which stops simple IP spoofing.`,
+      `BPDU Guard: enabled on PortFast/edge ports. If a BPDU arrives, the port is placed in an err-disabled state, since an end-user port should never receive one. Root Guard: on ports facing downstream, stops a switch from becoming the new root bridge by putting the port in a root-inconsistent state if superior BPDUs arrive.`,
+      `Storm control: sets a threshold (percent of bandwidth) for broadcast, multicast, or unknown-unicast traffic on a port and drops or shuts the port when exceeded, limiting the damage of loops and floods.`,
+      `Private VLANs (PVLANs): split one VLAN/subnet into sub-groups. Promiscuous ports (usually the router) talk to everyone; isolated ports talk only to the promiscuous port; community ports talk to their own community and the promiscuous port. Common in hosting and guest environments.`,
+      `MACsec (IEEE 802.1AE): encrypts Ethernet frames at Layer 2 between directly connected devices (hop by hop), protecting against taps on switch-to-switch or switch-to-host links.`,
+    ],
+    visual: {
+      type: 'diagram',
+      html: `<div class="lesson-diagram" role="img" aria-label="Table matching Layer 2 attacks to the switch feature that stops them">
+        <div class="table-scroll"><table class="lesson-table">
+          <thead><tr><th>Threat</th><th>Defense</th></tr></thead>
+          <tbody>
+            <tr><td>Rogue DHCP server</td><td>DHCP snooping (untrusted ports)</td></tr>
+            <tr><td>ARP spoofing / poisoning</td><td>Dynamic ARP Inspection</td></tr>
+            <tr><td>Spoofed source IP</td><td>IP Source Guard</td></tr>
+            <tr><td>Rogue switch on an edge port</td><td>BPDU Guard</td></tr>
+            <tr><td>Rogue switch claiming root</td><td>Root Guard</td></tr>
+            <tr><td>MAC flooding</td><td>Port security (MAC limit)</td></tr>
+            <tr><td>Broadcast storm</td><td>Storm control, STP</td></tr>
+            <tr><td>Hosts reaching each other in one subnet</td><td>Private VLANs</td></tr>
+            <tr><td>Sniffing a link</td><td>MACsec</td></tr>
+          </tbody>
+        </table></div>
+      </div>`,
+    },
+    realWorldExample: `An employee plugs a home Wi-Fi router into a wall jack. It starts handing out 192.168.0.x addresses and half of the floor loses network access. With DHCP snooping on, the switch drops the router's DHCP offers because that port is untrusted, and the floor never notices.`,
+    proTips: [
+      `DHCP snooping must be enabled BEFORE DAI will work, because DAI relies on the binding table.`,
+      `A port that suddenly goes err-disabled after enabling BPDU Guard usually means someone connected a switch or a loop. Find the device before you re-enable the port.`,
+      `Trusted ports are uplinks and the DHCP server link only. Everything else is untrusted by default.`,
+    ],
+    examAlert: `Expect scenario matching: "rogue DHCP server" = DHCP snooping; "ARP poisoning" = DAI; "unauthorized switch on an access port" = BPDU Guard; "user MAC flood" = port security. Know that err-disabled is how many of these features react.`,
+    beginnerMistakes: [
+      `Marking every port as trusted, which disables the protection.`,
+      `Enabling DAI without DHCP snooping on networks that use DHCP.`,
+      `Confusing BPDU Guard (shut the edge port) with Root Guard (block a superior BPDU).`,
+    ],
+    keyTerms: [
+      { term: 'DHCP snooping', def: 'Switch feature that filters DHCP server messages by trusted/untrusted port and builds a binding table.' },
+      { term: 'Dynamic ARP Inspection (DAI)', def: 'Drops ARP messages whose IP-MAC pairing does not match the binding table.' },
+      { term: 'BPDU Guard', def: 'Disables an edge port that receives spanning tree BPDUs.' },
+      { term: 'Root Guard', def: 'Prevents a port from accepting a better root bridge.' },
+      { term: 'Private VLAN', def: 'A VLAN subdivided into isolated and community groups within one subnet.' },
+      { term: 'MACsec', def: 'IEEE 802.1AE hop-by-hop Layer 2 encryption.' },
+    ],
+    commands: [
+      { os: 'Cisco IOS', cmd: 'show ip dhcp snooping binding', desc: 'Lists the learned IP/MAC/port/VLAN bindings.' },
+      { os: 'Cisco IOS', cmd: 'show ip arp inspection', desc: 'Shows DAI status and drop counters.' },
+      { os: 'Cisco IOS', cmd: 'show interfaces status err-disabled', desc: 'Lists ports shut down by security features.' },
+    ],
+    knowledgeCheck: [
+      {
+        prompt: 'Users on one floor receive 192.168.0.x addresses from an unknown device. Which switch feature prevents this?',
+        options: ['BPDU Guard', 'DHCP snooping', 'Storm control', 'MACsec'],
+        correct: 1,
+        explanation: 'DHCP snooping drops DHCP offers that arrive on untrusted ports.',
+      },
+      {
+        prompt: 'What does Dynamic ARP Inspection compare ARP messages against?',
+        options: ['The routing table', 'The DHCP snooping binding table', 'The DNS cache', 'The STP topology'],
+        correct: 1,
+        explanation: 'DAI trusts the bindings that DHCP snooping recorded, or static ARP ACLs.',
+      },
+      {
+        prompt: 'A user port goes err-disabled right after someone connects a small desktop switch. Which feature most likely did this?',
+        options: ['Root Guard', 'BPDU Guard', 'IP Source Guard', 'Private VLAN'],
+        correct: 1,
+        explanation: 'BPDU Guard disables an edge port when it receives a BPDU, which a switch sends.',
+      },
+    ],
+    miniScenario: {
+      prompt: 'Two tenants share a VLAN and subnet in a hosting rack. Policy says their servers must never talk to each other, but both must reach the gateway.',
+      task: 'Which feature fits, and which port type does the gateway use?',
+    },
+    recap: `DHCP snooping, DAI, IP Source Guard, BPDU Guard, Root Guard, storm control, private VLANs, and MACsec each address a specific Layer 2 weakness. DHCP snooping's binding table powers both DAI and IP Source Guard.`,
+    classroomAnswer: `"Rogue DHCP: snooping. Fake ARP: DAI. Rogue switch on an edge port: BPDU Guard. Isolating hosts in one subnet: private VLAN."`,
+  };
 }(window.NetReady));

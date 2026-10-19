@@ -84,7 +84,7 @@
       title: 'Ports, Protocols, and Network Services',
       blurb: 'DNS, DHCP, HTTP/S, at ang mga "language" ng internet.',
       status: 'available',
-      lessonIds: ['6-1', '6-2', '6-3', '6-4', '6-5', '6-6', '6-7'],
+      lessonIds: ['6-1', '6-2', '6-3', '6-4', '6-5', '6-6', '6-7', '6-8', '6-9'],
     },
     {
       id: 7,
@@ -92,7 +92,7 @@
       title: 'Switching, VLANs, and Layer 2',
       blurb: 'Paano nag-uusap ang mga device sa parehong network.',
       status: 'available',
-      lessonIds: ['7-1', '7-2', '7-3', '7-4', '7-5', '7-6', '7-7', '7-8'],
+      lessonIds: ['7-1', '7-2', '7-3', '7-4', '7-5', '7-6', '7-7', '7-8', '7-9', '7-10'],
     },
     {
       id: 8,
@@ -100,7 +100,7 @@
       title: 'Routing and Wide Area Networking',
       blurb: 'Paano naghahanap ng ruta ang data papunta sa ibang network.',
       status: 'available',
-      lessonIds: ['8-1', '8-2', '8-3', '8-4', '8-5', '8-6'],
+      lessonIds: ['8-1', '8-2', '8-3', '8-4', '8-5', '8-6', '8-7'],
     },
     {
       id: 9,
