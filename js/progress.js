@@ -19,7 +19,7 @@
     streak: { count: 0, lastStudyDate: null },
     studyTimeMinutes: 0,
     lastLessonId: null,
-    prefs: { theme: 'dark', fontSize: 'md', explanationMode: 'stacked' },
+    prefs: { theme: 'light', fontSize: 'md', explanationMode: 'stacked' },
   });
 
   let state = NetReady.storage.read() || DEFAULT_STATE();

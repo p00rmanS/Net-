@@ -28,7 +28,7 @@
     const themeBtn = qs('#theme-btn');
     if (themeBtn) themeBtn.innerHTML = NetReady.icon(prefs.theme === 'dark' ? 'sun' : 'moon', { size: 20 });
     const themeColorMeta = qs('meta[name="theme-color"]');
-    if (themeColorMeta) themeColorMeta.setAttribute('content', prefs.theme === 'light' ? '#f5f7fb' : '#0a0e1a');
+    if (themeColorMeta) themeColorMeta.setAttribute('content', prefs.theme === 'light' ? '#f6f1e6' : '#17140f');
   }
 
   // ============================================================
@@ -225,7 +225,7 @@
     setView(`
       <div class="page-header">
         <div>
-          <h1>Magandang araw, future SOC analyst! 👋</h1>
+          <h1>Magandang araw. Ready to study?</h1>
           <p class="text-muted">Heto ang buod ng progress mo ngayon. Keep going — consistency beats intensity.</p>
         </div>
         ${lastLesson ? `<a class="btn btn-primary" href="#/lesson/${lastLesson.id}">Continue Learning: ${escapeHtml(lastLesson.title)} ${NetReady.icon('arrowRight', { size: 15 })}</a>` : `<a class="btn btn-primary" href="#/lesson/0-1">Start Module 0 ${NetReady.icon('arrowRight', { size: 15 })}</a>`}
@@ -1872,7 +1872,7 @@
         const mod = lesson && NetReady.getModule(lesson.moduleId);
         const moduleFinished = mod && mod.lessonIds.every((id) => NetReady.Progress.isLessonComplete(id));
         showToast(
-          moduleFinished ? `Module ${mod.id} complete — nice consistency! 🎉` : 'Lesson marked complete. Great work!',
+          moduleFinished ? `Module ${mod.id} complete — nice consistency.` : 'Lesson marked complete. Great work!',
           'success'
         );
       }
