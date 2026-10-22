@@ -4,19 +4,23 @@ A self-paced, Udemy/Coursera-style learning platform for CompTIA Network+, built
 
 Lessons are written in Simple English **and** natural Taglish, with everyday Philippine analogies, pro tips, exam alerts, and practice questions — matching the request for content taught the way Udemy/Coursera courses are structured, but explained the way a Filipino IT reviewer would actually explain it to you.
 
+## Exam Objective Coverage
+
+See [OBJECTIVE_COVERAGE.md](OBJECTIVE_COVERAGE.md) for a map of every N10-009 objective to the lessons that teach it, plus the list of lightly covered topics.
+
 ## Project Purpose
 
 Teach a true beginner from zero networking knowledge toward CompTIA Network+ exam readiness and real help-desk/SOC-analyst competence, with everything trackable locally (progress, scores, streaks, bookmarks, notes) and zero paid tools.
 
 ## Current Status — Read This First
 
-The original spec asks for 12+ modules, 100 lessons, 500 questions, and 3 full mock exams. **All 16 planned modules are now built** (110 lessons total), including Module 15, story-driven "Case Files" that follow real incidents from complaint to fix, covering every N10-009 objective across all five exam domains, including modern-exam additions like zero trust, SASE/SSE, VXLAN, automation/orchestration/IaC, QoS, antenna types, organizational documents/policies (MOU/MSA/NDA/AUP/SOP), facilities/environmental controls (HVAC/UPS/generators/fire suppression), vulnerability/risk-management vocabulary, advanced DHCP/DNS services (scopes, relay, zones, DNSSEC, DoH/DoT), modern troubleshooting tools/device commands (Nmap, LLDP/CDP, show commands), transceiver and DAC/twinaxial selection, wireless deployment models (autonomous vs. lightweight APs, band steering, 802.11h), data center topologies and north-south vs. east-west traffic, secure remote management (jump hosts, in-band vs. out-of-band, VPN tunnel types), and SNMP versions, MIBs, and traps, how switches learn and flood (collision vs. broadcast domains, duplex), Layer 2 security features (DHCP snooping, DAI, BPDU Guard, private VLANs), routing loops and convergence (TTL, split horizon, metrics), multicast and IGMP,, ARP/ICMP, TCP windowing and MTU/MSS, wireless RSSI/SNR, cloud connectivity options, secure protocols and IPsec, and IDS/IPS/SIEM. The question bank (160 rich standalone + 330 inline knowledge-check questions = 490 total) is still short of the eventual 500-question target — see "Known Limitations" below for exactly what that means in practice.
+The original spec asks for 12+ modules, 100 lessons, 500 questions, and 3 full mock exams. **All 16 planned modules are now built** (130 lessons total), including Module 15, story-driven "Case Files" that follow real incidents from complaint to fix, covering every N10-009 objective across all five exam domains, including modern-exam additions like zero trust, SASE/SSE, VXLAN, automation/orchestration/IaC, QoS, antenna types, organizational documents/policies (MOU/MSA/NDA/AUP/SOP), facilities/environmental controls (HVAC/UPS/generators/fire suppression), vulnerability/risk-management vocabulary, advanced DHCP/DNS services (scopes, relay, zones, DNSSEC, DoH/DoT), modern troubleshooting tools/device commands (Nmap, LLDP/CDP, show commands), transceiver and DAC/twinaxial selection, wireless deployment models (autonomous vs. lightweight APs, band steering, 802.11h), data center topologies and north-south vs. east-west traffic, secure remote management (jump hosts, in-band vs. out-of-band, VPN tunnel types), and SNMP versions, MIBs, and traps, how switches learn and flood (collision vs. broadcast domains, duplex), Layer 2 security features (DHCP snooping, DAI, BPDU Guard, private VLANs), routing loops and convergence (TTL, split horizon, metrics), multicast and IGMP,, ARP/ICMP, TCP windowing and MTU/MSS, wireless RSSI/SNR, cloud connectivity options, secure protocols and IPsec, and IDS/IPS/SIEM. The question bank (221 rich standalone + 390 inline knowledge-check questions = 611 total) now exceeds the original 500-question target; see "Known Limitations" below for what is still approximate.
 
 | Built now | Status |
 | --- | --- |
 | Full app shell: navbar, sidebar, dashboard, lesson player, search, theming, accessibility | ✅ Done |
-| Modules 0–15 (all 16 planned modules, 110 lessons total) | ✅ Fully populated |
-| Question bank | 160 rich standalone questions + 279 inline lesson knowledge checks (439 total) |
+| Modules 0–15 (all 16 planned modules, 130 lessons total) | ✅ Fully populated |
+| Question bank | 221 rich standalone questions + 390 inline lesson knowledge checks (611 total) | ✅ Meets the 500-question target |
 | 7 guided labs (subnet planning ×2, VLAN assignment, static routing, Wi-Fi capacity/coverage, security hardening, troubleshooting ticket triage) | ✅ Working, with validation |
 | 3 mock exams, each drawing a distinct domain-weighted third of the question bank | ✅ Working — not yet fixed at 90 questions each (real exam length) |
 | Flashcards, Subnet Calculator, Subnetting Practice Generator, Port Trainer, OSI Layer Match, Acronym Trainer, Command Reference, Glossary | ✅ All fully functional |
@@ -142,7 +146,7 @@ Any modern evergreen browser (Chrome, Edge, Firefox, Safari) from the last ~3 ye
 
 ## Known Limitations
 
-- The question bank (490 questions) is still short of the eventual 500-question target — it is large enough for genuine practice across every module, not for exhaustive exam-length drilling on any single one.
+- The question bank (611 questions: 221 standalone + 390 inline) meets the 500-question target, but the standalone questions are the richer, exam-style ones; more standalone questions per module would give deeper exam-length drilling.
 - There are 3 mock exams (each a distinct, domain-weighted third of the full question bank, ~145-147 questions), not yet 3 separate fixed-at-90-question, full exam-length tests — and because they share one underlying pool, a question that appears in your knowledge-check practice can also appear in a mock exam.
 - There are 7 guided labs (subnet planning ×2, VLAN assignment, static routing, Wi-Fi capacity/coverage diagnosis, security hardening, troubleshooting ticket triage), short of the 25 the original spec envisioned — but the lab *system* itself supports three genuinely reusable interaction types (numeric/CIDR entry, multi-item matching, and checklist, each fully data-driven from `js/content/labs-data.js`), so adding more labs going forward is comparatively cheap.
 - The Subnetting Practice Generator produces effectively unlimited *generated* problems rather than 100 pre-written ones — this was a deliberate choice (see the lesson `4-5`) because a generator is strictly better practice than a fixed, eventually-memorized worksheet.

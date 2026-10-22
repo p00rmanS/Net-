@@ -131,7 +131,7 @@
       'If not cached, it queries its configured DNS resolver (often provided by the ISP or manually set, like a public resolver).',
       'The resolver may query a root name server, which points to the correct TLD (top-level domain, like .com) name server, which points to the authoritative name server for that specific domain.',
       'The authoritative name server returns the actual record (e.g., the A record with the IP address), which flows back to the original device and gets cached for future use.',
-      'Common record types: A (IPv4), AAAA (IPv6), CNAME (alias), MX (mail exchange), TXT (text/verification), NS (name server), PTR (reverse lookup, IP to name).',
+      'Common record types: A (IPv4), AAAA (IPv6), CNAME (alias), MX (mail exchange), TXT (text/verification), NS (name server), PTR (reverse lookup, IP to name), SOA (start of authority: zone owner, serial number, and refresh timers), SRV (locates a service by host and port, such as a domain controller or SIP server).',
     ],
     visual: {
       type: 'diagram',
@@ -152,7 +152,7 @@
       'MX records commonly have a priority number — lower numbers are tried first, which is a frequent point of confusion for beginners expecting "higher is better."',
     ],
     examAlert:
-      'Expect a question giving you a record type abbreviation (A, AAAA, MX, CNAME, TXT, NS, PTR) and asking what it stores — memorize this list cold, it is extremely high-yield.',
+      'Expect a question giving you a record type abbreviation (A, AAAA, MX, CNAME, TXT, NS, PTR, SOA, SRV) and asking what it stores — memorize this list cold, it is extremely high-yield.',
     beginnerMistakes: [
       'Confusing an A record (IPv4 address) with an AAAA record (IPv6 address) — the extra A\'s hint at the longer IPv6 address, a useful memory trick.',
       'Assuming DNS problems mean the whole network is down — often only name resolution is broken while IP-level connectivity works fine.',
@@ -1032,4 +1032,183 @@
     recap: `TCP gives reliability with sequence numbers, acknowledgments, and retransmission, and controls pace with window size and congestion control. MTU is the largest packet; MSS is the largest TCP payload (MTU minus 40). Fragmentation, the DF bit, and PMTUD explain many "small works, large fails" problems.`,
     classroomAnswer: `"Window controls how much, MSS controls how big, and when big does not fit the path, you get fragmentation or a stalled transfer."`,
   };
+
+  NetReady.LESSONS['6-11'] = NetReady.lesson(6, {
+    id: '6-11',
+    slug: 'nat-in-depth-snat-dnat-pat',
+    title: 'NAT in Depth: Static NAT, Dynamic NAT, PAT, SNAT, DNAT, and Port Forwarding',
+    minutes: 14,
+    outcomes: [
+      `Differentiate static NAT, dynamic NAT, and PAT.`,
+      `Explain source NAT (SNAT) and destination NAT (DNAT) and port forwarding.`,
+      `Read a NAT translation table and spot common NAT problems.`,
+    ],
+    why: `NAT is everywhere: home routers, cloud gateways, and corporate firewalls. Exam questions ask which NAT type fits a scenario and why a service is unreachable behind NAT.`,
+    simple: `Network Address Translation rewrites IP addresses as packets cross a router or firewall, letting private addresses reach the internet. Static NAT maps one private address to one public address permanently, so an internal server can be reached from outside. Dynamic NAT maps private addresses to a pool of public addresses on demand. Port Address Translation (PAT, also called NAT overload) lets many private hosts share a single public IP by tracking the port numbers; it is what your home router does. Source NAT (SNAT) changes the source address of outbound traffic; destination NAT (DNAT) changes the destination of inbound traffic, as in port forwarding to a server.`,
+    taglish: `Ang NAT ay nagpapalit ng IP address habang dumadaan sa router. Ang static NAT ay isa-sa-isang permanenteng pagmamapa ng private papuntang public — para maabot ang server mula sa labas. Ang dynamic NAT ay kumukuha mula sa pool ng public IP kapag kailangan. Ang PAT (NAT overload) ay maraming private host na iisa ang public IP, at ang port number ang ginagamit para magkaiba — ito ang ginagawa ng router sa bahay mo. Ang SNAT ay pagpapalit ng source ng palabas na traffic; ang DNAT ay pagpapalit ng destination ng papasok na traffic, gaya ng port forwarding sa server.`,
+    analogy: {
+      title: 'Receptionist ng opisina',
+      text: `Sa isang opisina, iisa lang ang numero ng telepono (public IP) pero maraming empleyado. Ang receptionist (PAT) ay naglalagay ng "extension number" (port) sa bawat tawag palabas para alam kung kanino ibabalik ang sagot. Ang port forwarding ay utos ng receptionist: "Lahat ng tawag sa extension 80, ipasa kay IT".`,
+    },
+    steps: [
+      `Terminology: inside local (private address of an inside host), inside global (the public address that represents it), outside global (the destination's public address).`,
+      `Static NAT: one-to-one, permanent. Typical use: a web server at 192.168.10.5 is always reachable as 203.0.113.10.`,
+      `Dynamic NAT: many-to-many from a pool. When the pool is empty, new connections fail ("pool exhaustion").`,
+      `PAT / NAT overload: many private hosts to one public IP. The router builds a table with the private IP:port, the public IP:port, and the destination, so each reply returns to the right host.`,
+      `SNAT: rewrites the source address of packets leaving the network. In the cloud, a NAT gateway performs SNAT so private instances can reach the internet but cannot be reached from it.`,
+      `DNAT / port forwarding: rewrites the destination of inbound packets. A rule such as "public TCP 443 goes to 192.168.10.5:443" exposes a service. Port forwarding is DNAT for specific ports.`,
+      `Limits: NAT breaks protocols that embed IP addresses in their payload (some VoIP and FTP active mode) unless an application-layer gateway (ALG) helps. NAT also hinders true end-to-end connectivity and IPsec AH.`,
+      `NAT is not a firewall, but its default behavior (no inbound mapping without a rule) incidentally blocks unsolicited inbound connections.`,
+      `Troubleshooting: check the translation table (show ip nat translations), verify the inside and outside interfaces, check the ACL that selects traffic to translate, and confirm the public address is routed to you.`,
+    ],
+    table: {
+      label: 'Table of NAT types',
+      head: ['Type', 'Mapping', 'Typical use'],
+      rows: [
+        ['Static NAT', '1 private to 1 public, permanent', 'Public-facing server'],
+        ['Dynamic NAT', 'Private to pool of public', 'Small ISP blocks'],
+        ['PAT / overload', 'Many private to 1 public using ports', 'Home and office internet'],
+        ['SNAT', 'Rewrites source (outbound)', 'Cloud NAT gateway'],
+        ['DNAT / port forwarding', 'Rewrites destination (inbound)', 'Publishing a service'],
+      ],
+      caption: 'Static = fixed, dynamic = pool, PAT = ports.',
+    },
+    example: `A small clinic hosts an appointment portal on an internal server. The ISP gives one public IP. The admin adds a port-forward rule (DNAT) sending public TCP 443 to the internal server, while all staff PCs browse the internet through PAT on that same address.`,
+    tips: [
+      `One public IP and many hosts = PAT. A server that must be reachable from outside = static NAT or port forwarding.`,
+      `If an inbound service is unreachable, check the DNAT rule, the server's gateway, and any firewall before blaming the ISP.`,
+      `IPv6 largely removes the need for NAT, though firewalls are still required.`,
+    ],
+    exam: `Match types to uses: static NAT for hosting, dynamic NAT for pools, PAT for many-to-one overload, SNAT for outbound, DNAT or port forwarding for inbound publishing.`,
+    mistakes: [
+      `Treating NAT as a security control that replaces a firewall.`,
+      `Forgetting that dynamic NAT can run out of pool addresses.`,
+      `Confusing source NAT and destination NAT.`,
+    ],
+    terms: [
+      { term: 'Static NAT', def: `Permanent one-to-one private to public mapping.` },
+      { term: 'Dynamic NAT', def: `Mapping of private hosts to a pool of public addresses.` },
+      { term: 'PAT', def: `Port Address Translation; many hosts share one public address using ports.` },
+      { term: 'SNAT', def: `Source NAT, changes the source address.` },
+      { term: 'DNAT', def: `Destination NAT, changes the destination address.` },
+      { term: 'Port forwarding', def: `DNAT of specific ports to an internal host.` },
+    ],
+    commands: [
+      { os: 'Cisco IOS', cmd: 'show ip nat translations', desc: `Displays the active NAT translation table.` },
+      { os: 'Cisco IOS', cmd: 'show ip nat statistics', desc: `Shows NAT hits, misses, and pool usage.` },
+    ],
+    checks: [
+      {
+        prompt: `A small office with 50 PCs uses a single public IP address for internet access. Which NAT type is this?`,
+        options: [`Static NAT`, `Dynamic NAT`, `PAT`, `DNAT only`],
+        correct: 2,
+        explanation: `PAT (overload) lets many private hosts share one public IP using port numbers.`,
+      },
+      {
+        prompt: `Which NAT function lets an outside user reach an internal web server on TCP 443?`,
+        options: [`SNAT`, `Port forwarding (DNAT)`, `PAT outbound`, `APIPA`],
+        correct: 1,
+        explanation: `Port forwarding rewrites the destination of inbound traffic to the internal server.`,
+      },
+      {
+        prompt: `What can happen with dynamic NAT when all pool addresses are in use?`,
+        options: [`New connections cannot be translated`, `Existing connections speed up`, `DHCP renews`, `DNS flushes`],
+        correct: 0,
+        explanation: `With no free pool address, new outbound connections fail.`,
+      },
+    ],
+    mini: {
+      prompt: `Staff can browse the internet, but customers cannot reach the new internal web server.`,
+      task: `Which NAT feature is missing?`,
+    },
+    recap: `Static NAT is fixed one-to-one, dynamic NAT uses a pool, PAT shares one public address by port, SNAT handles outbound and DNAT or port forwarding handles inbound. NAT is not a firewall.`,
+    classroom: `"Isang public IP, maraming tao — PAT. May server na kailangang maabot — port forwarding."`,
+  });
+
+  NetReady.LESSONS['6-12'] = NetReady.lesson(6, {
+    id: '6-12',
+    slug: 'unified-communications-voip-and-video',
+    title: 'Unified Communications: VoIP, PBX, SIP, and Video Conferencing Networks',
+    minutes: 13,
+    outcomes: [
+      `Describe how VoIP replaces traditional phone lines and the roles of a PBX, SIP, and RTP.`,
+      `Explain the network requirements for voice and video: QoS, PoE, and VLANs.`,
+      `Identify common VoIP and video conferencing problems.`,
+    ],
+    why: `Voice and video run on every business network, and they are the first to reveal network problems. The exam covers the protocols, ports, and requirements for unified communications.`,
+    simple: `Voice over IP (VoIP) carries phone calls as IP packets. An IP phone is powered by PoE, sits on a voice VLAN, and registers with a call server or IP-PBX (private branch exchange). SIP (Session Initiation Protocol, TCP/UDP 5060 and 5061 for TLS) sets up, manages, and ends calls. Once connected, the actual audio travels in RTP (Real-time Transport Protocol) over UDP on high ports, usually with codecs that compress the voice. Unified communications (UC) combines voice, video, chat, and conferencing in one platform. Because real-time media is sensitive to delay, you need QoS, enough bandwidth, and low jitter and packet loss.`,
+    taglish: `Ang VoIP ay tawag na dinadala bilang IP packets. Ang IP phone ay pinapakuryente ng PoE, nasa voice VLAN, at nagre-register sa call server o IP-PBX. Ang SIP (port 5060 at 5061 para sa TLS) ang nagse-set up at nagtatapos ng tawag. Kapag nakakonekta na, ang aktuwal na boses ay dumadaan sa RTP sa UDP. Ang unified communications (UC) ay pinagsamang voice, video, chat, at conferencing. Dahil sensitibo sa delay ang real-time na media, kailangan ng QoS, sapat na bandwidth, at mababang jitter at packet loss.`,
+    analogy: {
+      title: 'Operator at linya ng telepono',
+      text: `Ang SIP ay parang operator na nagkokonekta ng dalawang tao at nagsasabi kung kailan tapos ang tawag. Ang RTP ay ang mismong usapan na dumadaan sa linya. Ang PBX ay ang switchboard ng opisina.`,
+    },
+    steps: [
+      `PBX: a private telephone exchange for an organization. Traditional PBXs used analog or digital phone lines; an IP-PBX (or cloud UCaaS service) handles VoIP. Call manager is the name some vendors use for the call-control server.`,
+      `SIP: signaling protocol, TCP or UDP 5060 (unencrypted) and 5061 (TLS). It handles registration, call setup (INVITE), and teardown. H.323 is an older signaling suite.`,
+      `RTP/SRTP: carries the audio or video stream over UDP, typically on ports in the 10000 to 20000 range. SRTP adds encryption. RTCP reports quality statistics.`,
+      `Codecs: compress voice (G.711 uses about 64 kbps; G.729 about 8 kbps). More compression saves bandwidth but may reduce quality.`,
+      `Network requirements for voice: one-way delay under about 150 ms, jitter under about 30 ms, packet loss under about 1 percent. Mark voice with DSCP EF and prioritize it with QoS.`,
+      `PoE (802.3af/at/bt) powers IP phones, access points, and cameras from the switch, so a UPS on the switch keeps phones alive during outages.`,
+      `Voice VLAN: separates phone traffic from data traffic, supports QoS, and lets the phone and the PC behind it share one wall jack (the phone has a built-in switch).`,
+      `Video conferencing needs much more bandwidth than voice and is sensitive to both latency and packet loss. Multicast or cloud-hosted conferencing can reduce load.`,
+      `Common problems: one-way audio (often NAT or firewall blocking RTP), choppy audio (jitter or loss), echo, registration failures (wrong SIP server or blocked 5060), and dropped calls after a power event (PoE budget).`,
+    ],
+    table: {
+      label: 'Table of VoIP protocols and ports',
+      head: ['Protocol', 'Purpose', 'Port'],
+      rows: [
+        ['SIP', 'Call setup and teardown', '5060 (5061 TLS)'],
+        ['RTP / SRTP', 'Audio and video stream', 'UDP, high ports'],
+        ['RTCP', 'Stream quality reports', 'UDP, high ports'],
+        ['H.323', 'Older call signaling suite', 'TCP 1720'],
+      ],
+      caption: 'Signaling sets up the call; RTP carries the voice.',
+    },
+    example: `A company moves to IP phones and users complain of one-way audio: they can hear the caller, but the caller cannot hear them. The firewall allows SIP on 5060 but blocks the RTP port range in one direction. Opening the RTP range (or enabling a SIP ALG) restores two-way audio.`,
+    tips: [
+      `Signaling (SIP) can succeed while media (RTP) fails; "call connects but no audio" usually points to RTP, NAT, or firewall rules.`,
+      `Put phones on a voice VLAN with QoS and PoE so they behave predictably.`,
+      `Test voice quality with a call quality or MOS report, not by guessing.`,
+    ],
+    exam: `Know SIP on 5060/5061, RTP on UDP, that voice needs low latency, jitter, and loss, that PoE powers phones, and that voice VLANs and QoS are standard design.`,
+    mistakes: [
+      `Assuming that a connected call proves media is flowing.`,
+      `Forgetting PoE power budgets when adding many phones.`,
+      `Running voice and bulk data in the same queue.`,
+    ],
+    terms: [
+      { term: 'VoIP', def: `Voice over IP; telephone calls carried in IP packets.` },
+      { term: 'PBX', def: `Private branch exchange; the organization's phone switching system.` },
+      { term: 'SIP', def: `Session Initiation Protocol for call signaling.` },
+      { term: 'RTP', def: `Real-time Transport Protocol carrying audio and video streams.` },
+      { term: 'Codec', def: `Algorithm that compresses and decompresses audio or video.` },
+      { term: 'UC', def: `Unified communications combining voice, video, and messaging.` },
+    ],
+    checks: [
+      {
+        prompt: `Which protocol sets up and ends VoIP calls?`,
+        options: [`SIP`, `SNMP`, `LDAP`, `NTP`],
+        correct: 0,
+        explanation: `SIP handles call signaling; RTP carries the media.`,
+      },
+      {
+        prompt: `A VoIP call connects, but the caller hears nothing from your side. What should you check first?`,
+        options: [`RTP/firewall or NAT handling for media`, `DHCP lease time`, `STP root`, `Cable color`],
+        correct: 0,
+        explanation: `One-way audio is often a media path (RTP) blocked or mistranslated by NAT or a firewall.`,
+      },
+      {
+        prompt: `Why are IP phones commonly powered by PoE?`,
+        options: [`To avoid needing a separate power adapter at each desk`, `To increase bandwidth`, `To change IP addresses`, `To encrypt calls`],
+        correct: 0,
+        explanation: `PoE delivers power over the Ethernet cable, simplifying deployment and allowing UPS backup at the switch.`,
+      },
+    ],
+    mini: {
+      prompt: `A new department's IP phones fail to register while PCs on the same switch work fine.`,
+      task: `List two things to check.`,
+    },
+    recap: `VoIP uses SIP for signaling and RTP for media, runs on a PBX or cloud UC platform, and depends on PoE, voice VLANs, QoS, and low latency, jitter, and loss.`,
+    classroom: `"SIP ang tumatawag, RTP ang boses. Kung konektado pero walang tunog, hanapin mo ang RTP."`,
+  });
 }(window.NetReady));

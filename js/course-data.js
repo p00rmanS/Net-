@@ -60,7 +60,7 @@
       title: 'Ethernet, Cabling, and Physical Infrastructure',
       blurb: 'Mga kable, konektor, at ang mismong "kalsada" ng data.',
       status: 'available',
-      lessonIds: ['3-1', '3-2', '3-3', '3-4', '3-5', '3-6', '3-7'],
+      lessonIds: ['3-1', '3-2', '3-3', '3-4', '3-5', '3-6', '3-7', '3-8', '3-9', '3-10'],
     },
     {
       id: 4,
@@ -68,7 +68,7 @@
       title: 'IPv4 Addressing and Subnetting',
       blurb: 'Subnetting without the panic — step-by-step, may calculator ka pa.',
       status: 'available',
-      lessonIds: ['4-1', '4-2', '4-3', '4-4', '4-5'],
+      lessonIds: ['4-1', '4-2', '4-3', '4-4', '4-5', '4-6'],
     },
     {
       id: 5,
@@ -76,7 +76,7 @@
       title: 'IPv6 Addressing',
       blurb: 'Ang "malaking address space" na kapalit ng IPv4.',
       status: 'available',
-      lessonIds: ['5-1', '5-2', '5-3', '5-4'],
+      lessonIds: ['5-1', '5-2', '5-3', '5-4', '5-5'],
     },
     {
       id: 6,
@@ -84,7 +84,7 @@
       title: 'Ports, Protocols, and Network Services',
       blurb: 'DNS, DHCP, HTTP/S, at ang mga "language" ng internet.',
       status: 'available',
-      lessonIds: ['6-1', '6-2', '6-3', '6-4', '6-5', '6-6', '6-7', '6-8', '6-9', '6-10'],
+      lessonIds: ['6-1', '6-2', '6-3', '6-4', '6-5', '6-6', '6-7', '6-8', '6-9', '6-10', '6-11', '6-12'],
     },
     {
       id: 7,
@@ -92,7 +92,7 @@
       title: 'Switching, VLANs, and Layer 2',
       blurb: 'Paano nag-uusap ang mga device sa parehong network.',
       status: 'available',
-      lessonIds: ['7-1', '7-2', '7-3', '7-4', '7-5', '7-6', '7-7', '7-8', '7-9', '7-10'],
+      lessonIds: ['7-1', '7-2', '7-3', '7-4', '7-5', '7-6', '7-7', '7-8', '7-9', '7-10', '7-11'],
     },
     {
       id: 8,
@@ -100,7 +100,7 @@
       title: 'Routing and Wide Area Networking',
       blurb: 'Paano naghahanap ng ruta ang data papunta sa ibang network.',
       status: 'available',
-      lessonIds: ['8-1', '8-2', '8-3', '8-4', '8-5', '8-6', '8-7'],
+      lessonIds: ['8-1', '8-2', '8-3', '8-4', '8-5', '8-6', '8-7', '8-8', '8-9'],
     },
     {
       id: 9,
@@ -108,7 +108,7 @@
       title: 'Wireless Networking',
       blurb: 'Wi-Fi standards, channels, at pagpaplano ng coverage.',
       status: 'available',
-      lessonIds: ['9-1', '9-2', '9-3', '9-4', '9-5', '9-6', '9-7', '9-8', '9-9'],
+      lessonIds: ['9-1', '9-2', '9-3', '9-4', '9-5', '9-6', '9-7', '9-8', '9-9', '9-10', '9-11', '9-12'],
     },
     {
       id: 10,
@@ -116,7 +116,7 @@
       title: 'Cloud, Virtualization, and Modern Architecture',
       blurb: 'IaaS/PaaS/SaaS, SDN, at ang "network sa cloud".',
       status: 'available',
-      lessonIds: ['10-1', '10-2', '10-3', '10-4', '10-5', '10-6', '10-7', '10-8', '10-9'],
+      lessonIds: ['10-1', '10-2', '10-3', '10-4', '10-5', '10-6', '10-7', '10-8', '10-9', '10-10', '10-11'],
     },
     {
       id: 11,
@@ -132,7 +132,7 @@
       title: 'Network Security',
       blurb: 'CIA triad, AAA, firewalls, at karaniwang atake.',
       status: 'available',
-      lessonIds: ['12-1', '12-2', '12-3', '12-4', '12-5', '12-6', '12-7', '12-8', '12-9', '12-10'],
+      lessonIds: ['12-1', '12-2', '12-3', '12-4', '12-5', '12-6', '12-7', '12-8', '12-9', '12-10', '12-11', '12-12'],
     },
     {
       id: 13,
@@ -140,7 +140,7 @@
       title: 'Troubleshooting Methodology and Tools',
       blurb: 'Ang tamang proseso kapag may sirang network.',
       status: 'available',
-      lessonIds: ['13-1', '13-2', '13-3', '13-4', '13-5', '13-6', '13-7'],
+      lessonIds: ['13-1', '13-2', '13-3', '13-4', '13-5', '13-6', '13-7', '13-8', '13-9', '13-10'],
     },
     {
       id: 14,

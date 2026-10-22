@@ -1039,4 +1039,100 @@
     recap: `DHCP snooping, DAI, IP Source Guard, BPDU Guard, Root Guard, storm control, private VLANs, and MACsec each address a specific Layer 2 weakness. DHCP snooping's binding table powers both DAI and IP Source Guard.`,
     classroomAnswer: `"Rogue DHCP: snooping. Fake ARP: DAI. Rogue switch on an edge port: BPDU Guard. Isolating hosts in one subnet: private VLAN."`,
   };
+
+  NetReady.LESSONS['7-11'] = NetReady.lesson(7, {
+    id: '7-11',
+    slug: 'switch-configuration-deep-dive',
+    title: 'Switch Configuration Deep Dive: VLAN Database, VTP, Router-on-a-Stick, and STP Root Election',
+    minutes: 15,
+    outcomes: [
+      `Explain what the VLAN database is and what VTP does (and its risks).`,
+      `Describe router-on-a-stick and a Layer 3 switch SVI for inter-VLAN routing.`,
+      `Explain how STP elects a root bridge and assigns port roles and states.`,
+      `Explain flow control, auto-MDI-X, and QinQ at a high level.`,
+    ],
+    why: `Switch configuration questions are some of the most scenario-heavy on the exam: "which port becomes the root port?", "why did a VLAN disappear?", "how do two VLANs talk?". This lesson ties those mechanics together.`,
+    simple: `A switch keeps a VLAN database listing which VLAN IDs and names exist; ports are then assigned to those VLANs. VTP (VLAN Trunking Protocol, Cisco) can automatically copy the VLAN database between switches, which is convenient but dangerous: a switch with a higher revision number can overwrite everyone's VLANs. Inter-VLAN routing needs a Layer 3 device. Router-on-a-stick uses one trunk link to a router with a sub-interface for each VLAN; a Layer 3 switch uses switch virtual interfaces (SVIs), one per VLAN, and is faster. Spanning Tree Protocol first elects one root bridge (lowest bridge ID: priority then MAC), then every other switch picks a root port toward the root, designated ports forward on each segment, and the remaining ports block to prevent loops.`,
+    taglish: `May VLAN database ang switch: listahan ng mga VLAN ID at pangalan; ang mga port ay itatalaga sa mga VLAN na ito. Ang VTP ay kumokopya ng VLAN database sa ibang switch — madali pero delikado: ang switch na mas mataas ang revision number ay puwedeng mag-overwrite ng lahat ng VLAN. Kailangan ng Layer 3 para mag-usap ang mga VLAN. Sa router-on-a-stick, isang trunk papunta sa router na may sub-interface bawat VLAN; sa Layer 3 switch, SVI bawat VLAN, mas mabilis. Sa STP, una ang pagpili ng root bridge (pinakamababang bridge ID: priority tapos MAC). Bawat ibang switch ay pipili ng root port papunta sa root, may designated port sa bawat segment, at ang natitira ay magba-block para walang loop.`,
+    analogy: {
+      title: 'Punong-abala ng kasal',
+      text: `Ang root bridge ay ang punong-abala ng kasal: lahat ng bisita ay naghahanap ng pinakamaikling daan papunta sa kanya. Ang mga daan na magdudulot ng paikot-ikot ay isinasara (blocking). Ang router-on-a-stick ay iisang waiter na umiikot sa lahat ng mesa; ang SVI ay waiter na nakatalaga sa bawat mesa.`,
+    },
+    steps: [
+      `VLAN database: VLAN 1 is the default, 1002 to 1005 are reserved on Cisco switches, and normal VLANs are 2 to 1001 (extended 1006 to 4094). A port assigned to a VLAN that is not in the database gets no connectivity.`,
+      `VTP modes: server (can create, modify, delete VLANs and advertises them), client (learns VLANs, cannot create them), transparent (keeps its own VLANs, forwards VTP). A new switch with a higher configuration revision number can wipe the VLANs on the entire network, so reset the revision number before adding a switch.`,
+      `Router-on-a-stick: one physical router interface becomes an 802.1Q trunk with sub-interfaces (for example Gi0/0.10, Gi0/0.20), each with an IP address that is the default gateway for that VLAN. Simple, but the single link is a bottleneck.`,
+      `Layer 3 switch with SVIs: create interface vlan 10, interface vlan 20 with IP addresses, and enable ip routing. Routing is done in hardware and scales better.`,
+      `STP root election: switches exchange BPDUs; the bridge ID is priority (default 32768, plus VLAN ID in PVST) and MAC address. The lowest bridge ID wins. Set the priority lower on the switch you want as root (usually a core switch) rather than leaving it to the lowest MAC, which may be an old edge switch.`,
+      `Port roles: root port (best path to the root, on non-root switches), designated port (forwarding port for each segment), alternate/backup (blocking). Path cost depends on link speed.`,
+      `Classic STP states: blocking, listening, learning, forwarding (plus disabled). It takes up to about 30 to 50 seconds to converge. RSTP uses discarding, learning, and forwarding and converges in seconds. PortFast puts edge ports straight into forwarding.`,
+      `Protection: BPDU Guard shuts an edge port that receives a BPDU; Root Guard prevents an unwanted switch from becoming root; Loop Guard stops a blocked port from forwarding if BPDUs stop arriving (unidirectional link).`,
+      `Other features: Ethernet flow control (802.3x pause frames) asks a sender to pause when a buffer is full; auto-MDI-X lets a port detect and swap transmit and receive pairs so any cable works; QinQ (802.1ad) stacks a second VLAN tag so a provider can carry customers' VLANs transparently.`,
+    ],
+    table: {
+      label: 'Table of STP port roles and states',
+      head: ['Item', 'Meaning'],
+      rows: [
+        ['Root bridge', 'Switch with the lowest bridge ID (priority then MAC)'],
+        ['Root port', 'Best path toward the root on a non-root switch'],
+        ['Designated port', 'Forwarding port for a segment'],
+        ['Blocking / discarding', 'Port that prevents a loop'],
+        ['Forwarding', 'Port sending and receiving user traffic'],
+        ['PortFast', 'Edge port goes directly to forwarding'],
+      ],
+      caption: 'One root, one best path per switch, everything else blocked.',
+    },
+    example: `A technician plugs a lab switch into the network and half the company's VLANs disappear. The lab switch had been a VTP server with a higher revision number, and it overwrote the real VLAN database. Restoring the VLANs and setting production switches to VTP transparent mode (or using VTPv3 with a password) prevents a repeat.`,
+    tips: [
+      `Always set the root bridge priority intentionally; never accept the default election result.`,
+      `"Router on a stick" = single trunk with sub-interfaces. "SVI" = Layer 3 switch interfaces.`,
+      `After adding any switch, reset its VTP revision number or put it in transparent mode first.`,
+    ],
+    exam: `Know: lowest bridge ID wins root, root port versus designated port, blocking prevents loops, RSTP is faster than STP, PortFast on edge ports with BPDU Guard, router-on-a-stick versus SVI, and VTP's overwrite risk.`,
+    mistakes: [
+      `Putting PortFast on switch-to-switch links.`,
+      `Leaving the default priority so an old edge switch becomes root.`,
+      `Forgetting to create a VLAN in the database before assigning ports.`,
+    ],
+    terms: [
+      { term: 'VLAN database', def: `The list of VLAN IDs and names stored on a switch.` },
+      { term: 'VTP', def: `Cisco protocol that propagates VLAN definitions between switches.` },
+      { term: 'Router-on-a-stick', def: `Inter-VLAN routing over one trunk with router sub-interfaces.` },
+      { term: 'SVI', def: `Switch virtual interface, a Layer 3 interface for a VLAN.` },
+      { term: 'Root bridge', def: `The STP reference switch with the lowest bridge ID.` },
+      { term: 'PortFast', def: `Feature that puts an edge port directly into forwarding.` },
+    ],
+    commands: [
+      { os: 'Cisco IOS', cmd: 'show spanning-tree', desc: `Shows the root bridge, port roles, and states per VLAN.` },
+      { os: 'Cisco IOS', cmd: 'show vlan brief', desc: `Lists VLANs in the database and the ports assigned.` },
+      { os: 'Cisco IOS', cmd: 'show vtp status', desc: `Shows VTP mode, domain, and revision number.` },
+      { os: 'Cisco IOS', cmd: 'show ip interface brief', desc: `Shows SVIs and router sub-interfaces with their addresses.` },
+    ],
+    checks: [
+      {
+        prompt: `How does STP choose the root bridge?`,
+        options: [`The switch with the most ports`, `The lowest bridge ID (priority, then MAC)`, `The fastest uplink`, `The switch that booted first`],
+        correct: 1,
+        explanation: `The lowest bridge ID, made of priority and MAC, becomes the root.`,
+      },
+      {
+        prompt: `Which design routes between VLANs using a single trunk to a router with sub-interfaces?`,
+        options: [`SVI routing`, `Router-on-a-stick`, `Port channel`, `Spine-leaf`],
+        correct: 1,
+        explanation: `Router-on-a-stick uses sub-interfaces on one 802.1Q trunk.`,
+      },
+      {
+        prompt: `After plugging in a switch, many VLANs vanish. What is a likely cause?`,
+        options: [`A VTP revision number overwrote the VLAN database`, `A DNS error`, `Low RSSI`, `An expired lease`],
+        correct: 0,
+        explanation: `A VTP server with a higher revision number can replace VLANs on other switches.`,
+      },
+    ],
+    mini: {
+      prompt: `A branch's oldest edge switch keeps becoming the STP root and traffic takes odd paths.`,
+      task: `What should you configure?`,
+    },
+    recap: `Keep the VLAN database consistent (and guard against VTP overwrites), route VLANs with router-on-a-stick or SVIs, elect the root intentionally using bridge priority, and protect edge ports with PortFast and BPDU Guard.`,
+    classroom: `"Ang pinakamababang bridge ID ang hari ng STP — kaya ikaw ang magtakda kung sino."`,
+  });
 }(window.NetReady));

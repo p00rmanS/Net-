@@ -473,4 +473,92 @@
       '"I don\'t just memorize a few practice problems — I use the generator to get fresh ones until the method is muscle memory."',
     interactiveToolId: 'subnet-calculator',
   };
+
+  NetReady.LESSONS['4-6'] = NetReady.lesson(4, {
+    id: '4-6',
+    slug: 'classful-addressing-and-special-ranges',
+    title: 'Classful Addressing and Special IPv4 Ranges: Class A to E, Loopback, and Reserved Blocks',
+    minutes: 12,
+    outcomes: [
+      `Identify the class of an IPv4 address from its first octet and its default mask.`,
+      `Recall the private, loopback, APIPA, and multicast ranges.`,
+      `Explain why classful addressing gave way to CIDR.`,
+    ],
+    why: `Even though modern networks use CIDR, the exam still expects you to recognize Class A, B, and C ranges and the special-purpose blocks on sight.`,
+    simple: `Originally, IPv4 addresses were split into classes by their first octet. Class A (1 to 126) used a default mask of /8, Class B (128 to 191) used /16, and Class C (192 to 223) used /24. Class D (224 to 239) is multicast and Class E (240 to 255) is reserved for experimental use. 127.0.0.0/8 is reserved for loopback (127.0.0.1 is your own machine), which is why Class A skips from 126 to 128. Private (RFC 1918) ranges are 10.0.0.0/8, 172.16.0.0/12, and 192.168.0.0/16. APIPA addresses are 169.254.0.0/16. Classful addressing wasted many addresses because blocks came in only three sizes, so CIDR and VLSM replaced it with prefixes of any length.`,
+    taglish: `Noon, hinati ang IPv4 sa mga class ayon sa unang octet. Class A (1 hanggang 126) ay /8, Class B (128 hanggang 191) ay /16, Class C (192 hanggang 223) ay /24. Ang Class D (224 hanggang 239) ay multicast; ang Class E (240 hanggang 255) ay experimental. Ang 127.0.0.0/8 ay loopback — 127.0.0.1 ang sarili mong computer, kaya lumaktaw ang Class A mula 126 papuntang 128. Private ranges: 10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16. Ang APIPA ay 169.254.0.0/16. Maraming nasayang na address sa classful kaya pinalitan ng CIDR at VLSM.`,
+    analogy: {
+      title: 'Tatlong laki lang ng lupa',
+      text: `Isipin na tatlong laki lang ng lote ang ibinebenta: malaking-malaki, malaki, at maliit. Kung kailangan mo ng medyo malaki lang, kailangan mo pa ring bilhin ang pinakamalaki at masasayang ang sobra. Ang CIDR ay pagbebenta ng lote sa eksaktong laki na kailangan mo.`,
+    },
+    steps: [
+      `Class A: first octet 1 to 126, default mask 255.0.0.0 (/8), about 16.7 million addresses per network.`,
+      `Class B: first octet 128 to 191, default mask 255.255.0.0 (/16), about 65,000 addresses per network.`,
+      `Class C: first octet 192 to 223, default mask 255.255.255.0 (/24), 254 usable hosts.`,
+      `Class D: 224 to 239, used for multicast. Class E: 240 to 255, reserved or experimental.`,
+      `Loopback: 127.0.0.0/8. Pinging 127.0.0.1 tests the local TCP/IP stack and does not leave the machine. IPv6 loopback is ::1.`,
+      `Private ranges: 10.0.0.0/8 (Class A), 172.16.0.0 to 172.31.255.255 (172.16.0.0/12, Class B range), 192.168.0.0/16 (Class C range). They are not routed on the public internet and need NAT to reach it.`,
+      `Link-local (APIPA): 169.254.0.0/16. A host that cannot find a DHCP server assigns itself one. Shared address space 100.64.0.0/10 is used by carriers for carrier-grade NAT.`,
+      `Special addresses: 0.0.0.0 means "this host" or the default route, 255.255.255.255 is the limited broadcast, and 192.0.2.0/24 and similar blocks are reserved for documentation examples.`,
+      `Why classless: with CIDR and VLSM, an organization receives a prefix that fits its need (for example /22), preventing waste and shrinking routing tables through summarization.`,
+    ],
+    table: {
+      label: 'Table of IPv4 classes',
+      head: ['Class', 'First octet', 'Default mask', 'Use'],
+      rows: [
+        ['A', '1 to 126', '/8', 'Very large networks'],
+        ['B', '128 to 191', '/16', 'Medium networks'],
+        ['C', '192 to 223', '/24', 'Small networks'],
+        ['D', '224 to 239', 'n/a', 'Multicast'],
+        ['E', '240 to 255', 'n/a', 'Experimental'],
+        ['Loopback', '127', '/8', 'Local host testing'],
+      ],
+      caption: 'The first octet gives the class at a glance.',
+    },
+    example: `A technician sees 172.20.4.9 on a printer and 172.32.4.9 on a laptop and wonders if both are private. 172.16.0.0 through 172.31.255.255 is private; 172.32.4.9 is public address space, so the laptop's address is a misconfiguration.`,
+    tips: [
+      `Memorize the boundaries: 126, 127 (loopback), 128, 191, 192, 223, 224, 239.`,
+      `172.16 to 172.31 is the private block. 172.15 and 172.32 are NOT private.`,
+      `169.254.x.x always signals a DHCP failure.`,
+    ],
+    exam: `Expect "What class is 150.10.1.1?" (B) and "Which range is private?" Also know loopback 127.0.0.1, APIPA 169.254.0.0/16, and multicast 224.0.0.0 to 239.255.255.255.`,
+    mistakes: [
+      `Forgetting that 127.x.x.x is not Class A usable space.`,
+      `Assuming all of 172.x.x.x is private.`,
+      `Using default classful masks on modern CIDR networks.`,
+    ],
+    terms: [
+      { term: 'Classful addressing', def: `Original IPv4 scheme with fixed Class A, B, and C network sizes.` },
+      { term: 'Loopback', def: `127.0.0.0/8 range used for testing the local host.` },
+      { term: 'APIPA / link-local', def: `169.254.0.0/16 self-assigned address when DHCP fails.` },
+      { term: 'RFC 1918', def: `Document defining the private IPv4 ranges.` },
+      { term: 'CIDR', def: `Classless Inter-Domain Routing, prefixes of any length.` },
+    ],
+    checks: [
+      {
+        prompt: `Which class does the address 150.25.4.1 belong to?`,
+        options: [`Class A`, `Class B`, `Class C`, `Class D`],
+        correct: 1,
+        explanation: `First octet 128 to 191 is Class B.`,
+      },
+      {
+        prompt: `Which of these is NOT a private address?`,
+        options: [`10.50.1.1`, `172.20.5.5`, `172.32.5.5`, `192.168.100.1`],
+        correct: 2,
+        explanation: `The private block is 172.16.0.0 to 172.31.255.255; 172.32.x.x is public.`,
+      },
+      {
+        prompt: `What does pinging 127.0.0.1 test?`,
+        options: [`The default gateway`, `The local TCP/IP stack`, `The DNS server`, `The ISP`],
+        correct: 1,
+        explanation: `The loopback address never leaves the host and verifies the local network stack.`,
+      },
+    ],
+    mini: {
+      prompt: `A host shows 169.254.88.12.`,
+      task: `Name what this means and what to check next.`,
+    },
+    recap: `Know the classes by first octet, the default masks, the private, loopback, APIPA, and multicast ranges, and that CIDR replaced rigid classes to stop address waste.`,
+    classroom: `"Una ang unang octet: 1-126 A, 128-191 B, 192-223 C. Ang 127 ay para sa sarili mo."`,
+  });
 }(window.NetReady));
