@@ -334,7 +334,7 @@
     setActiveNav('curriculum');
     setView(`
       <div class="page-header">
-        <div><h1>Curriculum Roadmap</h1><p class="text-muted">Official N10-009 domains mapped across 15 planned modules. Locked modules are shown for transparency — no dead links.</p></div>
+        <div><h1>Curriculum Roadmap</h1><p class="text-muted">Official N10-009 domains mapped across 16 planned modules. Locked modules are shown for transparency — no dead links.</p></div>
       </div>
       <div class="domain-legend">
         ${NetReady.EXAM_META.domains.map((d) => `<span class="badge" style="--badge-color:${d.color}">${escapeHtml(d.name)} — ${d.weight}%</span>`).join('')}

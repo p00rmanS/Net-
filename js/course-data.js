@@ -150,6 +150,14 @@
       status: 'available',
       lessonIds: ['14-1', '14-2', '14-3'],
     },
+    {
+      id: 15,
+      domain: 'troubleshooting',
+      title: 'Case Files: Network Stories From the Field',
+      blurb: 'Mga kuwento ng totoong problema, mula reklamo hanggang solusyon.',
+      status: 'available',
+      lessonIds: ['15-1', '15-2', '15-3', '15-4', '15-5', '15-6', '15-7'],
+    },
   ];
 
   NetReady.getModule = (id) => NetReady.MODULES.find((m) => m.id === Number(id));
