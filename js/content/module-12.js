@@ -822,4 +822,194 @@
     classroomAnswer:
       '"I never say \'risk\' when I mean \'vulnerability\' — a weakness only becomes a real risk once there\'s an actual threat that could exploit it, and defense in depth is my insurance for the day one layer eventually fails."',
   };
+
+  NetReady.LESSONS['12-9'] = {
+    id: '12-9',
+    moduleId: 12,
+    slug: 'secure-protocols-and-ipsec',
+    title: 'Secure Protocol Replacements and IPsec: AH, ESP, and IKE',
+    estMinutes: 15,
+    outcomes: [
+      `Match insecure legacy protocols to their secure replacements and ports.`,
+      `Explain what IPsec provides and how AH and ESP differ.`,
+      `Distinguish IPsec transport mode from tunnel mode.`,
+      `Describe the role of IKE and security associations.`,
+    ],
+    whyItMatters: `Telnet, FTP, HTTP, and SNMPv1 send data, and often passwords, in clear text. Network+ repeatedly asks you to pick the secure alternative, and VPN questions assume you know what IPsec is actually doing.`,
+    simpleEnglish: `Many old protocols were designed when networks were trusted, so they send everything unencrypted. Each has a secure replacement: Telnet becomes SSH, FTP becomes SFTP or FTPS, HTTP becomes HTTPS, SNMPv1 and v2c become SNMPv3, LDAP becomes LDAPS. SSL is obsolete; TLS is the modern protocol underneath HTTPS and most secure services. IPsec is a suite that secures traffic at Layer 3. ESP (Encapsulating Security Payload) encrypts and authenticates; AH (Authentication Header) authenticates and protects integrity but does NOT encrypt. IKE (Internet Key Exchange) negotiates the keys and settings, called security associations. In tunnel mode IPsec wraps the whole original packet in a new one (typical for site-to-site VPNs); in transport mode only the payload is protected between two hosts.`,
+    taglish: `Ang mga lumang protocol ay parang postcard — kahit sino sa daan puwedeng bumasa. Ang secure na kapalit nila ay parang sealed na envelope: Telnet → SSH, FTP → SFTP/FTPS, HTTP → HTTPS, SNMPv1/v2c → SNMPv3, LDAP → LDAPS. Ang IPsec ay set ng patakaran para i-secure ang IP packets mismo. Ang ESP ay may encryption; ang AH ay pang-verify lang (hindi naka-encrypt). Ang IKE ang nagnenegosasyon ng susi at settings. Sa tunnel mode, ibinabalot ang buong orihinal na packet sa bagong packet (site-to-site VPN). Sa transport mode, ang payload lang ang pinoprotektahan (host-to-host).`,
+    analogy: {
+      title: 'Postcard laban sa armored van',
+      text: `Ang Telnet ay postcard: nababasa ng bawat kamay na dumaraan. Ang SSH ay selyadong sulat. Ang IPsec tunnel mode naman ay armored van na naglalaman ng buong sulat, pati ang sobre at address, at may bagong address sa labas ng van. Ang IKE ay ang pag-uusap ng dalawang guwardiya sa simula para pagkasunduan ang susi ng kandado.`,
+    },
+    howItWorks: [
+      `Telnet (TCP 23) is replaced by SSH (TCP 22), which also supplies secure file copy (SCP) and SFTP.`,
+      `FTP (TCP 21 control, 20 data) is replaced by SFTP (runs over SSH on TCP 22) or FTPS (FTP over TLS, commonly TCP 990 implicit or 21 explicit). TFTP (UDP 69) has no authentication or encryption at all.`,
+      `HTTP (80) becomes HTTPS (443). Mail: SMTP 25 becomes SMTP with TLS (587 or 465); POP3 110 becomes 995; IMAP 143 becomes 993. LDAP 389 becomes LDAPS 636. Syslog UDP 514 can be wrapped in TLS (commonly 6514).`,
+      `SNMPv1 and v2c use plain community strings. SNMPv3 adds authentication and encryption (authPriv).`,
+      `SSL versus TLS: SSL (all versions) and early TLS (1.0, 1.1) are deprecated. Use TLS 1.2 or 1.3.`,
+      `IPsec provides confidentiality (encryption), integrity, origin authentication, and anti-replay protection at the network layer.`,
+      `AH is IP protocol 51: authentication and integrity, no encryption, and it breaks across NAT because it protects the IP header. ESP is IP protocol 50: encryption plus integrity and authentication, and it works with NAT when wrapped in UDP 4500 (NAT traversal).`,
+      `IKE uses UDP 500 (and UDP 4500 for NAT-T). Phase 1 builds a secure management channel and authenticates peers (pre-shared key or certificates); phase 2 negotiates the IPsec security associations (SAs) that actually protect the data.`,
+      `Modes: transport mode protects only the payload and keeps the original IP header (host-to-host); tunnel mode encrypts the entire original packet and adds a new outer IP header (gateway-to-gateway or remote access VPN).`,
+    ],
+    visual: {
+      type: 'diagram',
+      html: `<div class="lesson-diagram" role="img" aria-label="Table mapping insecure protocols to secure replacements and ports">
+        <div class="table-scroll"><table class="lesson-table">
+          <thead><tr><th>Insecure</th><th>Port</th><th>Secure replacement</th><th>Port</th></tr></thead>
+          <tbody>
+            <tr><td>Telnet</td><td>TCP 23</td><td>SSH</td><td>TCP 22</td></tr>
+            <tr><td>FTP</td><td>TCP 21</td><td>SFTP / FTPS</td><td>TCP 22 / 990</td></tr>
+            <tr><td>HTTP</td><td>TCP 80</td><td>HTTPS</td><td>TCP 443</td></tr>
+            <tr><td>LDAP</td><td>TCP 389</td><td>LDAPS</td><td>TCP 636</td></tr>
+            <tr><td>POP3 / IMAP</td><td>110 / 143</td><td>POP3S / IMAPS</td><td>995 / 993</td></tr>
+            <tr><td>SNMPv1/v2c</td><td>UDP 161</td><td>SNMPv3</td><td>UDP 161</td></tr>
+          </tbody>
+        </table></div>
+      </div>`,
+    },
+    realWorldExample: `A security scan flags that a switch still accepts Telnet. The technician disables Telnet, enables SSH with key-based logins, restricts the management VTY lines to the management VLAN, and later notices that the monitoring tool uses SNMPv2c. They move it to SNMPv3 with authPriv so even the monitoring traffic is encrypted.`,
+    proTips: [
+      `If a question says "encrypts the payload and authenticates", it is ESP. If it says "authentication only, no confidentiality", it is AH.`,
+      `Site-to-site VPN between two firewalls almost always means IPsec in tunnel mode, using IKE with UDP 500.`,
+      `A packet capture showing readable passwords on port 21, 23, 80, or 110 is evidence of an insecure protocol still in use.`,
+    ],
+    examAlert: `Know the secure/insecure pairs and port numbers cold. Also memorize: ESP = protocol 50 (encrypts), AH = protocol 51 (no encryption), IKE = UDP 500, tunnel mode = new outer header.`,
+    beginnerMistakes: [
+      `Assuming SFTP and FTPS are the same thing. SFTP runs over SSH; FTPS is FTP wrapped in TLS.`,
+      `Thinking AH encrypts traffic.`,
+      `Calling any HTTPS site secure without noticing it relies on TLS, not SSL.`,
+    ],
+    keyTerms: [
+      { term: 'SSH', def: `Secure shell, an encrypted replacement for Telnet on TCP 22.` },
+      { term: 'TLS', def: `Transport Layer Security, the modern successor to SSL.` },
+      { term: 'ESP', def: `IPsec protocol that provides encryption, integrity, and authentication.` },
+      { term: 'AH', def: `IPsec protocol that provides integrity and authentication without encryption.` },
+      { term: 'IKE', def: `Protocol that negotiates IPsec keys and security associations.` },
+      { term: 'Security association (SA)', def: `Agreed set of keys and algorithms protecting one direction of traffic.` },
+    ],
+    knowledgeCheck: [
+      {
+        prompt: `Which protocol is the secure replacement for Telnet?`,
+        options: [`SFTP`, `SSH`, `HTTPS`, `SNMPv3`],
+        correct: 1,
+        explanation: `SSH on TCP 22 encrypts remote terminal sessions, replacing clear-text Telnet on TCP 23.`,
+      },
+      {
+        prompt: `Which IPsec protocol provides encryption of the payload?`,
+        options: [`AH`, `IKE`, `ESP`, `GRE`],
+        correct: 2,
+        explanation: `ESP encrypts and authenticates; AH only authenticates and protects integrity.`,
+      },
+      {
+        prompt: `Two firewalls build a site-to-site VPN. Which IPsec mode is typically used?`,
+        options: [`Transport mode`, `Tunnel mode`, `Aggressive mode only`, `Passive mode`],
+        correct: 1,
+        explanation: `Tunnel mode encapsulates the original packet with a new outer header, which suits gateway-to-gateway VPNs.`,
+      },
+    ],
+    miniScenario: {
+      prompt: `A capture of traffic to a file server shows a username and password in readable text on TCP 21.`,
+      task: `Name the protocol and two secure replacements you could recommend.`,
+    },
+    recap: `Replace Telnet with SSH, FTP with SFTP or FTPS, HTTP with HTTPS, SNMPv1/v2c with SNMPv3, and use TLS rather than SSL. IPsec secures Layer 3: ESP encrypts, AH only authenticates, IKE negotiates keys, and tunnel mode builds site-to-site VPNs.`,
+    classroomAnswer: `"If it travels in clear text, swap it for its secure twin. For IPsec: ESP encrypts, AH just signs, IKE sets it up."`,
+  };
+
+  NetReady.LESSONS['12-10'] = {
+    id: '12-10',
+    moduleId: 12,
+    slug: 'ids-ips-and-siem',
+    title: 'IDS, IPS, and SIEM: Detecting and Responding to Threats',
+    estMinutes: 13,
+    outcomes: [
+      `Explain the difference between an IDS and an IPS, including placement.`,
+      `Compare signature-based and anomaly-based detection.`,
+      `Define false positive and false negative.`,
+      `Explain what a SIEM does and why log correlation matters.`,
+    ],
+    whyItMatters: `Firewalls block known-bad rules, but attackers who use allowed ports still get through. IDS, IPS, and SIEM are how security teams notice and respond. These are core tools for a SOC analyst and show up often on the exam.`,
+    simpleEnglish: `An Intrusion Detection System (IDS) watches a copy of traffic and raises alerts but does not stop anything. An Intrusion Prevention System (IPS) sits inline, in the path of traffic, and can drop malicious packets automatically. Detection works by signatures (known patterns, accurate for known attacks, blind to new ones) or by anomalies (deviation from a baseline, can catch new attacks but creates more false alarms). A false positive is an alert on harmless traffic; a false negative is a real attack that went unnoticed. A SIEM (Security Information and Event Management) collects logs from firewalls, servers, switches, and IDS/IPS, normalizes them, correlates events, and alerts analysts.`,
+    taglish: `Ang IDS ay CCTV: nakakakita at nag-aalarma, pero hindi humaharang. Ang IPS ay guard na nasa pintuan at puwedeng pumigil mismo. Ang signature-based ay parang listahan ng mukha ng kilalang magnanakaw; ang anomaly-based ay nagtataka kapag may kakaibang kilos kahit hindi pa kilala. False positive: nag-alarm pero wala namang masama. False negative: may nakalusot pero walang nag-alarm — ito ang mas delikado. Ang SIEM ay central na control room: kinokolekta niya ang logs ng lahat ng device, pinag-uugnay ang mga pangyayari, at binibigyan ng alerto ang analyst.`,
+    analogy: {
+      title: 'CCTV, guwardiya, at control room',
+      text: `IDS = CCTV na nagre-record at nag-aalarma. IPS = guwardiyang nasa gate na puwedeng magpaalis agad. SIEM = control room kung saan pinagsasama ang footage ng lahat ng camera, logbook ng guwardiya, at ulat ng sensors, para makita ang pattern na hindi makikita ng isang camera lang.`,
+    },
+    howItWorks: [
+      `IDS placement: out-of-band, fed by a network tap or SPAN/mirror port. It cannot block traffic, so a failure of the IDS does not interrupt the network.`,
+      `IPS placement: inline between segments. It can drop packets, reset connections, or block a source. If the IPS fails it must be configured to fail-open (traffic keeps flowing, unprotected) or fail-closed (traffic stops), a business decision.`,
+      `Network-based (NIDS/NIPS) watches network traffic; host-based (HIDS/HIPS) runs on an endpoint and watches files, processes, and logs.`,
+      `Signature-based detection compares traffic to a database of known attack patterns. It needs regular updates and misses zero-day attacks.`,
+      `Anomaly (behavior) based detection learns a baseline of normal activity and alerts on deviations. It can catch unknown attacks but produces more false positives. Heuristic methods score suspicious behavior.`,
+      `False positive: harmless activity flagged. False negative: malicious activity missed. Tuning reduces false positives, but over-tuning can create false negatives.`,
+      `Next-generation firewalls (NGFW) commonly bundle IPS, application awareness, and TLS inspection with traditional firewalling.`,
+      `SIEM: collects logs (often via syslog), normalizes formats, correlates events across sources (for example failed logins on a server followed by a successful login and a new admin account), raises alerts, retains logs for compliance, and provides dashboards. SOAR tools can automate the response playbooks.`,
+    ],
+    visual: {
+      type: 'diagram',
+      html: `<div class="lesson-diagram" role="img" aria-label="Table comparing IDS and IPS">
+        <div class="table-scroll"><table class="lesson-table">
+          <thead><tr><th></th><th>IDS</th><th>IPS</th></tr></thead>
+          <tbody>
+            <tr><td>Placement</td><td>Out-of-band (tap/SPAN)</td><td>Inline</td></tr>
+            <tr><td>Action</td><td>Alert only</td><td>Alert and block</td></tr>
+            <tr><td>Impact if it fails</td><td>No traffic impact</td><td>Can stop traffic (fail-closed)</td></tr>
+            <tr><td>Latency added</td><td>None</td><td>Some</td></tr>
+          </tbody>
+        </table></div>
+      </div>`,
+    },
+    realWorldExample: `A SIEM correlates three separate events: 40 failed SSH logins from one external IP, a successful login from that same IP, and a new local account created on the server minutes later. No single log looked alarming, but the correlated sequence triggers a high-severity alert and the analyst isolates the host.`,
+    proTips: [
+      `Remember "IDS Detects, IPS Prevents". Inline means it can block, out-of-band means it can only watch.`,
+      `A flood of false positives leads to alert fatigue, where real alerts get ignored. Tune rules regularly.`,
+      `Accurate time (NTP) across devices is essential, or SIEM correlation of events will not line up.`,
+    ],
+    examAlert: `Typical question: "Which device sits inline and can block attacks?" = IPS. "Alerts but cannot block" = IDS. "Aggregates and correlates logs" = SIEM. Know false positive versus false negative.`,
+    beginnerMistakes: [
+      `Putting an IDS inline and expecting it to block traffic.`,
+      `Believing signature-based detection will catch brand new (zero-day) attacks.`,
+      `Treating a SIEM as just a log storage box rather than a correlation and alerting tool.`,
+    ],
+    keyTerms: [
+      { term: 'IDS', def: `Intrusion Detection System that monitors and alerts.` },
+      { term: 'IPS', def: `Intrusion Prevention System that sits inline and can block.` },
+      { term: 'Signature-based', def: `Detection by matching known attack patterns.` },
+      { term: 'Anomaly-based', def: `Detection by spotting deviation from a learned baseline.` },
+      { term: 'False positive / negative', def: `Harmless activity flagged / real attack missed.` },
+      { term: 'SIEM', def: `Platform that collects, correlates, and alerts on security logs.` },
+    ],
+    knowledgeCheck: [
+      {
+        prompt: `Which device is placed inline and can automatically drop malicious packets?`,
+        options: [`IDS`, `IPS`, `SIEM`, `Network tap`],
+        correct: 1,
+        explanation: `An IPS sits in the traffic path and can block, while an IDS only alerts.`,
+      },
+      {
+        prompt: `A detection engine alerts on a legitimate software update as an attack. What is this?`,
+        options: [`True positive`, `False negative`, `False positive`, `True negative`],
+        correct: 2,
+        explanation: `Harmless activity incorrectly flagged as malicious is a false positive.`,
+      },
+      {
+        prompt: `What is the primary purpose of a SIEM?`,
+        options: [
+          `Encrypting traffic between sites`,
+          `Collecting and correlating logs from many sources to generate alerts`,
+          `Assigning IP addresses`,
+          `Filtering web content by category`,
+        ],
+        correct: 1,
+        explanation: `A SIEM centralizes logs and correlates events so analysts can detect patterns across systems.`,
+      },
+    ],
+    miniScenario: {
+      prompt: `Your company wants a device that watches a copy of core switch traffic and alerts the SOC, without any risk of causing an outage if it breaks.`,
+      task: `Which device and which connection method fit best?`,
+    },
+    recap: `IDS detects and alerts out-of-band; IPS prevents inline. Signature detection catches known attacks, anomaly detection catches deviations but creates more false positives. A SIEM centralizes and correlates logs so analysts can see the bigger picture.`,
+    classroomAnswer: `"IDS watches, IPS blocks, SIEM connects the dots."`,
+  };
 }(window.NetReady));

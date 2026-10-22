@@ -935,4 +935,101 @@
     recap: `ARP maps IP to MAC on the local segment (broadcast request, unicast reply) and targets the gateway for remote destinations. ICMP carries diagnostics: echo for ping, time exceeded for traceroute, unreachable for delivery failures. ARP spoofing is countered by DAI; blocking all ICMP can break Path MTU Discovery.`,
     classroomAnswer: `"ARP asks who owns this IP so I can build the frame; ICMP is how the network tells me what went wrong or whether you are there."`,
   };
+
+  NetReady.LESSONS['6-10'] = {
+    id: '6-10',
+    moduleId: 6,
+    slug: 'tcp-in-depth-mtu-mss-windows',
+    title: 'TCP in Depth: Windowing, MTU, MSS, and Fragmentation',
+    estMinutes: 14,
+    outcomes: [
+      `Explain TCP sequence numbers, acknowledgments, and the window size.`,
+      `Calculate MSS from MTU for IPv4 TCP.`,
+      `Describe fragmentation, the DF bit, and Path MTU Discovery.`,
+      `Recognize the symptoms of an MTU problem.`,
+    ],
+    whyItMatters: `TCP versus UDP is only the start. Slow file transfers, VPN weirdness, and "small pings work but big ones fail" tickets are all explained by windowing and MTU concepts.`,
+    simpleEnglish: `TCP numbers every byte it sends (sequence numbers), and the receiver confirms what it got (acknowledgment numbers). If an acknowledgment does not arrive, the sender retransmits. The receiver also advertises a window size, the amount of data the sender may send before waiting for an acknowledgment. This is flow control. Slow start and congestion control make TCP ramp up carefully and slow down when it detects loss. MTU (Maximum Transmission Unit) is the largest packet an interface can send, normally 1500 bytes on Ethernet. MSS (Maximum Segment Size) is the largest TCP payload, which for IPv4 is MTU minus 20 bytes of IP header and 20 bytes of TCP header, so 1460. If a packet is bigger than the MTU of a link and the Don't Fragment (DF) bit is not set, routers split it into fragments; if DF is set, the router drops it and sends back an ICMP "fragmentation needed" message.`,
+    taglish: `Binibilang ng TCP ang bawat byte (sequence number) at kinukumpirma ng receiver ang natanggap (acknowledgment). Kapag walang ACK, magre-retransmit. May window size din: kung ilang data ang puwedeng ipadala bago maghintay ng ACK — yan ang flow control. Ang MTU ay pinakamalaking packet na kayang dalhin ng link, kadalasan 1500 bytes. Ang MSS ay pinakamalaking TCP data: MTU na 1500 minus 20 (IP header) minus 20 (TCP header) = 1460. Kapag mas malaki ang packet kaysa MTU at walang DF bit, hahatiin ito (fragmentation). Kapag may DF bit, itatapon at magpapadala ng ICMP "fragmentation needed".`,
+    analogy: {
+      title: 'Trak, tulay, at timbang limit',
+      text: `Ang MTU ay limit ng timbang ng tulay. Kapag lampas ang trak, puwede mong hatiin ang kargamento sa dalawang trak (fragmentation), o kung may "huwag hatiin" na tagubilin (DF), pababalikin ng tanod ang trak na may paalala (ICMP). Ang window size ay kung ilang trak ang puwedeng umalis bago ka maghintay ng kumpirmasyon na dumating na ang una.`,
+    },
+    howItWorks: [
+      `Sequence and acknowledgment numbers: the sender labels data with a sequence number; the receiver replies with the next sequence number it expects. Missing acknowledgments trigger retransmission, which is how TCP achieves reliability.`,
+      `Window size (flow control): the receiver advertises how much data it can buffer. A zero window tells the sender to pause. A small window limits throughput on high-latency links.`,
+      `Congestion control: slow start doubles the amount sent each round trip until loss appears, then TCP backs off. This is why short transfers never reach full link speed immediately.`,
+      `Connection teardown: FIN is a graceful close (each side finishes), while RST abruptly resets a connection, for example when a host receives data for a port that is not open.`,
+      `MTU: largest IP packet an interface can send without fragmenting. Ethernet is 1500, jumbo frames are about 9000, and PPPoE reduces it to 1492. VPN overhead (IPsec, GRE) reduces it further.`,
+      `MSS: largest TCP segment payload. For IPv4, MSS = MTU - 20 (IP) - 20 (TCP) = 1460 on a 1500 MTU. Each side announces its MSS in the SYN packet.`,
+      `Fragmentation: if a packet exceeds the next link's MTU and DF is not set, a router fragments it, and the destination reassembles. This costs performance and can break through some firewalls. IPv6 routers never fragment; only the source does.`,
+      `Path MTU Discovery (PMTUD): sender sets DF and relies on ICMP "fragmentation needed" replies to learn the smallest MTU along the path. If a firewall blocks those ICMP messages, large transfers hang while small packets still work (a PMTUD black hole). Fix by allowing the ICMP, lowering the MTU, or using MSS clamping on the VPN or router.`,
+      `UDP has no windows, sequencing, or retransmission; the application must handle loss if it cares.`,
+    ],
+    visual: {
+      type: 'diagram',
+      html: `<div class="lesson-diagram" role="img" aria-label="MTU and MSS values for common link types">
+        <div class="table-scroll"><table class="lesson-table">
+          <thead><tr><th>Link</th><th>MTU</th><th>IPv4 TCP MSS</th></tr></thead>
+          <tbody>
+            <tr><td>Standard Ethernet</td><td>1500</td><td>1460</td></tr>
+            <tr><td>PPPoE (DSL)</td><td>1492</td><td>1452</td></tr>
+            <tr><td>Jumbo frames</td><td>9000</td><td>8960</td></tr>
+          </tbody>
+        </table></div>
+        <p class="diagram-caption">MSS = MTU minus 20 bytes IP header minus 20 bytes TCP header.</p>
+      </div>`,
+    },
+    realWorldExample: `After a new IPsec VPN goes live, users can browse small pages and ping with default sizes, but copying large files stalls. A ping with the don't-fragment option and a 1472-byte payload fails, while smaller sizes pass, proving the path MTU is below 1500. Setting the VPN MSS lower fixes the stalls.`,
+    proTips: [
+      `Test MTU with ping using the DF flag: ping -f -l 1472 on Windows or ping -M do -s 1472 on Linux (1472 + 28 bytes of headers = 1500). Reduce the size until it succeeds.`,
+      `"Small packets work, large packets fail" is the classic MTU symptom.`,
+      `Jumbo frames only help if EVERY device in the path supports and is configured for them.`,
+    ],
+    examAlert: `Know MSS = MTU minus 40 for IPv4 TCP (1460 for 1500), that DF plus ICMP fragmentation-needed drives PMTUD, and that an MTU mismatch causes fragmentation or drops of large packets. Also remember that TCP window size is flow control.`,
+    beginnerMistakes: [
+      `Confusing MTU (whole packet) with MSS (TCP payload only).`,
+      `Blocking all ICMP and breaking Path MTU Discovery.`,
+      `Enabling jumbo frames on only part of a network.`,
+    ],
+    keyTerms: [
+      { term: 'Window size', def: `Amount of data a receiver allows before an acknowledgment is required; TCP flow control.` },
+      { term: 'MTU', def: `Maximum Transmission Unit, the largest packet a link can send.` },
+      { term: 'MSS', def: `Maximum Segment Size, the largest TCP payload per segment.` },
+      { term: 'Fragmentation', def: `Splitting a packet into smaller pieces to fit a link's MTU.` },
+      { term: 'DF bit', def: `Don't Fragment flag in the IP header.` },
+      { term: 'PMTUD', def: `Path MTU Discovery, finding the smallest MTU along a path.` },
+    ],
+    commands: [
+      { os: 'Windows', cmd: 'ping -f -l 1472 8.8.8.8', desc: `Sends a 1472-byte payload with the Don't Fragment flag to test for a 1500-byte path MTU.` },
+      { os: 'Linux', cmd: 'ping -M do -s 1472 8.8.8.8', desc: `Same test on Linux using the do-not-fragment option.` },
+      { os: 'Windows', cmd: 'netsh interface ipv4 show subinterfaces', desc: `Shows the MTU configured on each interface.` },
+    ],
+    knowledgeCheck: [
+      {
+        prompt: `What is the TCP MSS on a standard 1500-byte MTU IPv4 link?`,
+        options: [`1500`, `1480`, `1460`, `1400`],
+        correct: 2,
+        explanation: `1500 minus 20 bytes of IP header minus 20 bytes of TCP header equals 1460.`,
+      },
+      {
+        prompt: `Small pings succeed across a VPN, but large file transfers hang. What is the most likely cause?`,
+        options: [`DNS misconfiguration`, `An MTU/PMTUD problem`, `Expired DHCP lease`, `Wrong VLAN`],
+        correct: 1,
+        explanation: `Small packets fit within the reduced MTU while larger ones are dropped when fragmentation-needed ICMP is blocked.`,
+      },
+      {
+        prompt: `What does the TCP window size control?`,
+        options: [`IP addressing`, `Flow control: how much data can be sent before an acknowledgment`, `DNS caching`, `VLAN tagging`],
+        correct: 1,
+        explanation: `The receiver advertises a window to limit how much unacknowledged data the sender may transmit.`,
+      },
+    ],
+    miniScenario: {
+      prompt: `A ping with 1472 bytes and the DF flag fails, but 1400 bytes succeeds.`,
+      task: `What does this tell you about the path, and what would you adjust?`,
+    },
+    recap: `TCP gives reliability with sequence numbers, acknowledgments, and retransmission, and controls pace with window size and congestion control. MTU is the largest packet; MSS is the largest TCP payload (MTU minus 40). Fragmentation, the DF bit, and PMTUD explain many "small works, large fails" problems.`,
+    classroomAnswer: `"Window controls how much, MSS controls how big, and when big does not fit the path, you get fragmentation or a stalled transfer."`,
+  };
 }(window.NetReady));

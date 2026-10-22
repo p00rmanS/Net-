@@ -807,4 +807,96 @@
     classroomAnswer:
       '"Single site with few APs, I configure each one. Many APs with one policy, I manage them from a controller — and on 5 GHz, I always check 802.11h so radar doesn\'t take the network down."',
   };
+
+  NetReady.LESSONS['9-9'] = {
+    id: '9-9',
+    moduleId: 9,
+    slug: 'wireless-signal-quality-rssi-snr',
+    title: 'Wireless Signal Quality: RSSI, SNR, Interference, and Wi-Fi Troubleshooting',
+    estMinutes: 14,
+    outcomes: [
+      `Read RSSI values in dBm and say whether a signal is strong or weak.`,
+      `Explain signal-to-noise ratio (SNR) and why it matters more than signal alone.`,
+      `Tell co-channel, adjacent-channel, and non-Wi-Fi interference apart.`,
+      `Choose sensible fixes for common Wi-Fi complaints.`,
+    ],
+    whyItMatters: `Wi-Fi problems are the most common help-desk tickets, and "full bars" does not mean good Wi-Fi. This lesson gives you the numbers and vocabulary the exam uses for wireless troubleshooting.`,
+    simpleEnglish: `RSSI (Received Signal Strength Indicator) shows how strong the signal arrives, measured in dBm. The numbers are negative, and closer to zero is stronger: -50 dBm is excellent, -67 dBm is the usual minimum for voice and video, -70 dBm is okay for basic use, and -80 dBm is weak. But signal alone is not enough; you also need it to stand out above background noise. SNR (signal-to-noise ratio) is signal minus noise floor, in dB. For example, -60 dBm signal with a -95 dBm noise floor gives 35 dB SNR, which is healthy. Interference reduces SNR. Co-channel interference is multiple access points sharing the same channel, so they take turns using the air. Adjacent-channel interference comes from partially overlapping channels and is worse. Non-Wi-Fi sources like microwaves, Bluetooth, and cordless phones add noise on 2.4 GHz.`,
+    taglish: `Ang RSSI ay lakas ng signal na natatanggap mo, sa dBm. Negative ang numero, at mas malapit sa zero, mas malakas: -50 napakagaling, -67 minimum para sa video call, -80 mahina na. Pero hindi sapat ang malakas lang — kailangan din na mas mataas ito kaysa sa ingay sa paligid. Ang SNR ay signal minus noise. Halimbawa -60 signal at -95 noise = 35 dB SNR, magandang kondisyon. Ang co-channel interference ay mga AP na nagsasalitan sa iisang channel; ang adjacent-channel ay mas masama dahil nag-o-overlap. Ang microwave oven, Bluetooth, at cordless phone ay nagdadagdag ng ingay sa 2.4 GHz.`,
+    analogy: {
+      title: 'Kausap sa maingay na handaan',
+      text: `Ang RSSI ay lakas ng boses ng kausap mo. Ang noise floor ay ingay ng handaan. Kahit malakas ang boses niya, kung mas malakas ang videoke, hindi mo maiintindihan — yan ang mababang SNR. Ang co-channel interference ay maraming magkakausap sa iisang mesa na kailangang maghintayan ng turn.`,
+    },
+    howItWorks: [
+      `RSSI scale (approximate): -30 dBm excellent (right next to the AP), -50 excellent, -60 good, -67 minimum for VoIP and video, -70 fair, -80 poor, -90 unusable. Each 3 dB drop roughly halves the power.`,
+      `Noise floor: the background RF energy, typically about -90 to -95 dBm in a clean environment. SNR = signal (dBm) minus noise floor (dBm). Rough guide: 40+ dB excellent, 25 to 40 dB good, 15 to 25 dB marginal, under 15 dB poor.`,
+      `Attenuation: signal weakens with distance and with materials. Metal, concrete, brick, mirrors, and water (including fish tanks and people) absorb or reflect it most; drywall and glass much less. Higher frequencies (5 and 6 GHz) attenuate faster than 2.4 GHz.`,
+      `Co-channel interference (CCI): several APs on the same channel share airtime. Correct fix is better channel planning, not just more power.`,
+      `Adjacent-channel interference (ACI): overlapping channels corrupt each other. On 2.4 GHz only channels 1, 6, and 11 do not overlap in the US, so use only those.`,
+      `Non-Wi-Fi interference: microwaves, Bluetooth, cordless phones, baby monitors, and some wireless cameras on 2.4 GHz. A spectrum analyzer finds them; a Wi-Fi analyzer only sees Wi-Fi networks.`,
+      `Other symptoms: hidden node problem (two clients cannot hear each other but both reach the AP, causing collisions), sticky clients that stay on a distant AP instead of roaming, and capacity problems when too many clients share one AP.`,
+      `Fixes: move to 5 or 6 GHz, use band steering, set non-overlapping channels, lower AP transmit power on dense layouts, add APs for capacity, adjust placement away from metal and water, and raise minimum data rates so distant, slow clients stop hogging airtime.`,
+    ],
+    visual: {
+      type: 'diagram',
+      html: `<div class="lesson-diagram" role="img" aria-label="Table of RSSI ranges and what they mean">
+        <div class="table-scroll"><table class="lesson-table">
+          <thead><tr><th>RSSI</th><th>Quality</th><th>Good for</th></tr></thead>
+          <tbody>
+            <tr><td>-30 to -50 dBm</td><td>Excellent</td><td>Everything</td></tr>
+            <tr><td>-50 to -67 dBm</td><td>Good</td><td>VoIP, video, streaming</td></tr>
+            <tr><td>-67 to -70 dBm</td><td>Fair</td><td>Web, email</td></tr>
+            <tr><td>-70 to -80 dBm</td><td>Weak</td><td>Basic, unreliable</td></tr>
+            <tr><td>Below -80 dBm</td><td>Poor</td><td>Drops and retries</td></tr>
+          </tbody>
+        </table></div>
+      </div>`,
+    },
+    realWorldExample: `A clinic complains of dropped video calls in the waiting room even though laptops show full bars. A survey shows -58 dBm signal but a -78 dBm noise floor, an SNR of only 20 dB. A cordless phone base and a microwave in the staff kitchen are flooding 2.4 GHz. Moving video devices to 5 GHz fixes it.`,
+    proTips: [
+      `"Full bars but slow" usually points to interference or congestion (low SNR or high channel utilization), not weak signal.`,
+      `A Wi-Fi analyzer shows networks and channels; a spectrum analyzer shows ALL RF energy, including non-Wi-Fi interference.`,
+      `More AP transmit power is not always better, because clients can hear the AP but the AP cannot hear their weaker replies.`,
+    ],
+    examAlert: `Expect questions such as "which value indicates the strongest signal?" (the one closest to zero, so -45 beats -75) and "which channels are non-overlapping on 2.4 GHz?" (1, 6, 11). SNR matters more than signal strength alone.`,
+    beginnerMistakes: [
+      `Thinking -80 dBm is stronger than -50 dBm because 80 is bigger.`,
+      `Fixing slow Wi-Fi only by buying a stronger AP rather than checking channels and interference.`,
+      `Putting APs on channels 3, 4, or 8 on 2.4 GHz and creating overlap.`,
+    ],
+    keyTerms: [
+      { term: 'RSSI', def: `Measure of received signal strength, expressed in dBm.` },
+      { term: 'Noise floor', def: `Background RF energy level that limits usable signal.` },
+      { term: 'SNR', def: `Signal-to-noise ratio, signal minus noise floor in dB.` },
+      { term: 'Co-channel interference', def: `Multiple APs sharing the same channel.` },
+      { term: 'Adjacent-channel interference', def: `Overlapping channels corrupting each other.` },
+      { term: 'Attenuation', def: `Loss of signal strength through distance or obstacles.` },
+    ],
+    knowledgeCheck: [
+      {
+        prompt: `Which RSSI reading represents the strongest signal?`,
+        options: [`-85 dBm`, `-70 dBm`, `-55 dBm`, `-95 dBm`],
+        correct: 2,
+        explanation: `Values closer to zero are stronger, so -55 dBm is the best of these.`,
+      },
+      {
+        prompt: `A client reports -55 dBm signal and a -90 dBm noise floor. What is the SNR?`,
+        options: [`145 dB`, `35 dB`, `-35 dB`, `55 dB`],
+        correct: 1,
+        explanation: `SNR is signal minus noise floor: -55 minus -90 equals 35 dB.`,
+      },
+      {
+        prompt: `Which 2.4 GHz channel set avoids overlap in the United States?`,
+        options: [`1, 2, 3`, `1, 6, 11`, `2, 7, 12`, `3, 8, 13`],
+        correct: 1,
+        explanation: `Channels 1, 6, and 11 are the three non-overlapping 2.4 GHz channels in the US.`,
+      },
+    ],
+    miniScenario: {
+      prompt: `Users in a break room get a good signal indicator but constant video call stutter, mostly around lunch time when the microwave runs.`,
+      task: `Name the likely interference type and a quick fix.`,
+    },
+    recap: `RSSI is signal strength in negative dBm (closer to zero is stronger); SNR compares it to the noise floor and is what really predicts quality. Co-channel, adjacent-channel, and non-Wi-Fi interference degrade SNR; fix with channel planning, 5/6 GHz, placement, and capacity changes.`,
+    classroomAnswer: `"Bars measure signal, not quality. Check the SNR and what else is on the channel before blaming the AP."`,
+  };
 }(window.NetReady));

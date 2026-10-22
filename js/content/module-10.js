@@ -819,4 +819,100 @@
     classroomAnswer:
       '"For a modern data center, I design spine-leaf for predictable east-west paths, and I always separate the north-south edge traffic from the internal server-to-server traffic when I plan capacity."',
   };
+
+  NetReady.LESSONS['10-9'] = {
+    id: '10-9',
+    moduleId: 10,
+    slug: 'connecting-to-the-cloud',
+    title: 'Connecting to the Cloud: VPN, Private Links, and Hybrid Architectures',
+    estMinutes: 13,
+    outcomes: [
+      `Compare internet-based VPN connections with dedicated private connections to a cloud provider.`,
+      `Identify cloud gateway types and what each does.`,
+      `Define hybrid cloud and multi-cloud.`,
+      `Recognize common cloud connectivity problems such as overlapping address space.`,
+    ],
+    whyItMatters: `Almost every company now runs part of its network in a public cloud. The Network+ exam expects you to choose the right way to connect an office or data center to the cloud and to understand how cloud networks talk to each other.`,
+    simpleEnglish: `There are three common ways to reach cloud resources. First, over the public internet, which is cheap and easy but has variable performance. Second, a site-to-site VPN, an encrypted IPsec tunnel over the internet to the provider's VPN gateway. Third, a dedicated private connection (products such as AWS Direct Connect or Azure ExpressRoute) that is a circuit through a carrier straight into the provider, with predictable latency and bandwidth. Private links are not encrypted by default, so security-minded organizations add a VPN or link encryption on top. Inside the cloud, gateways connect networks: an internet gateway for public access, a NAT gateway for outbound-only access from private subnets, a VPN gateway for tunnels, and a transit gateway to hub many networks together. A hybrid cloud mixes on-premises and cloud; multi-cloud uses more than one provider.`,
+    taglish: `May tatlong paraan para makarating sa cloud: (1) diretso sa internet — mura pero hindi predictable ang bilis; (2) site-to-site VPN — naka-encrypt na tunnel sa ibabaw ng internet; (3) dedicated private link — parang sariling kalsada papunta sa cloud provider, mas stable ang latency at bandwidth pero mas mahal at hindi encrypted bilang default. Sa loob ng cloud, ang internet gateway ay pinto papunta sa internet, ang NAT gateway ay pinto palabas lang para sa private subnet, ang VPN gateway ang dulo ng tunnel, at ang transit gateway ang sentrong hub ng maraming network. Ang hybrid ay kombinasyon ng sariling data center at cloud; ang multi-cloud ay higit sa isang provider.`,
+    analogy: {
+      title: 'Kalsada, tunnel, at private expressway',
+      text: `Ang public internet ay pambansang kalsada: libre pero minsan trapik. Ang VPN ay armored na sasakyan na dumadaan sa parehong kalsada. Ang dedicated private link ay sariling expressway na diretso sa gusali ng provider — walang trapik, pero may toll at kailangan mong ikandado ang sasakyan mo kung gusto mo ng dagdag na seguridad.`,
+    },
+    howItWorks: [
+      `Internet access: simplest and cheapest; subject to congestion and no performance guarantee. Services are reached by public IP, so security relies on TLS and access controls.`,
+      `Site-to-site VPN: IPsec tunnel from your edge router or firewall to the cloud VPN gateway. Quick to set up, encrypted, but performance depends on the internet path.`,
+      `Dedicated private connection: a layer 2/3 circuit through a colocation facility or carrier directly to the cloud provider. Benefits: consistent latency, higher throughput, and lower data egress costs. It is NOT encrypted by default.`,
+      `Client VPN or remote access VPN: individual users connect to the cloud network, often using SSL/TLS or IPsec clients.`,
+      `Internet gateway: lets resources with public IPs reach and be reached from the internet. NAT gateway: lets private-subnet instances initiate outbound connections only. VPN gateway: terminates VPN tunnels. Transit gateway: a hub that connects many VPCs and on-premises links.`,
+      `VPC peering: a direct private link between two virtual networks. Address ranges must NOT overlap, and peering is generally not transitive.`,
+      `Private endpoints / private links: let you reach a cloud service (such as storage) using a private IP address inside your network instead of its public address.`,
+      `Hybrid cloud: on-premises plus public cloud working together. Multi-cloud: using two or more public cloud providers. Both increase the importance of consistent IP planning, identity, and monitoring.`,
+    ],
+    visual: {
+      type: 'diagram',
+      html: `<div class="lesson-diagram" role="img" aria-label="Table comparing cloud connection methods">
+        <div class="table-scroll"><table class="lesson-table">
+          <thead><tr><th>Method</th><th>Path</th><th>Encrypted by default</th><th>Performance</th></tr></thead>
+          <tbody>
+            <tr><td>Internet</td><td>Public internet</td><td>Only via TLS</td><td>Variable</td></tr>
+            <tr><td>Site-to-site VPN</td><td>IPsec over internet</td><td>Yes</td><td>Variable</td></tr>
+            <tr><td>Dedicated private link</td><td>Carrier circuit</td><td>No</td><td>Predictable, high</td></tr>
+            <tr><td>Client VPN</td><td>User to cloud over internet</td><td>Yes</td><td>Variable</td></tr>
+          </tbody>
+        </table></div>
+      </div>`,
+    },
+    realWorldExample: `A company moves its database to the cloud but keeps the application servers on-premises. Queries across the internet VPN feel slow because latency varies throughout the day. They order a dedicated private connection for steady latency and keep the VPN as an encrypted backup path, a common hybrid design.`,
+    proTips: [
+      `"Consistent latency, not encrypted by default" is the signature of a dedicated private connection.`,
+      `Plan non-overlapping IP ranges before connecting any two networks. Overlap is a classic reason peering and VPN routes fail.`,
+      `A private subnet needs a NAT gateway (not an internet gateway) when its servers must download updates but must not accept inbound connections from the internet.`,
+    ],
+    examAlert: `Be ready to choose between VPN and a dedicated private connection based on requirements: lowest cost and quick = VPN, predictable performance = private link, outbound only for private subnets = NAT gateway, many VPCs to one hub = transit gateway.`,
+    beginnerMistakes: [
+      `Assuming a private circuit is automatically encrypted.`,
+      `Using overlapping CIDR blocks in on-premises and cloud networks.`,
+      `Mixing up an internet gateway (two-way public access) with a NAT gateway (outbound only).`,
+    ],
+    keyTerms: [
+      { term: 'Site-to-site VPN', def: `Encrypted tunnel between your network and the cloud over the internet.` },
+      { term: 'Dedicated private connection', def: `Provider circuit directly into a cloud network with predictable performance.` },
+      { term: 'Transit gateway', def: `Hub that interconnects many virtual networks and on-premises links.` },
+      { term: 'NAT gateway', def: `Allows private resources outbound internet access without inbound exposure.` },
+      { term: 'Hybrid cloud', def: `Combination of on-premises infrastructure and public cloud.` },
+      { term: 'Multi-cloud', def: `Use of multiple public cloud providers.` },
+    ],
+    knowledgeCheck: [
+      {
+        prompt: `A company needs predictable latency and high bandwidth to a cloud provider. Which option fits best?`,
+        options: [`Client VPN`, `Dedicated private connection`, `Public internet only`, `Wi-Fi hotspot`],
+        correct: 1,
+        explanation: `Dedicated private links bypass the public internet for consistent performance.`,
+      },
+      {
+        prompt: `Servers in a private subnet must download patches but must not be reachable from the internet. What should be used?`,
+        options: [`Internet gateway with public IPs`, `NAT gateway`, `Transit gateway`, `Open security group`],
+        correct: 1,
+        explanation: `A NAT gateway permits outbound-initiated connections only.`,
+      },
+      {
+        prompt: `Two networks with the same 10.0.0.0/16 range need to be connected. What is the problem?`,
+        options: [
+          `The VPN will use too much bandwidth.`,
+          `Overlapping address space makes routing ambiguous.`,
+          `TLS will not work.`,
+          `Multicast will be blocked.`,
+        ],
+        correct: 1,
+        explanation: `Overlapping CIDR blocks cannot be routed unambiguously between networks.`,
+      },
+    ],
+    miniScenario: {
+      prompt: `A branch office needs a cheap, encrypted connection to its cloud network by next week.`,
+      task: `Which connection method would you choose, and why not a dedicated private link?`,
+    },
+    recap: `Reach the cloud over the internet, an IPsec site-to-site VPN, or a dedicated private link. Private links give predictable performance but are not encrypted by default. Gateways (internet, NAT, VPN, transit) control paths inside the cloud, and hybrid or multi-cloud designs need non-overlapping IP planning.`,
+    classroomAnswer: `"VPN is quick and encrypted but rides the internet; a private link is steady but costs more and needs its own encryption."`,
+  };
 }(window.NetReady));

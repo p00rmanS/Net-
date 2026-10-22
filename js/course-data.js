@@ -84,7 +84,7 @@
       title: 'Ports, Protocols, and Network Services',
       blurb: 'DNS, DHCP, HTTP/S, at ang mga "language" ng internet.',
       status: 'available',
-      lessonIds: ['6-1', '6-2', '6-3', '6-4', '6-5', '6-6', '6-7', '6-8', '6-9'],
+      lessonIds: ['6-1', '6-2', '6-3', '6-4', '6-5', '6-6', '6-7', '6-8', '6-9', '6-10'],
     },
     {
       id: 7,
@@ -108,7 +108,7 @@
       title: 'Wireless Networking',
       blurb: 'Wi-Fi standards, channels, at pagpaplano ng coverage.',
       status: 'available',
-      lessonIds: ['9-1', '9-2', '9-3', '9-4', '9-5', '9-6', '9-7', '9-8'],
+      lessonIds: ['9-1', '9-2', '9-3', '9-4', '9-5', '9-6', '9-7', '9-8', '9-9'],
     },
     {
       id: 10,
@@ -116,7 +116,7 @@
       title: 'Cloud, Virtualization, and Modern Architecture',
       blurb: 'IaaS/PaaS/SaaS, SDN, at ang "network sa cloud".',
       status: 'available',
-      lessonIds: ['10-1', '10-2', '10-3', '10-4', '10-5', '10-6', '10-7', '10-8'],
+      lessonIds: ['10-1', '10-2', '10-3', '10-4', '10-5', '10-6', '10-7', '10-8', '10-9'],
     },
     {
       id: 11,
@@ -132,7 +132,7 @@
       title: 'Network Security',
       blurb: 'CIA triad, AAA, firewalls, at karaniwang atake.',
       status: 'available',
-      lessonIds: ['12-1', '12-2', '12-3', '12-4', '12-5', '12-6', '12-7', '12-8'],
+      lessonIds: ['12-1', '12-2', '12-3', '12-4', '12-5', '12-6', '12-7', '12-8', '12-9', '12-10'],
     },
     {
       id: 13,
