@@ -896,4 +896,96 @@
     recap: `Use floating static routes for backup, ECMP to share equal paths, VRF for isolated routing tables, BFD for fast failure detection, OSPF areas to scale, and filtered redistribution to join protocols.`,
     classroom: `"Mataas ang AD ng backup para hindi ito piliin hangga't hindi kailangan."`,
   });
+
+  NetReady.LESSONS['8-10'] = NetReady.lesson(8, {
+    id: '8-10',
+    slug: 'bgp-in-practice-autonomous-systems',
+    title: 'BGP in Practice: Autonomous Systems, eBGP vs. iBGP, Peering, Transit, and Path Attributes',
+    minutes: 13,
+    outcomes: [
+      `Explain what an autonomous system (AS) and an AS number are.`,
+      `Differentiate eBGP from iBGP and peering from transit.`,
+      `Name the main BGP path attributes and explain how BGP chooses a path.`,
+      `Describe a BGP route hijack and a defense.`,
+    ],
+    why: `BGP is the protocol that glues the internet together. The exam describes it as the exterior gateway protocol and asks where it is used and how it differs from OSPF and EIGRP.`,
+    simple: `An autonomous system is a network (or group of networks) under one administrative control that presents a single routing policy to the internet, such as an ISP or a large company. Each AS has an AS number (ASN). The Border Gateway Protocol (BGP) exchanges routes between autonomous systems. BGP between different ASes is eBGP; BGP between routers inside the same AS is iBGP. BGP runs over TCP port 179 between manually configured neighbors. It is a path-vector protocol: it chooses a route using attributes such as the AS path (the list of ASes the route passes through) and local preference, rather than speed. A customer that pays an ISP for internet reachability buys transit; two networks that exchange traffic for their own customers, often for free, are peering.`,
+    taglish: `Ang autonomous system (AS) ay network na iisa ang namamahala at iisa ang routing policy sa internet, gaya ng ISP. Bawat AS ay may AS number (ASN). Ang BGP ang nagpapalitan ng ruta sa pagitan ng mga AS. Ang BGP sa magkaibang AS ay eBGP; sa loob ng iisang AS ay iBGP. Tumatakbo ito sa TCP port 179 sa pagitan ng mga neighbor na sinadyang i-configure. Path-vector ito: pinipili ang ruta batay sa attributes gaya ng AS path at local preference, hindi sa bilis. Ang customer na nagbabayad sa ISP ay bumibili ng transit; ang dalawang network na nagpapalitan ng traffic para sa sarili nilang customer (madalas libre) ay peering.`,
+    analogy: {
+      title: 'Mga bansa at kasunduan sa hangganan',
+      text: `Ang bawat AS ay parang bansa na may sariling batas. Ang BGP ay diplomatikong usapan ng mga bansa kung aling kalsada ang dadaanan papunta sa ibang bansa. Ang AS path ay listahan ng mga bansang dadaanan; mas kaunti ang bansang tatawirin, mas gusto. Ang transit ay pagbabayad para dumaan sa teritoryo ng iba; ang peering ay palitan ng pabor.`,
+    },
+    steps: [
+      `ASN: 16-bit (1 to 65535) and 32-bit numbers. The private ASN range is 64512 to 65534 (and 4200000000 to 4294967294), used inside organizations or with a provider that translates them. Public ASNs are assigned by the regional internet registries.`,
+      `eBGP: sessions between different ASes, usually between directly connected edge routers. Administrative distance 20. iBGP: sessions between routers in the same AS so that they all learn external routes. Administrative distance 200.`,
+      `Neighbors: BGP does not discover neighbors; each peer is configured manually, and a TCP session on port 179 carries OPEN, UPDATE, KEEPALIVE, and NOTIFICATION messages.`,
+      `Transit versus peering: transit means a customer pays a provider to carry traffic to the whole internet. Peering is a mutual agreement to exchange traffic for each other's customers only, often at an internet exchange point (IXP).`,
+      `Path attributes include AS_PATH (the ASes traversed; shorter is preferred, and it also prevents loops because a router rejects routes containing its own ASN), LOCAL_PREF (preference inside an AS; higher is better), MED (a hint to a neighbor AS about which entry point to use; lower is better), and NEXT_HOP.`,
+      `Path selection (simplified): highest local preference, then shortest AS path, then lowest origin type, then lowest MED, then prefer eBGP over iBGP, then lowest IGP metric to the next hop.`,
+      `Why BGP and not OSPF on the internet: BGP scales to hundreds of thousands of prefixes, supports routing policy (business relationships), and hides internal details between organizations. IGPs such as OSPF and EIGRP are for inside one AS.`,
+      `Typical enterprise use: multi-homing to two ISPs with eBGP for redundancy and traffic engineering, or a BGP-based fabric inside a data center.`,
+      `Risks: a BGP hijack happens when an AS wrongly (or maliciously) announces prefixes it does not own, pulling traffic toward itself. Defenses include prefix filtering, maximum-prefix limits, and RPKI route origin validation.`,
+    ],
+    table: {
+      label: 'Table comparing eBGP and iBGP',
+      head: ['', 'eBGP', 'iBGP'],
+      rows: [
+        ['Between', 'Different autonomous systems', 'Routers in the same AS'],
+        ['Administrative distance', '20', '200'],
+        ['Typical use', 'ISP and customer edge', 'Spread external routes inside the AS'],
+        ['Transport', 'TCP 179', 'TCP 179'],
+      ],
+      caption: 'BGP is the exterior gateway protocol: policy and scale, not speed.',
+    },
+    example: `A hospital buys internet from two ISPs. Using eBGP with its own public ASN, it advertises its address block to both, so if one ISP fails the other carries all traffic without renumbering anything. A neighbor limit and prefix filters prevent it from accidentally becoming a transit path between the two ISPs.`,
+    tips: [
+      `"Between autonomous systems" or "the internet" = BGP. "Inside one organization" = OSPF or EIGRP.`,
+      `BGP prefers policy and AS path length, not bandwidth.`,
+      `Always filter what you accept and advertise on BGP sessions.`,
+    ],
+    exam: `Remember: BGP is the exterior gateway protocol on TCP 179, a path-vector protocol using ASNs. eBGP between ASes, iBGP within an AS. Know peering versus transit and that AS path length matters.`,
+    mistakes: [
+      `Thinking BGP chooses the fastest link by bandwidth.`,
+      `Confusing OSPF areas with autonomous systems.`,
+      `Advertising prefixes without filters.`,
+    ],
+    terms: [
+      { term: 'Autonomous system (AS)', def: `A network under one administrative control with one routing policy.` },
+      { term: 'ASN', def: `AS number that identifies an autonomous system.` },
+      { term: 'eBGP / iBGP', def: `BGP between different ASes / within one AS.` },
+      { term: 'Transit', def: `Paid service that carries a customer's traffic to the rest of the internet.` },
+      { term: 'Peering', def: `Agreement to exchange traffic between networks for their own customers.` },
+      { term: 'AS path', def: `Ordered list of ASes a route has traversed.` },
+    ],
+    commands: [
+      { os: 'Cisco IOS', cmd: 'show ip bgp summary', desc: `Shows BGP neighbors, their state, and prefixes received.` },
+      { os: 'Cisco IOS', cmd: 'show ip bgp', desc: `Displays the BGP table with AS paths and attributes.` },
+    ],
+    checks: [
+      {
+        prompt: `Which routing protocol is used to exchange routes between autonomous systems on the internet?`,
+        options: [`OSPF`, `RIP`, `BGP`, `EIGRP`],
+        correct: 2,
+        explanation: `BGP is the exterior gateway protocol that connects autonomous systems.`,
+      },
+      {
+        prompt: `What TCP port does BGP use?`,
+        options: [`179`, `161`, `443`, `520`],
+        correct: 0,
+        explanation: `BGP peers establish a TCP session on port 179.`,
+      },
+      {
+        prompt: `Which BGP attribute lists the autonomous systems a route has passed through?`,
+        options: [`MED`, `LOCAL_PREF`, `AS_PATH`, `NEXT_HOP`],
+        correct: 2,
+        explanation: `AS_PATH records the ASes traversed, and shorter paths are preferred.`,
+      },
+    ],
+    mini: {
+      prompt: `A company with its own ASN connects to two ISPs and wants to keep service if one fails.`,
+      task: `Name the protocol and term for this design.`,
+    },
+    recap: `BGP connects autonomous systems over TCP 179. eBGP runs between ASes (AD 20), iBGP inside one (AD 200). It is a path-vector protocol selecting by policy and AS path, with transit and peering describing business relationships and filters guarding against hijacks.`,
+    classroom: `"OSPF sa loob ng bahay, BGP sa pagitan ng mga bansa."`,
+  });
 }(window.NetReady));

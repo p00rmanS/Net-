@@ -917,38 +917,58 @@
   // VIEW: MOCK EXAMS
   // ============================================================
   const MOCK_EXAM_COUNT = 3;
+  const MOCK_EXAM_QUESTIONS = 90; // same length as the real N10-009 maximum
+  const MOCK_EXAM_MINUTES = 90;
 
   /**
-   * Builds several mock exams from the SAME question pool by splitting each
-   * domain's questions round-robin across N exams. This keeps every exam's
-   * domain proportions close to the real distribution (rather than one
-   * giant exam, or exams segregated by domain, which would defeat the
-   * point of a "mixed" mock exam). The split is deterministic — driven
-   * entirely by stable array order — so the same exam number always draws
-   * the same set, letting a learner meaningfully compare attempts over time.
+   * Splits each domain's questions round-robin across the mock exams (so the
+   * exams never share a question), then samples MOCK_EXAM_QUESTIONS from each
+   * exam's slice using the official domain weights (largest-remainder rounding
+   * so the quotas always add up exactly). Within a domain the questions are
+   * picked at even intervals, so every exam spans early and late modules
+   * instead of clustering at the start of the bank. Everything is
+   * deterministic: the same exam number always contains the same questions,
+   * letting a learner compare attempts over time.
    */
   function buildMockExamDefinitions() {
     const all = NetReady.Quiz.allQuestions();
+    const domains = NetReady.EXAM_META.domains;
     const byDomain = {};
+    domains.forEach((d) => { byDomain[d.id] = []; });
     all.forEach((q) => {
-      const d = q.domain || 'uncategorized';
-      (byDomain[d] = byDomain[d] || []).push(q.id);
+      if (byDomain[q.domain]) byDomain[q.domain].push(q.id);
     });
-    const slices = Array.from({ length: MOCK_EXAM_COUNT }, () => []);
-    Object.keys(byDomain).forEach((domainId) => {
-      byDomain[domainId].forEach((qid, i) => {
-        slices[i % MOCK_EXAM_COUNT].push(qid);
+
+    // Per-domain question quotas that add up to exactly MOCK_EXAM_QUESTIONS.
+    const totalWeight = domains.reduce((sum, d) => sum + d.weight, 0);
+    const raw = domains.map((d) => (MOCK_EXAM_QUESTIONS * d.weight) / totalWeight);
+    const quota = raw.map((r) => Math.floor(r));
+    let remaining = MOCK_EXAM_QUESTIONS - quota.reduce((a, b) => a + b, 0);
+    raw
+      .map((r, i) => ({ i, frac: r - Math.floor(r) }))
+      .sort((a, b) => b.frac - a.frac)
+      .forEach((entry) => {
+        if (remaining > 0) { quota[entry.i] += 1; remaining -= 1; }
+      });
+
+    const exams = Array.from({ length: MOCK_EXAM_COUNT }, () => []);
+    domains.forEach((d, di) => {
+      const slices = Array.from({ length: MOCK_EXAM_COUNT }, () => []);
+      byDomain[d.id].forEach((qid, i) => slices[i % MOCK_EXAM_COUNT].push(qid));
+      slices.forEach((slice, ei) => {
+        const take = Math.min(quota[di], slice.length);
+        for (let k = 0; k < take; k += 1) {
+          exams[ei].push(slice[Math.floor(((k + 0.5) * slice.length) / take)]);
+        }
       });
     });
-    const moduleList = NetReady.availableModules()
-      .map((m) => `Module ${m.id}`)
-      .join(', ');
-    return slices.map((ids, i) => ({
+
+    return exams.map((ids, i) => ({
       id: `mock-${i + 1}`,
       title: `NetReady+ Mock Exam ${i + 1}`,
-      description: `A mixed-domain mock exam drawing a distinct third of the available question bank (${moduleList}), split so each exam's domain mix stays close to the real N10-009 proportions. Grows automatically as more content ships — not yet a fixed 90-question, full exam-length test.`,
+      description: `A ${ids.length}-question mixed-domain mock exam weighted to the real N10-009 domain percentages (Concepts 23%, Implementation 20%, Operations 19%, Security 14%, Troubleshooting 24%). Questions never repeat between the three mock exams.`,
       questionIds: ids,
-      timeLimitSeconds: Math.max(600, ids.length * 60),
+      timeLimitSeconds: MOCK_EXAM_MINUTES * 60,
     }));
   }
 
@@ -956,7 +976,7 @@
     setActiveNav('mock-exams');
     const defs = buildMockExamDefinitions();
     setView(`
-      <div class="page-header"><h1>Mock Exams</h1><p class="text-muted">Three separate mock exams, each drawing a distinct, domain-weighted third of the question bank — attempt them in any order, or all three for full coverage.</p></div>
+      <div class="page-header"><h1>Mock Exams</h1><p class="text-muted">Three separate 90-question, 90-minute mock exams, each weighted to the real exam's domain percentages and sharing no questions with the others. Attempt them in any order, or all three for full coverage.</p></div>
       ${defs
         .map((def) => {
           const history = NetReady.Progress.state.mockExamAttempts.filter((a) => a.examId === def.id);

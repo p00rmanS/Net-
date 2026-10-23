@@ -1192,4 +1192,95 @@
     recap: `Certificates tie keys to identities through a chain of trust ending at a trusted root. Self-signed, expired, mismatched, and revoked certificates cause warnings. Manage keys carefully and encrypt data in transit and at rest.`,
     classroom: `"Hindi pinaniniwalaan ang ID na ikaw mismo ang gumawa — kailangan ng CA."`,
   });
+
+  NetReady.LESSONS['12-13'] = NetReady.lesson(12, {
+    id: '12-13',
+    slug: 'ics-scada-and-ot-network-security',
+    title: 'Industrial Control Systems: SCADA, PLCs, IIoT, and OT Network Security',
+    minutes: 13,
+    outcomes: [
+      `Define ICS, SCADA, PLC, HMI, RTU, and IIoT.`,
+      `Explain why OT networks prioritize availability and safety over confidentiality.`,
+      `Describe segmentation models and controls that protect OT from IT and the internet.`,
+    ],
+    why: `Factories, utilities, and buildings run on operational technology. The exam includes ICS and SCADA in the security concepts and segmentation objectives, with questions about how to isolate them.`,
+    simple: `Operational technology (OT) controls physical processes: factory lines, water treatment, power grids, and building systems. An industrial control system (ICS) is the collection of equipment that does this. SCADA (supervisory control and data acquisition) gathers data from remote sites and lets operators supervise them. A PLC (programmable logic controller) is a rugged computer that runs control logic for machinery. An HMI (human-machine interface) is the screen operators use. An RTU (remote terminal unit) collects data at remote locations. IIoT (industrial IoT) adds networked sensors and devices to industrial processes. In OT, uptime and safety matter most: a security patch that reboots a controller may be unacceptable. Many industrial protocols (Modbus, DNP3) were designed without authentication. The usual protection is strict segmentation from IT and the internet, monitoring, and controlled remote access.`,
+    taglish: `Ang OT ay kumokontrol sa pisikal na proseso: linya ng pabrika, water treatment, power grid, at building systems. Ang ICS ang kabuuang kagamitan para dito. Ang SCADA ay nangangalap ng data mula sa malalayong site at nagpapahintulot sa operator na mag-supervise. Ang PLC ay matibay na computer na nagpapatakbo ng control logic ng makina. Ang HMI ay screen ng operator. Ang RTU ay nangongolekta ng data sa remote site. Ang IIoT ay mga networked na sensor sa industriya. Sa OT, mas mahalaga ang uptime at kaligtasan: ang patch na nagre-reboot ng controller ay maaaring hindi pwede. Maraming industrial protocol (Modbus, DNP3) ang walang authentication, kaya kailangan ang mahigpit na segmentation, monitoring, at kontroladong remote access.`,
+    analogy: {
+      title: 'Pagpapatakbo ng planta ng tubig',
+      text: `Isipin ang waterworks ng bayan. Ang PLC ang operator ng bomba na sumusunod sa programa. Ang HMI ay control panel na tinitingnan ng tao. Kung hihinto ang bomba para sa "update", mawawalan ng tubig ang bayan, kaya hindi puwedeng basta-basta mag-reboot gaya ng office computer.`,
+    },
+    steps: [
+      `Components: sensors and actuators (the physical layer), PLCs and RTUs (controllers), HMIs (operator displays), SCADA servers (supervision and data collection), and a historian (long-term process data). Together they form an ICS.`,
+      `IT versus OT priorities: IT emphasizes the CIA triad with confidentiality first. OT emphasizes availability, integrity, and safety first. Equipment may run for 20 to 30 years on legacy operating systems that cannot be patched easily.`,
+      `Industrial protocols: Modbus (TCP 502) and DNP3 (TCP/UDP 20000) are common and often unauthenticated and unencrypted; BACnet (UDP 47808) is used in building automation; OPC UA is a newer protocol with built-in security.`,
+      `Purdue model: a reference architecture that layers the environment. Level 0 is the physical process, 1 the controllers, 2 the local supervisory systems (HMIs), 3 site operations, and 4 and 5 enterprise IT and the internet. Traffic should flow only between adjacent levels through controlled points, and the zone between IT and OT is often called an industrial DMZ.`,
+      `Air gap: no connection at all between OT and other networks. True air gaps are rare today; USB drives and laptops can still bridge them. A data diode (unidirectional gateway) allows data to flow out only.`,
+      `Segmentation: separate OT from IT with firewalls and VLANs, restrict communication to required protocols and ports, and use separate zones for different production cells.`,
+      `Secure remote access: use a jump host in the DMZ with MFA, session logging, and time-limited vendor access instead of open remote desktop to controllers.`,
+      `Monitoring: passive OT network monitoring (via taps or SPAN) learns normal industrial traffic and alerts on unusual commands, without disturbing sensitive devices. Avoid aggressive scanning on fragile equipment.`,
+      `Other controls: asset inventory, change control, physical security of cabinets, application allow-listing, backups of PLC logic, and incident response plans that include safety.`,
+      `IIoT and smart buildings: place cameras, sensors, and HVAC controllers on separate VLANs or networks with minimal access, change default credentials, and plan for firmware updates.`,
+    ],
+    table: {
+      label: 'Table of ICS and OT terms',
+      head: ['Term', 'Meaning'],
+      rows: [
+        ['PLC', 'Rugged controller that runs machine control logic'],
+        ['HMI', 'Operator display and control interface'],
+        ['RTU', 'Remote data collector and controller'],
+        ['SCADA', 'Supervision and data acquisition across sites'],
+        ['Historian', 'Database of process data over time'],
+        ['IIoT', 'Networked sensors and devices in industry'],
+        ['Data diode', 'One-way gateway that allows data out only'],
+      ],
+      caption: 'Availability and safety first; isolate and monitor.',
+    },
+    example: `A water utility's treatment plant used to allow a vendor to connect to a PLC over an open remote desktop. After an audit, the utility puts the plant in its own zone, gives the vendor a jump host with MFA and session recording in an industrial DMZ, blocks all other inbound traffic, and installs passive monitoring that alerts on unexpected Modbus write commands.`,
+    tips: [
+      `OT question hints: "uptime", "safety", "legacy PLCs" mean segmentation and compensating controls, not rapid patching.`,
+      `A flat network joining office PCs and PLCs is the classic mistake.`,
+      `Passive monitoring is safer than active scanning on fragile industrial gear.`,
+    ],
+    exam: `Know ICS, SCADA, PLC, HMI, RTU, and IIoT; that OT prioritizes availability and safety; and that segmentation, jump hosts, and monitoring protect OT networks. Be able to place IoT and OT devices on separate VLANs.`,
+    mistakes: [
+      `Treating OT like office IT and patching or scanning aggressively.`,
+      `Allowing direct internet or vendor access to controllers.`,
+      `Assuming an old air gap is still intact.`,
+    ],
+    terms: [
+      { term: 'ICS', def: `Industrial control system that automates and supervises physical processes.` },
+      { term: 'SCADA', def: `System for supervisory control and data acquisition across distributed sites.` },
+      { term: 'PLC', def: `Programmable logic controller running control logic for equipment.` },
+      { term: 'HMI', def: `Human-machine interface used by operators.` },
+      { term: 'OT', def: `Operational technology controlling physical devices and processes.` },
+      { term: 'Industrial DMZ', def: `Buffer zone between enterprise IT and the OT network.` },
+    ],
+    checks: [
+      {
+        prompt: `Which priority typically ranks highest in an OT environment such as a power plant?`,
+        options: [`Availability and safety`, `Marketing reach`, `Cloud migration`, `Wi-Fi speed`],
+        correct: 0,
+        explanation: `OT prioritizes keeping processes running safely over confidentiality.`,
+      },
+      {
+        prompt: `What is the best way to protect PLCs from threats on the corporate network?`,
+        options: [`Segment them into their own zone behind a firewall`, `Put them on guest Wi-Fi`, `Give every user remote desktop access`, `Disable logging`],
+        correct: 0,
+        explanation: `Segmentation limits exposure and controls traffic into the OT zone.`,
+      },
+      {
+        prompt: `What does an HMI do?`,
+        options: [`Provides the operator interface to a control system`, `Routes BGP`, `Assigns IP addresses`, `Encrypts email`],
+        correct: 0,
+        explanation: `A human-machine interface displays process data and lets operators control it.`,
+      },
+    ],
+    mini: {
+      prompt: `A vendor needs occasional remote access to a factory PLC.`,
+      task: `Describe a safer access design than open remote desktop.`,
+    },
+    recap: `ICS and SCADA run physical processes, using PLCs, HMIs, and RTUs. OT puts availability and safety first, so protect it with segmentation, industrial DMZs, jump hosts, passive monitoring, and careful patching.`,
+    classroom: `"Hindi pwedeng i-reboot ang planta para sa update. Kaya ihiwalay at bantayan, huwag basta galawin."`,
+  });
 }(window.NetReady));

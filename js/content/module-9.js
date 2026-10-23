@@ -1165,4 +1165,92 @@
     recap: `Clients scan, authenticate, and associate with an AP (BSS); multiple APs with one SSID form an ESS. Roaming, sticky clients, coverage gaps, and mismatched AP settings cause most client disassociation problems.`,
     classroom: `"Kapag naglalakad ang user at napuputol, roaming ang hinahanap mo, hindi lang signal."`,
   });
+
+  NetReady.LESSONS['9-13'] = NetReady.lesson(9, {
+    id: '9-13',
+    slug: 'cellular-generations-sim-and-private-5g',
+    title: 'Cellular Networks in Depth: 2G to 5G, LTE, SIM and eSIM, APNs, and Private 5G',
+    minutes: 12,
+    outcomes: [
+      `Place GSM/CDMA, 3G, LTE, and 5G on a generation timeline with their key traits.`,
+      `Explain SIM, eSIM, APN, and carrier aggregation in simple terms.`,
+      `Describe 5G bands, network slicing, and private cellular networks.`,
+    ],
+    why: `Cellular is a WAN backup, an IoT link, and increasingly a primary connection. The exam expects you to recognize the technologies and their trade-offs.`,
+    simple: `Cellular networks have evolved through generations. 2G (GSM and CDMA) added digital voice and slow data. 3G (UMTS/HSPA, EV-DO) made mobile internet practical. 4G LTE is an all-IP network with much higher speeds. 5G (New Radio) adds higher speeds, lower latency, and support for many devices. A SIM card identifies the subscriber to the carrier; an eSIM is the same identity built into the device and provisioned by software. An APN (access point name) tells the device which carrier gateway to use for data. 5G uses low-band (wide coverage, moderate speed), mid-band (balance), and high-band millimeter wave (very fast, very short range, easily blocked). Network slicing creates virtual networks on one 5G infrastructure with different guarantees. Private 5G or LTE lets an organization run its own cellular network, for example in a factory or port.`,
+    taglish: `Nag-evolve ang cellular sa mga henerasyon. Ang 2G (GSM at CDMA) ay digital voice at mabagal na data. Ang 3G (UMTS/HSPA, EV-DO) ay nagpraktikal sa mobile internet. Ang 4G LTE ay all-IP at mas mabilis. Ang 5G (New Radio) ay mas mabilis, mas mababa ang latency, at kayang magdala ng maraming device. Ang SIM card ang nagpapakilala sa subscriber sa carrier; ang eSIM ay nakapaloob na sa device at sa software ini-provision. Ang APN ang nagsasabi sa device kung aling gateway ng carrier ang gagamitin para sa data. Sa 5G, may low-band (malawak ang saklaw), mid-band (balanse), at high-band mmWave (napakabilis pero maiksi at madaling harangan). Ang network slicing ay virtual networks na may magkaibang garantiya sa iisang 5G. Ang private 5G/LTE ay sariling cellular network ng organisasyon, gaya ng pabrika o pantalan.`,
+    analogy: {
+      title: 'Mga uri ng kalsada sa bansa',
+      text: `Ang low-band ay malawak na pambansang highway na umaabot sa probinsya pero hindi pinakamabilis. Ang mmWave ay napakabilis na expressway pero sa loob lang ng isang siyudad at hinaharangan ng gusali. Ang network slicing ay mga lane sa iisang kalsada na nakareserba para sa ambulansya, bus, o trak. Ang private 5G ay sariling kalsada ng pabrika.`,
+    },
+    steps: [
+      `2G: GSM (TDMA based, widely used with SIM cards) and CDMA (spread-spectrum, used by some US carriers). Voice plus slow data (GPRS and EDGE).`,
+      `3G: UMTS with HSPA and CDMA2000 EV-DO. Several Mbps. Introduced mobile broadband.`,
+      `4G LTE: all-IP, OFDMA downlink, tens to hundreds of Mbps; voice carried as VoLTE. LTE-Advanced adds carrier aggregation, combining multiple frequency blocks for more speed.`,
+      `5G NR: three bands. Low-band (below about 1 GHz) for wide coverage; mid-band (about 1 to 6 GHz) balances speed and coverage; high-band mmWave (24 GHz and above) offers multi-gigabit speeds over short distances with poor wall penetration. Latency can drop to a few milliseconds.`,
+      `5G use cases: enhanced mobile broadband, ultra-reliable low latency (industrial control, remote surgery), and massive IoT (many sensors). Network slicing assigns each use case its own virtual network.`,
+      `SIM and eSIM: the SIM stores the subscriber identity (IMSI) and keys; an eSIM is an embedded SIM with downloadable profiles, so switching carriers needs no physical card.`,
+      `APN: the settings (name, authentication) a device uses to reach the carrier data network. A wrong APN causes "connected to the tower but no data".`,
+      `Network use: cellular routers provide failover for branch WAN links, connect IoT devices and vehicles, and serve remote sites. Considerations: data caps, latency variability, coverage, signal strength (RSRP/RSRQ), and the carrier NAT (often CGNAT) which hinders inbound connections.`,
+      `Private LTE/5G: an organization operates its own radio network (often using shared spectrum such as CBRS in the US) for predictable coverage and low latency in factories, ports, and campuses.`,
+      `Security: cellular uses SIM-based authentication and encryption, but traffic still needs an end-to-end VPN or TLS across the carrier network.`,
+    ],
+    table: {
+      label: 'Table of cellular generations',
+      head: ['Generation', 'Examples', 'Key trait'],
+      rows: [
+        ['2G', 'GSM, CDMA, GPRS, EDGE', 'Digital voice, slow data'],
+        ['3G', 'UMTS, HSPA, EV-DO', 'Practical mobile internet'],
+        ['4G', 'LTE, LTE-Advanced', 'All-IP, high speed, carrier aggregation'],
+        ['5G', 'NR (low, mid, mmWave)', 'Higher speed, low latency, slicing, massive IoT'],
+      ],
+      caption: 'Each generation raised speed, reduced latency, and moved toward all-IP.',
+    },
+    example: `A retail chain installs 4G/5G routers at each store as a backup WAN. When the cable line fails, the router fails over to cellular within seconds. A tech notices a new router shows signal bars but no data; the SIM profile had a wrong APN. Correcting the APN restores the data connection.`,
+    tips: [
+      `"Millimeter wave" = fastest 5G but shortest range and worst penetration.`,
+      `Connected to the tower but no internet? Check the APN and data plan before the antenna.`,
+      `Cellular backup links often sit behind carrier NAT; plan for outbound-initiated VPNs.`,
+    ],
+    exam: `Know that LTE is 4G and all-IP, 5G has low, mid, and high bands, SIM/eSIM identify the subscriber, APN selects the data gateway, and cellular is a WAN backup and IoT medium.`,
+    mistakes: [
+      `Thinking mmWave 5G has the widest coverage.`,
+      `Forgetting that carrier-grade NAT blocks inbound connections.`,
+      `Mixing up GSM and CDMA as 3G; both are 2G-era technologies (with later 3G evolutions).`,
+    ],
+    terms: [
+      { term: 'LTE', def: `Long Term Evolution, a 4G all-IP cellular standard.` },
+      { term: 'eSIM', def: `Embedded SIM that holds a downloadable carrier profile.` },
+      { term: 'APN', def: `Access point name that selects the carrier data gateway.` },
+      { term: 'Carrier aggregation', def: `Combining multiple frequency blocks to increase speed.` },
+      { term: 'Network slicing', def: `Creating multiple virtual networks with different guarantees on one 5G network.` },
+      { term: 'mmWave', def: `High-frequency 5G band with high speed and short range.` },
+    ],
+    checks: [
+      {
+        prompt: `Which 5G band offers the highest speeds but the shortest range?`,
+        options: [`Low-band`, `Mid-band`, `High-band mmWave`, `Sub-GHz`],
+        correct: 2,
+        explanation: `Millimeter wave offers multi-gigabit speeds over short distances.`,
+      },
+      {
+        prompt: `A cellular router shows a strong signal but no data. What should you check?`,
+        options: [`The APN and data plan`, `The rack unit height`, `The VLAN trunk`, `The spanning tree root`],
+        correct: 0,
+        explanation: `A wrong APN or inactive plan prevents data even with good signal.`,
+      },
+      {
+        prompt: `What is an eSIM?`,
+        options: [`A SIM identity embedded in the device and provisioned by software`, `A faster antenna`, `A kind of Wi-Fi password`, `A fiber transceiver`],
+        correct: 0,
+        explanation: `An eSIM holds carrier profiles in the device without a physical card.`,
+      },
+    ],
+    mini: {
+      prompt: `A factory wants wireless coverage with guaranteed low latency for robots and does not want to depend on a public carrier.`,
+      task: `Suggest the cellular option.`,
+    },
+    recap: `Cellular evolved from GSM/CDMA through 3G and all-IP LTE to 5G with low, mid, and mmWave bands and slicing. SIM and eSIM identify subscribers, APNs choose the data gateway, and private 5G gives organizations control.`,
+    classroom: `"Mas mabilis ang mmWave pero mas maikli; mas malawak ang low-band pero mas mabagal."`,
+  });
 }(window.NetReady));

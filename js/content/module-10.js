@@ -1092,4 +1092,91 @@
     recap: `IaC keeps the desired network state in code: templates fill in variables, playbooks run ordered tasks, compliance checks detect drift, dynamic inventories keep device lists current, and staged automated upgrades reduce risk.`,
     classroom: `"Kapag nasa code ang tamang config, madali mong mahuhuli kung sino ang lumihis."`,
   });
+
+  NetReady.LESSONS['10-12'] = NetReady.lesson(10, {
+    id: '10-12',
+    slug: 'storage-networking-nas-san-iscsi-fc',
+    title: 'Storage Networking: NAS, SAN, iSCSI, Fibre Channel, FCoE, and File Protocols',
+    minutes: 13,
+    outcomes: [
+      `Differentiate file-level storage (NAS) from block-level storage (SAN).`,
+      `Describe iSCSI, Fibre Channel, and FCoE and what network each uses.`,
+      `Recognize file-sharing protocols (SMB, NFS) and their ports.`,
+    ],
+    why: `Servers and virtual machines depend on storage networks. The exam tests whether you can tell NAS from SAN and match the transport to the description.`,
+    simple: `Network-attached storage (NAS) shares files over the regular network using file protocols such as SMB (Windows) and NFS (Unix and Linux); users see folders and files. A storage area network (SAN) provides raw block storage to servers over a dedicated, high-speed network, so the server treats the storage like a local disk. SANs commonly run on Fibre Channel (FC), a specialized lossless network with its own switches, HBAs (host bus adapters), and WWN addresses. iSCSI carries SCSI block commands over ordinary IP and Ethernet (TCP port 3260), which is cheaper and uses familiar equipment. FCoE (Fibre Channel over Ethernet) carries Fibre Channel frames over lossless Ethernet to converge LAN and SAN cabling.`,
+    taglish: `Ang NAS ay nagbabahagi ng files sa karaniwang network gamit ang SMB (Windows) at NFS (Unix/Linux); folders at files ang nakikita ng user. Ang SAN ay nagbibigay ng block storage sa mga server sa hiwalay at mabilis na network, kaya parang lokal na disk ang tingin ng server. Karaniwang Fibre Channel (FC) ang SAN: espesyal na lossless na network na may sariling switch, HBA, at WWN. Ang iSCSI ay SCSI commands sa pamamagitan ng IP at Ethernet (TCP 3260) — mas mura at pamilyar na gamit. Ang FCoE ay Fibre Channel frames sa lossless Ethernet para pagsamahin ang LAN at SAN cabling.`,
+    analogy: {
+      title: 'Aklatan at bodega ng mga bakanteng estante',
+      text: `Ang NAS ay aklatan: humihingi ka ng "aklat na ito" (file) at ibibigay sa iyo. Ang SAN ay bodega ng mga bakanteng estante na ibinibigay sa iyo nang buo (block): ikaw na ang bahalang mag-organisa kung ano ang ilalagay. Ang Fibre Channel ay sariling daanan papunta sa bodega; ang iSCSI ay dumadaan sa karaniwang kalsada ng lungsod.`,
+    },
+    steps: [
+      `NAS: a file server appliance on the LAN. Access is file-level (the NAS manages the file system). Protocols: SMB/CIFS (TCP 445), NFS (TCP/UDP 2049), and sometimes FTP or HTTPS. Easy to set up; good for shared documents and backups.`,
+      `SAN: block-level storage presented to servers as raw disks (LUNs, logical unit numbers). The server formats and manages the file system. Needed for databases and virtualization clusters that need performance and shared disks.`,
+      `Fibre Channel: dedicated fabric with FC switches and HBAs; speeds such as 16, 32, and 64 Gbps; devices identified by WWNs (World Wide Names); zoning controls which hosts see which storage. Lossless and low latency, but specialized and costly.`,
+      `iSCSI: SCSI over TCP/IP, port 3260. Initiators (servers) connect to targets (storage). Use a dedicated VLAN or network, jumbo frames, and multipathing for performance and redundancy. CHAP authentication is common.`,
+      `FCoE: encapsulates FC frames in Ethernet frames, requiring a lossless Ethernet (Data Center Bridging with priority flow control). It is not routable like IP. Used to reduce cabling by sharing 10 GbE adapters (CNAs) for LAN and SAN traffic.`,
+      `Other terms: DAS (direct-attached storage) is plugged directly into one server; object storage (such as cloud buckets) is accessed over HTTP APIs; unified storage can present both file and block.`,
+      `Network design points: separate storage traffic, use redundant paths (multipathing), enough bandwidth, low latency, and consider MTU consistency end to end if using jumbo frames.`,
+      `Troubleshooting: slow storage can come from congestion, duplex or MTU mismatch, a failed path, or incorrect zoning/LUN masking.`,
+    ],
+    table: {
+      label: 'Table comparing NAS and SAN',
+      head: ['', 'NAS', 'SAN'],
+      rows: [
+        ['Access level', 'File-level', 'Block-level'],
+        ['Protocols', 'SMB, NFS', 'Fibre Channel, iSCSI, FCoE'],
+        ['Network', 'Regular LAN', 'Dedicated storage network (or dedicated VLAN)'],
+        ['Server sees', 'Shared folders', 'A local-looking disk (LUN)'],
+        ['Typical use', 'File shares, backups', 'Databases, virtualization clusters'],
+      ],
+      caption: 'Files for NAS, blocks for SAN.',
+    },
+    example: `A virtualization cluster needs shared storage so VMs can move between hosts. The team chooses an iSCSI SAN on a dedicated VLAN with jumbo frames and two paths per host. A separate NAS holds department file shares over SMB.`,
+    tips: [
+      `"Shared folders over the LAN" = NAS. "Raw disk presented to a server" = SAN.`,
+      `iSCSI uses TCP 3260; SMB uses TCP 445; NFS uses 2049.`,
+      `If a storage link is slow, check MTU, duplex, and path redundancy first.`,
+    ],
+    exam: `Match: NAS = file-level over IP, SAN = block-level, Fibre Channel = dedicated lossless storage network, iSCSI = SCSI over IP, FCoE = FC over Ethernet, and the file protocols SMB and NFS.`,
+    mistakes: [
+      `Saying a NAS provides block storage.`,
+      `Running iSCSI on the same congested VLAN as user traffic.`,
+      `Assuming FCoE can be routed across a WAN like IP.`,
+    ],
+    terms: [
+      { term: 'NAS', def: `Network-attached storage that serves files over the LAN.` },
+      { term: 'SAN', def: `Storage area network providing block-level storage.` },
+      { term: 'iSCSI', def: `Block storage protocol carried over IP (TCP 3260).` },
+      { term: 'Fibre Channel', def: `Dedicated high-speed storage networking technology.` },
+      { term: 'FCoE', def: `Fibre Channel frames carried over lossless Ethernet.` },
+      { term: 'LUN', def: `Logical unit number identifying a block storage volume.` },
+    ],
+    checks: [
+      {
+        prompt: `Which storage type presents raw block storage to servers so they see it like a local disk?`,
+        options: [`NAS`, `SAN`, `CDN`, `NAT gateway`],
+        correct: 1,
+        explanation: `A SAN provides block-level storage; a NAS provides file-level shares.`,
+      },
+      {
+        prompt: `Which protocol carries SCSI commands over standard IP networks?`,
+        options: [`iSCSI`, `SMB`, `SNMP`, `NTP`],
+        correct: 0,
+        explanation: `iSCSI encapsulates SCSI commands in TCP/IP, typically on port 3260.`,
+      },
+      {
+        prompt: `Which two protocols are most associated with NAS file sharing?`,
+        options: [`SMB and NFS`, `BGP and OSPF`, `SIP and RTP`, `LACP and STP`],
+        correct: 0,
+        explanation: `SMB (Windows) and NFS (Unix/Linux) are common NAS file-sharing protocols.`,
+      },
+    ],
+    mini: {
+      prompt: `A team wants to reduce cabling by running LAN and storage traffic on the same 10 GbE adapters while keeping Fibre Channel semantics.`,
+      task: `Which technology is this, and what must the Ethernet fabric provide?`,
+    },
+    recap: `NAS shares files over the LAN with SMB or NFS; SANs deliver block storage using Fibre Channel, iSCSI, or FCoE. Keep storage traffic separate, redundant, and consistent in MTU.`,
+    classroom: `"Files ang NAS, blocks ang SAN. Pareho silang storage, magkaiba lang ang antas."`,
+  });
 }(window.NetReady));

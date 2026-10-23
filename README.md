@@ -14,15 +14,15 @@ Teach a true beginner from zero networking knowledge toward CompTIA Network+ exa
 
 ## Current Status — Read This First
 
-The original spec asks for 12+ modules, 100 lessons, 500 questions, and 3 full mock exams. **All 16 planned modules are now built** (130 lessons total), including Module 15, story-driven "Case Files" that follow real incidents from complaint to fix, covering every N10-009 objective across all five exam domains, including modern-exam additions like zero trust, SASE/SSE, VXLAN, automation/orchestration/IaC, QoS, antenna types, organizational documents/policies (MOU/MSA/NDA/AUP/SOP), facilities/environmental controls (HVAC/UPS/generators/fire suppression), vulnerability/risk-management vocabulary, advanced DHCP/DNS services (scopes, relay, zones, DNSSEC, DoH/DoT), modern troubleshooting tools/device commands (Nmap, LLDP/CDP, show commands), transceiver and DAC/twinaxial selection, wireless deployment models (autonomous vs. lightweight APs, band steering, 802.11h), data center topologies and north-south vs. east-west traffic, secure remote management (jump hosts, in-band vs. out-of-band, VPN tunnel types), and SNMP versions, MIBs, and traps, how switches learn and flood (collision vs. broadcast domains, duplex), Layer 2 security features (DHCP snooping, DAI, BPDU Guard, private VLANs), routing loops and convergence (TTL, split horizon, metrics), multicast and IGMP,, ARP/ICMP, TCP windowing and MTU/MSS, wireless RSSI/SNR, cloud connectivity options, secure protocols and IPsec, and IDS/IPS/SIEM. The question bank (221 rich standalone + 390 inline knowledge-check questions = 611 total) now exceeds the original 500-question target; see "Known Limitations" below for what is still approximate.
+The original spec asks for 12+ modules, 100 lessons, 500 questions, and 3 full mock exams. **All 16 planned modules are now built** (136 lessons total), including Module 15, story-driven "Case Files" that follow real incidents from complaint to fix, covering every N10-009 objective across all five exam domains, including modern-exam additions like zero trust, SASE/SSE, VXLAN, automation/orchestration/IaC, QoS, antenna types, organizational documents/policies (MOU/MSA/NDA/AUP/SOP), facilities/environmental controls (HVAC/UPS/generators/fire suppression), vulnerability/risk-management vocabulary, advanced DHCP/DNS services (scopes, relay, zones, DNSSEC, DoH/DoT), modern troubleshooting tools/device commands (Nmap, LLDP/CDP, show commands), transceiver and DAC/twinaxial selection, wireless deployment models (autonomous vs. lightweight APs, band steering, 802.11h), data center topologies and north-south vs. east-west traffic, secure remote management (jump hosts, in-band vs. out-of-band, VPN tunnel types), and SNMP versions, MIBs, and traps, how switches learn and flood (collision vs. broadcast domains, duplex), Layer 2 security features (DHCP snooping, DAI, BPDU Guard, private VLANs), routing loops and convergence (TTL, split horizon, metrics), multicast and IGMP,, ARP/ICMP, TCP windowing and MTU/MSS, wireless RSSI/SNR, cloud connectivity options, secure protocols and IPsec, and IDS/IPS/SIEM. The question bank (233 rich standalone + 408 inline knowledge-check questions = 641 total) now exceeds the original 500-question target; see "Known Limitations" below for what is still approximate.
 
 | Built now | Status |
 | --- | --- |
 | Full app shell: navbar, sidebar, dashboard, lesson player, search, theming, accessibility | ✅ Done |
-| Modules 0–15 (all 16 planned modules, 130 lessons total) | ✅ Fully populated |
-| Question bank | 221 rich standalone questions + 390 inline lesson knowledge checks (611 total) | ✅ Meets the 500-question target |
+| Modules 0–15 (all 16 planned modules, 136 lessons total) | ✅ Fully populated |
+| Question bank | 233 rich standalone questions + 408 inline lesson knowledge checks (641 total) | ✅ Meets the 500-question target |
 | 7 guided labs (subnet planning ×2, VLAN assignment, static routing, Wi-Fi capacity/coverage, security hardening, troubleshooting ticket triage) | ✅ Working, with validation |
-| 3 mock exams, each drawing a distinct domain-weighted third of the question bank | ✅ Working — not yet fixed at 90 questions each (real exam length) |
+| 3 mock exams: 90 questions and 90 minutes each, weighted to the real domain percentages, no shared questions | ✅ Working |
 | Flashcards, Subnet Calculator, Subnetting Practice Generator, Port Trainer, OSI Layer Match, Acronym Trainer, Command Reference, Glossary | ✅ All fully functional |
 
 Every lesson follows the full 18-part template (outcomes, why it matters, Simple English, Taglish, analogy, step-by-step, visual diagram, real-world example, pro tips, exam alert, beginner mistakes, key terms, commands where relevant, 3-question knowledge check, mini scenario, recap, and "what I'd say in class"). Nothing in the learner-facing UI links to a lesson, quiz, or tool that doesn't actually work.
@@ -65,8 +65,10 @@ Net+/
 │   ├── labs.js            (lab lookup + answer validation)
 │   ├── app.js             (router, views, all UI wiring)
 │   └── content/
-│       ├── module-0.js … module-4.js   (lesson content, one file per module)
+│       ├── lesson-helper.js             (builds full lessons from compact data)
+│       ├── module-0.js … module-15.js  (lesson content, one file per module)
 │       ├── questions-bank.js           (standalone rich practice questions)
+│       ├── questions-bank-2.js         (additional standalone questions for later lessons)
 │       ├── glossary-data.js
 │       ├── flashcards-data.js
 │       ├── ports-data.js
@@ -101,6 +103,8 @@ Then open `http://localhost:8000`.
 ## Deploying
 
 This is a pure static site (no build step, no server code, hash-based routing), so it deploys as-is to any static host.
+
+**GitHub Pages (live site):** the repo is a plain static site, so Pages serves it straight from the `main` branch root. In the repository go to Settings, then Pages, choose "Deploy from a branch", branch `main`, folder `/ (root)`. The site then lives at `https://<your-user>.github.io/Net-/`. All paths in the app are relative, so it works under that sub-path. A `.nojekyll` file at the root tells Pages to skip Jekyll processing.
 
 **Netlify:** New site from Git (or drag-and-drop the folder). Build command: *(leave empty)*. Publish directory: `.` (repo root). `_headers` is picked up automatically and keeps `service-worker.js` and `manifest.json` from being cached.
 
@@ -146,8 +150,8 @@ Any modern evergreen browser (Chrome, Edge, Firefox, Safari) from the last ~3 ye
 
 ## Known Limitations
 
-- The question bank (611 questions: 221 standalone + 390 inline) meets the 500-question target, but the standalone questions are the richer, exam-style ones; more standalone questions per module would give deeper exam-length drilling.
-- There are 3 mock exams (each a distinct, domain-weighted third of the full question bank, ~145-147 questions), not yet 3 separate fixed-at-90-question, full exam-length tests — and because they share one underlying pool, a question that appears in your knowledge-check practice can also appear in a mock exam.
+- The question bank (641 questions: 233 standalone + 408 inline) meets the 500-question target, but the standalone questions are the richer, exam-style ones; more standalone questions per module would give deeper exam-length drilling.
+- The 3 mock exams are 90 questions each (the real exam's maximum) and never share a question with each other, but they draw from the same pool as your knowledge-check practice, so a question you have already seen in a lesson can also appear in a mock exam. The real exam also includes performance-based simulations that this site only approximates.
 - There are 7 guided labs (subnet planning ×2, VLAN assignment, static routing, Wi-Fi capacity/coverage diagnosis, security hardening, troubleshooting ticket triage), short of the 25 the original spec envisioned — but the lab *system* itself supports three genuinely reusable interaction types (numeric/CIDR entry, multi-item matching, and checklist, each fully data-driven from `js/content/labs-data.js`), so adding more labs going forward is comparatively cheap.
 - The Subnetting Practice Generator produces effectively unlimited *generated* problems rather than 100 pre-written ones — this was a deliberate choice (see the lesson `4-5`) because a generator is strictly better practice than a fixed, eventually-memorized worksheet.
 - No drag-and-drop diagram-labeling PBQ simulation yet (ordering/ranking questions and dropdown-based matching are implemented; drag-based diagram placement is not).
