@@ -1,5 +1,7 @@
 # NetReady+ — CompTIA Network+ (N10-009) Mastery Course
 
+**Live site: https://p00rmans.github.io/Net-/**
+
 A self-paced, Udemy/Coursera-style learning platform for CompTIA Network+, built with the technique in [NETWORK_PLUS_COURSE_PROMPT.md](NETWORK_PLUS_COURSE_PROMPT.md) as the source spec. No backend, no accounts, no build tools — it runs entirely in your browser and works offline after the first load.
 
 Lessons are written in Simple English **and** natural Taglish, with everyday Philippine analogies, pro tips, exam alerts, and practice questions — matching the request for content taught the way Udemy/Coursera courses are structured, but explained the way a Filipino IT reviewer would actually explain it to you.
