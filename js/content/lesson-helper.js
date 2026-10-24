@@ -37,6 +37,7 @@
           (t.caption ? '<p class="diagram-caption">' + esc(t.caption) + '</p>' : '') +
           '</div>',
       },
+      deepDive: s.deepDive,
       realWorldExample: s.example,
       proTips: s.tips,
       examAlert: s.exam,

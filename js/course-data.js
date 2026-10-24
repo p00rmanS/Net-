@@ -158,6 +158,14 @@
       status: 'available',
       lessonIds: ['15-1', '15-2', '15-3', '15-4', '15-5', '15-6', '15-7'],
     },
+    {
+      id: 16,
+      domain: 'implementation',
+      title: 'Deep Dives: Worked Examples and Configuration Walkthroughs',
+      blurb: 'Mas malalim: step-by-step na solusyon, config, at output.',
+      status: 'available',
+      lessonIds: ['16-1', '16-2', '16-3', '16-4', '16-5', '16-6', '16-7', '16-8', '16-9', '16-10'],
+    },
   ];
 
   NetReady.getModule = (id) => NetReady.MODULES.find((m) => m.id === Number(id));

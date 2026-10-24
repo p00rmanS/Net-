@@ -6,7 +6,7 @@
  * Bump CACHE_VERSION whenever any precached file changes so clients pick
  * up the update instead of serving stale content forever.
  */
-const CACHE_VERSION = 'netready-plus-v31';
+const CACHE_VERSION = 'netready-plus-v36';
 const PRECACHE_URLS = [
   './',
   './index.html',
@@ -32,6 +32,7 @@ const PRECACHE_URLS = [
   './js/content/module-13.js',
   './js/content/module-14.js',
   './js/content/module-15.js',
+  './js/content/module-16.js',
   './js/content/questions-bank.js',
   './js/content/questions-bank-2.js',
   './js/content/glossary-data.js',

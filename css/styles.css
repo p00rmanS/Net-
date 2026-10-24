@@ -24,7 +24,7 @@
   --accent-blue: #8a9bb8;   /* quiet secondary */
   --accent-green: #7fb27a;
   --accent-amber: #d4a64a;
-  --accent-red: #d9695f;
+  --accent-red: #e57b71;
 
   --font-body: 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif;
   --font-head: 'Iowan Old Style', 'Palatino Linotype', Palatino, 'Book Antiqua', Georgia, serif;
@@ -70,8 +70,8 @@
   --focus-ring: #a8431f;
   --accent-cyan: #a8431f;
   --accent-blue: #4d607f;
-  --accent-green: #3d7a3a;
-  --accent-amber: #946a12;
+  --accent-green: #32692f;
+  --accent-amber: #7d5a0c;
   --accent-red: #b3362c;
   --on-accent: #fffaf2;
   --shadow-pop: 0 8px 24px -10px rgba(43, 36, 24, 0.3);
@@ -418,8 +418,8 @@ img { max-width: 100%; }
 .lesson-nav-buttons { display: flex; justify-content: space-between; align-items: center; gap: 0.75rem; }
 
 /* inline knowledge check */
-.inline-question { border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 1rem 1.1rem; margin-bottom: 1rem; }
-.inline-question legend { font-weight: 700; padding: 0 0.3em; }
+.inline-question { min-width: 0; border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 1rem 1.1rem; margin-bottom: 1rem; }
+.inline-question legend { font-weight: 700; padding: 0 0.3em; max-width: 100%; white-space: normal; overflow-wrap: anywhere; }
 .option-row { display: flex; align-items: flex-start; gap: 0.6em; padding: 0.55em 0.7em; border-radius: var(--radius-sm); cursor: pointer; margin-bottom: 0.3em; border: 1px solid transparent; }
 .option-row:hover { background: var(--bg-surface-hover); }
 .option-row input { margin-top: 0.25em; flex: none; }
@@ -679,3 +679,17 @@ input:focus, select:focus, textarea:focus { border-color: var(--accent-cyan); }
   padding: 0.9em 0.2em;
 }
 .inline-empty .icon { color: var(--text-muted); opacity: 0.7; flex: none; }
+
+/* ==========================================================================
+   Worked examples (in-depth lessons)
+   ========================================================================== */
+.deep-item { margin-bottom: 1.5rem; min-width: 0; }
+.lesson-article, .lesson-block { min-width: 0; }
+.deep-item h3 { font-size: 1.1rem; margin-bottom: 0.4em; }
+.code-block {
+  margin: 0.6rem 0 0.8rem; padding: 0.9em 1em; overflow-x: auto; max-width: 100%;
+  background: var(--bg-surface-hover); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm);
+  font-family: var(--font-mono); font-size: 0.84rem; line-height: 1.55; white-space: pre; tab-size: 2;
+}
+.code-block code { background: none; padding: 0; border: 0; color: var(--text-primary); font-size: inherit; }
+.deep-note { border-left: 3px solid var(--accent-cyan); padding: 0.4em 0.9em; background: var(--bg-surface); margin: 0.6rem 0 0; }

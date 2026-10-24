@@ -62,9 +62,24 @@ at a glance that nothing is missing. Lesson IDs match the website (`#/lesson/<id
 | 5.4 Troubleshooting tools | 13-6, 13-7, 13-10, 13-11, 13-12, 3-6, 3-8 |
 | Final review and exam strategy | 14-1, 14-2, 14-3, 0-2, 0-3 |
 
+## Module 16: in-depth deep dives (extra depth on high-value objectives)
+
+| Deep dive | Objectives it reinforces |
+|---|---|
+| 16-1 Subnetting worked problems | 1.7 IPv4 addressing and subnetting |
+| 16-2 OSPF in depth | 2.1 Routing technologies |
+| 16-3 VLANs, trunks, port security, STP configuration | 2.2 Switching technologies |
+| 16-4 Access control lists | 4.3 Security features, 2.1 filtering |
+| 16-5 DNS in depth | 3.4 Network services, 5.3 service issues |
+| 16-6 DHCP in depth | 3.4 Network services, 5.3 service issues |
+| 16-7 TLS and HTTPS | 4.1 Encryption and certificates, 5.3 |
+| 16-8 Wi-Fi security, WPA2/WPA3 and 802.1X | 2.3 Wireless, 4.1 AAA, 4.2 attacks |
+| 16-9 IPv6 Neighbor Discovery and SLAAC | 1.8 IPv6, 3.4 services |
+| 16-10 Site-to-site IPsec VPN | 3.5 Access and management methods, 5.3 |
+
 ## Practice and tools that support the objectives
 
-- **Standalone question bank:** 233 questions across all five domains, plus an
+- **Standalone question bank:** 253 questions across all five domains, plus an
   inline knowledge check in every lesson (see README for totals).
 - **Mock exams, daily drill, and quizzes:** filter by domain to drill your weakest area.
 - **Guided labs (7):** subnetting, VLANs, static routing, Wi-Fi capacity,

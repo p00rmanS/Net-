@@ -334,7 +334,7 @@
     setActiveNav('curriculum');
     setView(`
       <div class="page-header">
-        <div><h1>Curriculum Roadmap</h1><p class="text-muted">Official N10-009 domains mapped across 16 planned modules. Locked modules are shown for transparency — no dead links.</p></div>
+        <div><h1>Curriculum Roadmap</h1><p class="text-muted">Official N10-009 domains mapped across 17 planned modules. Locked modules are shown for transparency — no dead links.</p></div>
       </div>
       <div class="domain-legend">
         ${NetReady.EXAM_META.domains.map((d) => `<span class="badge" style="--badge-color:${d.color}">${escapeHtml(d.name)} — ${d.weight}%</span>`).join('')}
@@ -478,6 +478,24 @@
             ${lesson.interactiveToolId ? `<a class="btn btn-secondary mt-sm" href="#/tools/subnet-calculator">Open the Subnet Calculator &rarr;</a>` : ''}
           </section>
 
+          ${
+            lesson.deepDive && lesson.deepDive.length
+              ? `<section class="lesson-block deep-dive">
+                  <h2>Worked Examples and Walkthroughs</h2>
+                  ${lesson.deepDive
+                    .map(
+                      (item) => `<div class="deep-item">
+                    <h3>${escapeHtml(item.title)}</h3>
+                    ${item.text ? NetReady.formatProse(item.text) : ''}
+                    ${item.code ? `<pre class="code-block" tabindex="0" aria-label="${escapeHtml(item.title)} (code or command output)"><code>${escapeHtml(item.code)}</code></pre>` : ''}
+                    ${item.note ? `<p class="deep-note"><strong>Takeaway:</strong> ${escapeHtml(item.note)}</p>` : ''}
+                  </div>`
+                    )
+                    .join('')}
+                </section>`
+              : ''
+          }
+
           <section class="lesson-block">
             <h2>Real-World Example</h2>
             ${NetReady.formatProse(lesson.realWorldExample)}
@@ -507,10 +525,10 @@
             lesson.commands
               ? `<section class="lesson-block">
                   <h2>Commands</h2>
-                  <table class="lesson-table">
+                  <div class="table-scroll"><table class="lesson-table">
                     <thead><tr><th>OS</th><th>Command</th><th>What it does</th></tr></thead>
                     <tbody>${lesson.commands.map((c) => `<tr><td>${escapeHtml(c.os)}</td><td><code>${escapeHtml(c.cmd)}</code></td><td>${escapeHtml(c.desc)}</td></tr>`).join('')}</tbody>
-                  </table>
+                  </table></div>
                 </section>`
               : ''
           }
@@ -538,7 +556,7 @@
 
           <section class="lesson-block">
             <h2>Your Notes <span id="notes-save-indicator" class="notes-save-indicator" aria-live="polite"></span></h2>
-            <textarea id="lesson-notes" class="notes-textarea" placeholder="Personal notes for this lesson (saved automatically)...">${escapeHtml(NetReady.Progress.getNote(lesson.id))}</textarea>
+            <textarea id="lesson-notes" class="notes-textarea" aria-label="Your personal notes for this lesson" placeholder="Personal notes for this lesson (saved automatically)...">${escapeHtml(NetReady.Progress.getNote(lesson.id))}</textarea>
           </section>
 
           <footer class="lesson-footer">
@@ -551,6 +569,15 @@
         </article>
       </div>
     `);
+
+    // Older lesson visuals contain bare tables; give every table a horizontal scroll container on narrow screens.
+    qsa('.lesson-article table').forEach((tbl) => {
+      if (tbl.closest('.table-scroll')) return;
+      const wrap = document.createElement('div');
+      wrap.className = 'table-scroll';
+      tbl.parentNode.insertBefore(wrap, tbl);
+      wrap.appendChild(tbl);
+    });
 
     bindReadingProgress();
     bindNotesAutosave(lesson.id);
@@ -767,6 +794,7 @@
 
     setView(`
       <div class="quiz-run">
+        <h1 class="sr-only">${escapeHtml(session.title || 'Practice quiz')}</h1>
         <div class="quiz-run-header">
           <div class="quiz-progress-text">Question ${session.currentIndex + 1} of ${session.questions.length}</div>
           ${progressBar(((session.currentIndex + 1) / session.questions.length) * 100, 'fill-cyan')}
@@ -1201,13 +1229,22 @@
           <div class="term-row"><dt>Total Addresses</dt><dd>${result.totalAddresses}</dd></div>
           <div class="term-row"><dt>Usable Hosts</dt><dd>${result.usableHosts}</dd></div>
         </dl>
+        ${
+          result.input.cidr === 31
+            ? '<p class="small text-muted"><strong>Note on /31:</strong> RFC 3021 allows a /31 on point-to-point links, where both addresses are used as hosts (there is no network or broadcast address). The usual "subtract 2" rule shown above is the exam convention for ordinary subnets.</p>'
+            : result.input.cidr === 32
+              ? '<p class="small text-muted"><strong>Note on /32:</strong> a /32 is a single-host address, used for loopbacks and host routes.</p>'
+              : ''
+        }
         <h3>Binary Breakdown</h3>
-        <table class="lesson-table binary-octet">
-          <tbody>
-            <tr>${result.binaryOctets.map((o) => `<td>${o}</td>`).join('')}</tr>
-            <tr>${result.maskBinaryOctets.map((o) => `<td>${o}</td>`).join('')}</tr>
-          </tbody>
-        </table>
+        <div class="table-scroll">
+          <table class="lesson-table binary-octet">
+            <tbody>
+              <tr><th scope="row">IP address</th>${result.binaryOctets.map((o) => `<td>${o}</td>`).join('')}</tr>
+              <tr><th scope="row">Subnet mask</th>${result.maskBinaryOctets.map((o) => `<td>${o}</td>`).join('')}</tr>
+            </tbody>
+          </table>
+        </div>
       </div>
     `;
   }
@@ -1264,7 +1301,7 @@
     setView(`
       <div class="page-header"><h1>Port &amp; Protocol Trainer</h1><p class="text-muted">Search or drill common ports. Click "Quiz Me" to test recall instead of recognition.</p></div>
       <div class="card">
-        <input type="search" id="port-search" placeholder="Search by port number or protocol name..." />
+        <input type="search" id="port-search" aria-label="Search ports and protocols" placeholder="Search by port number or protocol name..." />
       </div>
       <div class="table-scroll">
         <table class="lesson-table" id="port-table">
@@ -1441,7 +1478,7 @@
     setView(`
       <div class="page-header"><h1>Glossary</h1><p class="text-muted">${terms.length} terms and growing as new modules ship.</p></div>
       <div class="card">
-        <input type="search" id="glossary-search" placeholder="Search terms..." />
+        <input type="search" id="glossary-search" aria-label="Search glossary terms" placeholder="Search terms..." />
         <div class="alpha-nav">${letters.map((l) => `<button type="button" data-action="scroll-to-letter" data-letter="${l}">${l}</button>`).join('')}</div>
       </div>
       <dl class="term-list glossary-list" id="glossary-list">
