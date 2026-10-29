@@ -1224,4 +1224,326 @@
     recap: `Capture on the right interface, narrow with capture filters, explore with display filters, and read the TCP flags: handshake, data, FIN or RST. Retransmissions mean loss, unanswered SYNs mean a blocked or dead service, and a slow first response points to the server.`,
     classroom: `"Hindi mo kailangang manghula — nasa packet capture ang sagot."`,
   });
+
+  NetReady.LESSONS['13-13'] = NetReady.lesson(13, {
+    id: '13-13',
+    slug: 'troubleshooting-approaches-and-user-interviews',
+    title: 'Troubleshooting Approaches in Practice: Top-Down, Bottom-Up, Divide and Conquer, and Interviewing Users',
+    minutes: 19,
+    outcomes: [
+      `Apply each step of the troubleshooting methodology with concrete actions.`,
+      `Choose between top-down, bottom-up, and divide-and-conquer approaches.`,
+      `Ask effective questions, duplicate the problem, and handle multiple problems.`,
+      `Document findings and decide when to escalate.`,
+    ],
+    why: `Troubleshooting is the largest exam domain, and its first objective is the methodology, including sub-steps such as questioning users, duplicating the problem, determining what changed, questioning the obvious, and the three OSI-based approaches. Questions give you a scenario and ask for the next step in the correct order.`,
+    simple: `Troubleshooting follows a repeatable method. First identify the problem: gather information, question users, identify symptoms, determine what changed, duplicate the problem if possible, and approach multiple problems individually. Second, establish a theory of probable cause, questioning the obvious first and considering several approaches. Third, test the theory; if confirmed, plan the next step, and if not, form a new theory or escalate. Fourth, establish a plan of action and identify potential effects. Fifth, implement the solution or escalate. Sixth, verify full system functionality and implement preventive measures. Seventh, document findings, actions, outcomes, and lessons learned. Three common ways to search for a cause are bottom-up (start at the physical layer), top-down (start at the application), and divide and conquer (start in the middle layers and move based on what you find).`,
+    taglish: `Sumusunod ang troubleshooting sa paulit-ulit na paraan. Una, tukuyin ang problema: mangalap ng impormasyon, tanungin ang user, tukuyin ang sintomas, alamin kung ano ang nagbago, subukang ulitin ang problema, at hiwalayin ang maraming problema. Pangalawa, bumuo ng theory ng posibleng sanhi, simulan sa halata, at isaalang-alang ang iba't ibang paraan. Pangatlo, i-test ang theory; kung tama, magpatuloy; kung hindi, bagong theory o i-escalate. Pang-apat, gumawa ng plano at alamin ang posibleng epekto. Panlima, ipatupad ang solusyon o i-escalate. Pang-anim, i-verify na gumagana ang buong sistema at maglagay ng pangontra. Pampito, i-document ang nakita, ginawa, resulta, at natutunan. Tatlong paraan ng paghahanap: bottom-up (simula sa pisikal na layer), top-down (simula sa application), at divide and conquer (simula sa gitna).`,
+    analogy: {
+      title: 'Doktor na nag-iimbestiga ng sakit',
+      text: `Tinatanong ng doktor ang sintomas at kailan nagsimula (questioning users), tinitingnan kung may bagong gamot (what changed), pinag-iisipan ang pinakakaraniwang sanhi muna (question the obvious), nag-oorder ng test (test the theory), nagrereseta (plan and implement), nagpapa-follow up (verify), at nagtatala sa chart (document).`,
+    },
+    steps: [
+      `Step 1, identify the problem: gather information (logs, alerts, error messages), question users (what exactly happened, when it started, who else is affected, what they were doing), identify symptoms, determine whether anything has changed (recent change tickets, updates, moves), duplicate the problem if possible (to confirm it and see the symptoms yourself), and approach multiple problems individually (separate and prioritize them).`,
+      `Step 2, theory of probable cause: question the obvious first (is it plugged in, is the interface up, is the service running, is the password correct?), and consider multiple approaches: top-down, bottom-up, divide and conquer, or comparing a working and a failing case.`,
+      `Step 3, test the theory: perform a non-disruptive test that would confirm or reject the cause. If confirmed, determine the next steps. If not confirmed, establish a new theory or escalate (to a more experienced engineer or a vendor).`,
+      `Step 4, plan of action: decide the fix, the steps in order, the rollback plan, who must approve it (change management), and what else might be affected (potential effects, maintenance window, user notice).`,
+      `Step 5, implement the solution or escalate: make one change at a time, so you know which change worked. Escalate when the fix is outside your authority, tools, or expertise, or the impact is high.`,
+      `Step 6, verify full functionality: test the original symptom, related functions, and the users who reported it, then implement preventive measures (monitoring, a configuration change, documentation, training).`,
+      `Step 7, document findings, actions, outcomes, and lessons learned throughout: update the ticket and knowledge base, update diagrams and configurations, and share what was learned.`,
+      `Bottom-up: start at the Physical layer (cables, link lights, power) and move up through data link, network, transport, and application. Best when you suspect hardware or when there is no connectivity at all. It is thorough but can be slow.`,
+      `Top-down: start at the Application layer and move down. Best for a single application failing while others work, and when the symptom points to software or configuration.`,
+      `Divide and conquer: start at a middle layer (often the Network layer, with ping) and move up or down depending on the result. If ping to the IP works, the lower layers are fine, so go up; if it fails, go down. It is often the fastest approach for connectivity problems.`,
+    ],
+    deepDive: [
+      {
+        title: 'Questions that find the problem fast',
+        code: `Question to ask the user or check yourself            What it narrows
+----------------------------------------------------  -----------------------------------------
+Exactly what are you trying to do, and what happens?  Real symptom vs. assumption
+When did it last work? When did it start?             Time correlation with a change
+Is it everyone, a group, or just you?                 Scope: user, VLAN, site, network
+Does it fail every time or sometimes?                 Intermittent (physical, load) vs constant (config)
+Did anything change (move, update, new device)?       Recent change is the top suspect
+Can you do the same from another place or device?     Isolates device, location, or service
+What does the error message say, exactly?             Often names the cause`,
+        note: `Write down the user's words and the exact error text; both are evidence.`,
+      },
+      {
+        title: 'Divide and conquer in action (ping at the middle)',
+        text: `A user cannot open the company intranet site. Start in the middle.`,
+        code: `ping 10.20.5.10 (the intranet server's IP)      -> reply?
+  YES: Layers 1 to 3 to this server are fine -> go UP: DNS (nslookup), TCP port (443), the web service,
+       certificate, browser settings, proxy
+  NO : go DOWN: ping the default gateway -> reply?
+        YES: problem beyond the gateway (route, firewall/ACL, server down)
+        NO : check the local IP settings (ipconfig), then the cable/Wi-Fi link, then the switch port`,
+        note: `One test at the right place removes half the possibilities. That is the power of this approach.`,
+      },
+      {
+        title: 'Worked ticket 1: "The Wi-Fi is down" (bottom-up and what changed)',
+        code: `Identify : Only the 3rd floor; started after 9 a.m.; wired PCs on that floor work
+What changed: facilities installed new ceiling tiles and moved an AP
+Duplicate: tablet on that floor shows "connected, no internet" -> reproduced
+Theory   : the moved AP is unplugged or its PoE switch port is down (question the obvious)
+Test     : switch interface for that AP is up/up but PoE shows "power-deny"; budget exceeded
+Plan     : move the AP to a port with PoE budget available; notify users; no config change needed
+Implement: patch the AP to another port
+Verify   : AP shows connected; tablet browses; wireless clients associate
+Document : ticket updated; PoE budget added to the switch monitoring; diagram corrected`,
+      },
+      {
+        title: 'Worked ticket 2: three complaints at once (handle individually)',
+        code: `Complaints received at 9:05:  (a) printer offline in HR  (b) VPN slow for sales  (c) email down for the CEO
+Triage by impact and dependency:
+  (c) CEO email down -> high impact; check mail service status first (possible wider outage)
+  (a) HR printer     -> low impact; DHCP lease change? (assign a reservation later)
+  (b) VPN slow       -> medium; check concentrator load and ISP latency
+Treat each as its own problem with its own theory. Do not assume one cause behind all three, but
+check whether they share one (a core switch issue) before spending time on each.`,
+        note: `Approach multiple problems individually, while remaining open to a common root cause revealed by testing.`,
+      },
+      {
+        title: 'When to escalate',
+        code: `Escalate when:
+  - the fix needs access, authority, or tools you do not have (firewall change, carrier line)
+  - the impact is large (many users, a critical service) and time is passing
+  - your tested theories are exhausted and the evidence points to a vendor bug or hardware fault
+  - security is involved (possible breach): follow the incident response plan immediately
+Escalate with: symptoms, scope, timeline, what changed, tests done and results, current theory, steps tried`,
+      },
+    ],
+    table: {
+      label: 'Table comparing the three troubleshooting approaches',
+      head: ['Approach', 'Start at', 'Best when', 'Risk'],
+      rows: [
+        ['Bottom-up', 'Physical layer', 'Suspected hardware or no connectivity', 'Can be slow'],
+        ['Top-down', 'Application layer', 'One application fails; others work', 'May miss a physical cause'],
+        ['Divide and conquer', 'Middle layers (ping)', 'General connectivity problems', 'Needs a good first test'],
+        ['Follow the path', 'Source, then each hop', 'Path or routing problems', 'Needs path knowledge'],
+        ['Compare working and failing', 'The difference', 'A similar device or user works', 'Needs a working example'],
+      ],
+      caption: 'Pick the approach that removes the most possibilities with the fewest tests.',
+    },
+    example: `A branch reports that "the network is slow". The technician asks questions and learns it started Monday after a switch upgrade, only affects the file server, and is worse at noon. She duplicates it by copying a file and sees low throughput and rising CRC errors on the server's switch port. Her theory is a bad cable or duplex mismatch after the upgrade; she tests by checking the port settings, finds auto versus fixed speed, corrects them, verifies a fast copy, adds an alert on error rates, and records the cause in the knowledge base.`,
+    tips: [
+      `Change one thing at a time and record each change; otherwise you cannot know what fixed or broke something.`,
+      `Check the obvious first: power, cables, link lights, and whether it ever worked.`,
+      `If a fix will affect other users, plan it through change management even when it is urgent.`,
+    ],
+    exam: `Know the order of the seven steps and the sub-steps (question users, determine what changed, duplicate the problem, approach multiple problems individually, question the obvious, test the theory, escalate if not confirmed, verify and prevent, document). Be able to choose top-down, bottom-up, or divide and conquer.`,
+    mistakes: [
+      `Skipping straight to a fix without testing a theory.`,
+      `Making several changes at once.`,
+      `Closing the ticket without verifying the original symptom and documenting the cause.`,
+    ],
+    terms: [
+      { term: 'Bottom-up', def: `Troubleshooting starting at the Physical layer and moving up.` },
+      { term: 'Top-down', def: `Troubleshooting starting at the Application layer and moving down.` },
+      { term: 'Divide and conquer', def: `Starting at a middle layer and moving up or down depending on test results.` },
+      { term: 'Theory of probable cause', def: `A reasoned hypothesis about the problem that you then test.` },
+      { term: 'Escalation', def: `Passing a problem to a more experienced person or the vendor.` },
+    ],
+    checks: [
+      {
+        prompt: `A user reports that a website will not load. According to the methodology, what should you do before changing anything?`,
+        options: [`Gather information, question the user, and try to duplicate the problem`, `Replace the user's PC`, `Reboot the core switch`, `Close the ticket`],
+        correct: 0,
+        explanation: `Identify the problem first by gathering information and duplicating it.`,
+      },
+      {
+        prompt: `You test a theory and it is not confirmed. What is the next step?`,
+        options: [`Establish a new theory or escalate`, `Implement the fix anyway`, `Document and close`, `Ignore the result`],
+        correct: 0,
+        explanation: `If the theory fails, form a new one or escalate.`,
+      },
+      {
+        prompt: `Which approach begins by pinging the destination IP and then moves up or down the OSI model based on the result?`,
+        options: [`Divide and conquer`, `Top-down`, `Bottom-up`, `Replace and hope`],
+        correct: 0,
+        explanation: `Divide and conquer starts at a middle layer and splits the problem in half with each test.`,
+      },
+    ],
+    mini: {
+      prompt: `You receive three unrelated tickets at once: a slow VPN, a printer offline, and no email for one executive.`,
+      task: `What does the methodology tell you to do with them?`,
+    },
+    recap: `Work the seven steps in order: identify, theorize, test, plan, implement, verify, document. Interview users, check what changed, question the obvious, use bottom-up, top-down, or divide and conquer to search efficiently, change one thing at a time, escalate when needed, and record lessons learned.`,
+    classroom: `"Magtanong muna, maghinala nang may batayan, subukan bago ayusin, at isulat ang natutunan."`,
+  });
+
+  NetReady.LESSONS['13-14'] = NetReady.lesson(13, {
+    id: '13-14',
+    slug: 'interface-status-port-states-and-poe-troubleshooting',
+    title: 'Interface Status, Error Counters, Port States, and PoE Troubleshooting',
+    minutes: 17,
+    outcomes: [
+      `Read interface states such as up/up, up/down, down/down, and administratively down.`,
+      `Explain err-disabled and suspended ports and what causes them.`,
+      `Interpret CRC, runt, giant, collision, and drop counters.`,
+      `Diagnose PoE problems: power budget exceeded and the wrong standard.`,
+    ],
+    why: `Interface troubleshooting is an exam objective: port status (error disabled, administratively down, suspended), increasing counters (CRC, runts, giants, drops), encapsulation errors, and PoE problems. The pattern in the output usually names the cause directly.`,
+    simple: `Every interface has two status values: the physical line status (is a link detected?) and the line protocol status (is Layer 2 working?). Up/up is healthy. Down/down usually means no cable or a dead end at Layer 1. Up/down means the link is detected but Layer 2 fails (for example an encapsulation or keepalive problem). Administratively down means someone shut the port with the shutdown command. Err-disabled means the switch shut the port automatically after a protection feature triggered, such as port security, BPDU Guard, or a link flap. Suspended means a port was put on hold by a protocol, such as an EtherChannel with mismatched settings. Error counters reveal the cause: CRC errors suggest a bad cable, interference, or duplex mismatch; runts are frames below 64 bytes; giants exceed the maximum size (often an MTU mismatch); drops mean congestion. PoE faults appear as devices that will not power, often because the power budget is exhausted or the standard is incompatible.`,
+    taglish: `Bawat interface ay may dalawang status: line status (may natutukoy bang link?) at line protocol (gumagana ba ang Layer 2?). Ang up/up ay maayos. Ang down/down ay karaniwang walang cable o sira sa Layer 1. Ang up/down ay may link pero sira ang Layer 2 (halimbawa encapsulation o keepalive). Ang administratively down ay sinadyang i-shutdown. Ang err-disabled ay awtomatikong pinatay ng switch dahil sa protection feature gaya ng port security o BPDU Guard. Ang suspended ay hinold ng protocol, gaya ng EtherChannel na hindi magkatugma ang settings. Ang error counters ang nagsasabi ng sanhi: CRC (sirang cable, interference, duplex mismatch); runts (mas maliit sa 64 bytes); giants (lampas sa pinakamalaking laki, madalas MTU mismatch); drops (congestion). Ang PoE problem ay device na hindi nagpapower, madalas dahil ubos ang power budget o hindi tugma ang standard.`,
+    analogy: {
+      title: 'Ilaw ng kuryente sa bahay',
+      text: `Ang line status ay kung may kuryente sa poste; ang line protocol ay kung gumagana ang mga kable sa loob ng bahay. Ang administratively down ay sinadyang patayin ang breaker. Ang err-disabled ay awtomatikong tumalon ang breaker dahil may sobrang karga. Ang PoE power budget ay limitadong amperes ng breaker: kapag sobra ang nakasaksak, may hindi makakakuha ng kuryente.`,
+    },
+    steps: [
+      `Status combinations: up/up (healthy), up/down (link detected but Layer 2 not working: encapsulation or keepalive mismatch, no carrier from the far end), down/down (no link: bad cable or port, far end off, transceiver problem), administratively down/down (shutdown command applied).`,
+      `Switch port states on the status list: connected (link up), notconnect (nothing detected), disabled (administratively shut), err-disabled (shut by a protection feature), inactive (assigned to a VLAN that does not exist or is suspended), and suspended (not forwarding because of a protocol mismatch such as LACP or a trunk negotiation problem).`,
+      `Err-disable causes: port security violation, BPDU Guard, loop or storm control, link flapping, UDLD, and DHCP snooping rate limits. Find the cause with the log message or show errdisable, fix it, then bounce the port (shutdown then no shutdown) or enable errdisable recovery.`,
+      `CRC errors: frames that failed the checksum. Common causes: bad or damaged cable, bad connector, electromagnetic interference, bad NIC, or a duplex mismatch. They rise on the receiving port.`,
+      `Runts: frames smaller than 64 bytes, often caused by collisions in a duplex mismatch or a faulty NIC. Giants: frames larger than the allowed maximum (1518 bytes, or 1522 with a VLAN tag), usually from an MTU or jumbo frame mismatch or a faulty NIC.`,
+      `Collisions and late collisions: late collisions on a switch port point to a duplex mismatch or a cable that is too long. Collisions should not exist on full duplex.`,
+      `Input errors and output drops: input errors total the CRC, runt, giant, and other receive errors. Output drops mean the egress queue is full: congestion or insufficient bandwidth, and the fix is QoS, a faster link, or reducing traffic. Overruns or ignored frames show the port cannot keep up.`,
+      `Encapsulation errors: both ends of a link must use the same encapsulation (for example 802.1Q on both ends of a trunk, matching VLAN IDs on router sub-interfaces, and the same WAN encapsulation such as PPP or HDLC). A mismatch causes up/down status, protocol errors, and no traffic.`,
+      `PoE standards: 802.3af (PoE, up to 15.4 W per port), 802.3at (PoE+, up to 30 W), 802.3bt (PoE++, up to 60 W Type 3 and 100 W Type 4). The device negotiates a power class. Problems: power budget exceeded (the switch's total PoE supply is less than the sum of device demands, so some ports show power-deny), incorrect standard (a device that needs 802.3bt power on an 802.3af port may not power or may reboot), a damaged cable, or a cable that is too long or too thin.`,
+      `Method: check status first, then counters, then the log, then the far end. Clear the counters, wait, and re-check to see whether errors are still increasing, so you diagnose the present problem and not old history.`,
+    ],
+    deepDive: [
+      {
+        title: 'Reading show interfaces status',
+        code: `SW1# show interfaces status
+Port      Name         Status       Vlan   Duplex  Speed  Type
+Gi0/1     PC-Sales-01  connected    10     a-full  a-1000 10/100/1000BaseTX
+Gi0/2     Printer-HR   notconnect   10     auto    auto   10/100/1000BaseTX
+Gi0/3     Spare        disabled     1      auto    auto   10/100/1000BaseTX
+Gi0/7     Desk-Lab     err-disabled 10     auto    auto   10/100/1000BaseTX
+Gi0/10    Link-to-SW2  connected    trunk  a-full  a-1000 10/100/1000BaseTX
+Gi0/11    Po1-member   suspended    1      auto    auto   10/100/1000BaseTX
+
+Meaning:  notconnect = no cable or far end off;  disabled = shutdown applied by an admin;
+          err-disabled = a protection feature shut it;  suspended = protocol mismatch (such as LACP)`,
+        note: `The letter "a-" before full and 1000 means auto-negotiated values; a hard-coded setting shows plain full or 100.`,
+      },
+      {
+        title: 'Reading show interface counters for one port',
+        code: `SW1# show interface GigabitEthernet0/12
+GigabitEthernet0/12 is up, line protocol is up (connected)
+  Full-duplex, 1000Mb/s, media type is 10/100/1000BaseTX
+  5 minute input rate 2000 bits/sec, 3 packets/sec
+  12450088 packets input, 1654899342 bytes
+     0 runts, 14 giants, 0 throttles
+     482 input errors, 468 CRC, 0 frame, 0 overrun, 0 ignored
+  0 collisions, 0 late collision
+  102 output drops
+
+Interpretation:
+  468 CRC errors     -> physical problem on this port (cable, connector, interference); replace the cable
+  14 giants          -> a device sends frames above the allowed size: MTU/jumbo mismatch or bad NIC
+  102 output drops   -> egress congestion: check utilization and QoS
+  The log and "clear counters" then re-checking tells you whether they are still rising`,
+      },
+      {
+        title: 'Diagnosing an err-disabled port',
+        code: `SW1# show interfaces status err-disabled
+Port      Name        Status        Reason               Err-disabled Vlans
+Gi0/7     Desk-Lab    err-disabled  bpduguard
+
+Log: %SPANTREE-2-BLOCK_BPDUGUARD: Received BPDU on port Gi0/7 with BPDU Guard enabled. Disabling port.
+
+Fix: find the device (an unauthorized switch) and remove it, then
+SW1(config)# interface Gi0/7
+SW1(config-if)# shutdown
+SW1(config-if)# no shutdown`,
+        note: `Fix the cause before re-enabling the port, or it will go err-disabled again.`,
+      },
+      {
+        title: 'PoE budget troubleshooting',
+        code: `SW1# show power inline
+Available:370.0(w)  Used:358.4(w)  Remaining:11.6(w)
+
+Interface Admin  Oper       Power(W)  Device              Class Max
+Gi0/1     auto   on         15.4      IP Phone            3     30.0
+Gi0/2     auto   on         30.0      Access point        4     30.0
+Gi0/20    auto   power-deny 0.0       n/a                 n/a   30.0
+
+Problem: Gi0/20 shows power-deny: the remaining 11.6 W is below the 30 W the new camera needs.
+
+Options: use a switch with a larger PoE budget, move low-priority devices to a PoE injector,
+set a lower max on ports (power inline max), or reduce the load. A device that needs 802.3bt (60 W)
+will not power fully on an 802.3af (15.4 W) port.`,
+      },
+      {
+        title: 'Fast symptom-to-cause table',
+        code: `Symptom in the output                         Most likely cause
+--------------------------------------------  ------------------------------------------------
+down/down, notconnect                         Cable unplugged, bad cable, far end off, wrong transceiver
+up/down                                       Encapsulation or keepalive mismatch, far end problem
+administratively down                         shutdown command applied
+err-disabled                                  Port security, BPDU Guard, loop, link flap
+Rising CRC errors                             Bad cable or connector, EMI, duplex mismatch
+Late collisions                               Duplex mismatch or over-length cable
+Giants                                        MTU mismatch, jumbo frames not set on both ends
+Runts                                         Collisions (duplex mismatch) or faulty NIC
+Output drops                                  Congestion or speed bottleneck
+Device will not power, power-deny             PoE budget exceeded or wrong PoE standard`,
+      },
+    ],
+    table: {
+      label: 'Table of PoE standards',
+      head: ['Standard', 'Name', 'Max power at the port', 'Typical devices'],
+      rows: [
+        ['802.3af', 'PoE (Type 1)', '15.4 W', 'IP phones, basic access points'],
+        ['802.3at', 'PoE+ (Type 2)', '30 W', 'Newer access points, PTZ cameras'],
+        ['802.3bt Type 3', 'PoE++', '60 W', 'Video phones, multi-radio access points'],
+        ['802.3bt Type 4', 'PoE++', '100 W', 'Displays, thin clients, lighting'],
+      ],
+      caption: 'Match the device to the standard and watch the total budget.',
+    },
+    example: `Several new cameras on a floor refuse to power on, while older phones on the same switch work. show power inline reports 11 W remaining of the switch's 370 W budget, so the 30 W camera ports show power-deny. The team moves the low-priority phones to a second switch and adds a higher-budget switch for the cameras, and all devices power on; the budget is now monitored with a threshold alert.`,
+    tips: [
+      `Check the status first; do not chase counters on a port that is administratively down.`,
+      `Clear the counters and watch for a few minutes: only increasing errors are a current problem.`,
+      `Always add up the PoE needs of devices before ordering a switch.`,
+    ],
+    exam: `Know up/up, up/down, down/down, and administratively down; err-disabled, suspended, and notconnect; the causes of CRC errors, runts, giants, collisions, and drops; encapsulation mismatches; and the PoE problems of exceeded power budget and incorrect standard.`,
+    mistakes: [
+      `Re-enabling an err-disabled port without fixing the cause.`,
+      `Reading old, cumulative counters as a current problem.`,
+      `Assuming any PoE device will work on any PoE port.`,
+    ],
+    terms: [
+      { term: 'Err-disabled', def: `Port shut down automatically by a protection feature.` },
+      { term: 'Administratively down', def: `Port disabled by an administrator with the shutdown command.` },
+      { term: 'CRC error', def: `Frame that failed its checksum, often from a physical problem.` },
+      { term: 'Runt / giant', def: `Frame smaller than 64 bytes / larger than the maximum allowed size.` },
+      { term: 'Output drop', def: `Frame discarded because the outgoing queue is full.` },
+      { term: 'PoE budget', def: `Total power a switch can supply to powered devices.` },
+    ],
+    commands: [
+      { os: 'Cisco IOS', cmd: 'show interfaces status', desc: `Lists every port's state, VLAN, duplex, and speed.` },
+      { os: 'Cisco IOS', cmd: 'show interfaces status err-disabled', desc: `Shows ports shut down by protection features and the reason.` },
+      { os: 'Cisco IOS', cmd: 'show power inline', desc: `Shows PoE budget, usage, and per-port status.` },
+      { os: 'Cisco IOS', cmd: 'clear counters', desc: `Resets interface counters so you can see whether errors are still rising.` },
+    ],
+    checks: [
+      {
+        prompt: `A switch port shows "administratively down". What does this mean?`,
+        options: [`An administrator shut the port down with a command`, `A bad cable is connected`, `BPDU Guard triggered`, `PoE budget is exhausted`],
+        correct: 0,
+        explanation: `Administratively down is the result of the shutdown command, not a fault.`,
+      },
+      {
+        prompt: `An interface shows a rising count of giants. What is the most likely cause?`,
+        options: [`An MTU or jumbo frame mismatch`, `A dead DHCP server`, `A wrong DNS record`, `An expired certificate`],
+        correct: 0,
+        explanation: `Giants are frames larger than the allowed size, usually from mismatched MTU settings or a faulty NIC.`,
+      },
+      {
+        prompt: `A new PoE camera does not power on and the port shows power-deny, while other devices work. What should you check?`,
+        options: [`The switch's remaining PoE power budget`, `The VLAN name`, `The DHCP lease time`, `The NTP server`],
+        correct: 0,
+        explanation: `Power-deny means the switch cannot supply the requested power, often because the budget is exhausted.`,
+      },
+    ],
+    mini: {
+      prompt: `A port is err-disabled right after a user plugged in a small desktop switch.`,
+      task: `Which feature likely triggered it and how do you restore the port?`,
+    },
+    recap: `Read line status and line protocol together, know err-disabled, suspended, and administratively down, use CRC, runt, giant, collision, and drop counters to find causes, check encapsulation, and diagnose PoE faults by the power budget and the standard. Clear counters and watch for new errors.`,
+    classroom: `"Status muna, counters pangalawa, log pangatlo. At bago i-on ulit ang port, ayusin ang sanhi."`,
+  });
 }(window.NetReady));

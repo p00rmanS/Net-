@@ -52,7 +52,7 @@
       title: 'OSI and TCP/IP Models',
       blurb: 'Ang "restaurant kitchen" ng networking — bawat layer may trabaho.',
       status: 'available',
-      lessonIds: ['2-1', '2-2', '2-3', '2-4'],
+      lessonIds: ['2-1', '2-2', '2-3', '2-4', '2-5'],
     },
     {
       id: 3,
@@ -60,7 +60,7 @@
       title: 'Ethernet, Cabling, and Physical Infrastructure',
       blurb: 'Mga kable, konektor, at ang mismong "kalsada" ng data.',
       status: 'available',
-      lessonIds: ['3-1', '3-2', '3-3', '3-4', '3-5', '3-6', '3-7', '3-8', '3-9', '3-10'],
+      lessonIds: ['3-1', '3-2', '3-3', '3-4', '3-5', '3-6', '3-7', '3-8', '3-9', '3-10', '3-11', '3-12'],
     },
     {
       id: 4,
@@ -116,7 +116,7 @@
       title: 'Cloud, Virtualization, and Modern Architecture',
       blurb: 'IaaS/PaaS/SaaS, SDN, at ang "network sa cloud".',
       status: 'available',
-      lessonIds: ['10-1', '10-2', '10-3', '10-4', '10-5', '10-6', '10-7', '10-8', '10-9', '10-10', '10-11', '10-12'],
+      lessonIds: ['10-1', '10-2', '10-3', '10-4', '10-5', '10-6', '10-7', '10-8', '10-9', '10-10', '10-11', '10-12', '10-13'],
     },
     {
       id: 11,
@@ -124,7 +124,7 @@
       title: 'Network Operations and Documentation',
       blurb: 'Diagrams, baselines, change management, disaster recovery.',
       status: 'available',
-      lessonIds: ['11-1', '11-2', '11-3', '11-4', '11-5', '11-6', '11-7', '11-8', '11-9'],
+      lessonIds: ['11-1', '11-2', '11-3', '11-4', '11-5', '11-6', '11-7', '11-8', '11-9', '11-10', '11-11', '11-12'],
     },
     {
       id: 12,
@@ -132,7 +132,7 @@
       title: 'Network Security',
       blurb: 'CIA triad, AAA, firewalls, at karaniwang atake.',
       status: 'available',
-      lessonIds: ['12-1', '12-2', '12-3', '12-4', '12-5', '12-6', '12-7', '12-8', '12-9', '12-10', '12-11', '12-12', '12-13'],
+      lessonIds: ['12-1', '12-2', '12-3', '12-4', '12-5', '12-6', '12-7', '12-8', '12-9', '12-10', '12-11', '12-12', '12-13', '12-14'],
     },
     {
       id: 13,
@@ -140,7 +140,7 @@
       title: 'Troubleshooting Methodology and Tools',
       blurb: 'Ang tamang proseso kapag may sirang network.',
       status: 'available',
-      lessonIds: ['13-1', '13-2', '13-3', '13-4', '13-5', '13-6', '13-7', '13-8', '13-9', '13-10', '13-11', '13-12'],
+      lessonIds: ['13-1', '13-2', '13-3', '13-4', '13-5', '13-6', '13-7', '13-8', '13-9', '13-10', '13-11', '13-12', '13-13', '13-14'],
     },
     {
       id: 14,

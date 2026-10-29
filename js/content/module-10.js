@@ -1179,4 +1179,160 @@
     recap: `NAS shares files over the LAN with SMB or NFS; SANs deliver block storage using Fibre Channel, iSCSI, or FCoE. Keep storage traffic separate, redundant, and consistent in MTU.`,
     classroom: `"Files ang NAS, blocks ang SAN. Pareho silang storage, magkaiba lang ang antas."`,
   });
+
+  NetReady.LESSONS['10-13'] = NetReady.lesson(10, {
+    id: '10-13',
+    slug: 'source-control-git-for-network-engineers',
+    title: 'Source Control for Network Automation: Git, Repositories, Branching, and Resolving Conflicts',
+    minutes: 17,
+    outcomes: [
+      `Explain version control, a central repository, commits, branches, and merges.`,
+      `Follow a safe change workflow: branch, edit, review, merge, deploy.`,
+      `Identify and resolve a merge conflict.`,
+      `Explain why configurations and automation belong in source control.`,
+    ],
+    why: `The modern-environments objective lists source control with version control, a central repository, conflict identification, and branching next to infrastructure as code. Network teams that store configurations and playbooks in Git get history, review, and rollback for free.`,
+    simple: `Source control (version control) records every change to a set of files: who changed what, when, and why. In Git, a repository holds the files and their full history. A commit is a saved snapshot with a message. A branch is a separate line of work, so you can try a change without touching the main, production-ready version. When the change is reviewed and approved, you merge the branch back. A central repository on a service such as GitHub or GitLab lets a team share work: you clone it to your computer, push your commits, and pull others' changes. If two people change the same lines, Git cannot decide which is right, and a merge conflict must be resolved by a person.`,
+    taglish: `Ang source control (version control) ay nagtatala ng bawat pagbabago sa mga file: sino, ano, kailan, at bakit. Sa Git, ang repository ay may mga file at buong history nila. Ang commit ay naka-save na snapshot na may mensahe. Ang branch ay hiwalay na linya ng trabaho, kaya puwede kang sumubok ng pagbabago nang hindi ginagalaw ang main na bersyon. Kapag na-review at aprubado, i-merge pabalik. Ang central repository sa GitHub o GitLab ang nagpapahintulot sa team na magbahagi: i-clone mo, i-push ang commits mo, at i-pull ang sa iba. Kapag dalawang tao ang nagbago ng parehong linya, hindi makapagpapasya ang Git; ang tao ang dapat mag-resolve ng merge conflict.`,
+    analogy: {
+      title: 'Google Docs na may history, at kopya para sa eksperimento',
+      text: `Isipin ang dokumento na may buong history ng bawat bersyon (commits). Gusto mong subukan ang bagong ayos kaya gumawa ka ng kopya (branch). Kapag maganda, ipapasok mo ito sa orihinal (merge). Kapag dalawang tao ang nag-edit ng parehong pangungusap sa magkaibang kopya, kailangang mag-usap at pumili kung alin ang tama (conflict).`,
+    },
+    steps: [
+      `Why network teams use it: every device configuration, template, playbook, and diagram is text. In Git you get a full history, an audit trail, peer review, the ability to roll back to a known good state, and a single source of truth for automation.`,
+      `Core terms: repository (the project and its history), working copy (files on your computer), commit (snapshot with message and author), branch (a movable pointer to a line of commits), main (the production-ready branch), tag (a label for a version such as a release), remote (the shared central repository).`,
+      `Everyday commands: git clone (copy a remote repository), git status, git add (stage changes), git commit (save a snapshot), git push (send commits to the remote), git pull (fetch and merge others' changes), git log (history), git diff (what changed).`,
+      `Branching workflow: create a branch for each change (for example feature/add-vlan-30), commit your work there, push it, open a pull request (or merge request) so a colleague reviews it, run automated checks, then merge to main. Main always represents what should be deployed.`,
+      `Merge conflicts: when two branches change the same lines, Git marks the file with conflict markers, and a person must choose or combine the correct content, remove the markers, commit the result, and complete the merge. Frequent pulls and small changes reduce conflicts.`,
+      `Rollback: git revert creates a new commit that undoes an earlier one, preserving history; this is how you return to a known good configuration after a bad change.`,
+      `Good practice: write clear commit messages, keep commits small, never store passwords, keys, or tokens in the repository (use a vault and a .gitignore file), protect the main branch (reviews required), and tie changes to change tickets.`,
+      `Pipelines: a continuous integration system can lint templates, run tests in a lab, and then deploy approved changes from main, so every production change passes the same checks.`,
+    ],
+    deepDive: [
+      {
+        title: 'A safe change from start to finish',
+        text: `Add VLAN 30 to a configuration template stored in a central repository. Every step is recorded and reviewable.`,
+        code: `$ git clone https://git.example.com/netops/switch-configs.git
+$ cd switch-configs
+$ git checkout -b feature/add-vlan-30        # work on a branch, not on main
+$ nano templates/access-switch.j2            # make the change
+$ git diff                                   # review what changed
+$ git add templates/access-switch.j2
+$ git commit -m "Add VLAN 30 (GUEST) to access switch template. Ticket CHG-1042"
+$ git push -u origin feature/add-vlan-30
+  -> open a pull request; a teammate reviews; automated checks run
+  -> after approval: merge into main; the pipeline deploys during the maintenance window`,
+        note: `The branch protects production, the diff and review catch mistakes, and the commit message links the change to its ticket.`,
+      },
+      {
+        title: 'A merge conflict, and how to resolve it',
+        text: `Two engineers changed the same line of the same configuration file on different branches. Git stops the merge and marks the file.`,
+        code: `$ git merge feature/new-mgmt-ip
+Auto-merging switch1.cfg
+CONFLICT (content): Merge conflict in switch1.cfg
+Automatic merge failed; fix conflicts and then commit the result.
+
+switch1.cfg now contains:
+interface Vlan99
+<<<<<<< HEAD
+ ip address 10.1.99.1 255.255.255.0
+=======
+ ip address 10.1.99.2 255.255.255.0
+>>>>>>> feature/new-mgmt-ip
+
+Fix: decide which is correct (here 10.1.99.1 is the gateway; keep it), delete the markers:
+interface Vlan99
+ ip address 10.1.99.1 255.255.255.0
+
+$ git add switch1.cfg
+$ git commit                                  # completes the merge`,
+        note: `Everything between <<<<<<< HEAD and ======= is your current branch; the part below it up to >>>>>>> is the incoming branch. Talk to the other author when it is not obvious.`,
+      },
+      {
+        title: 'Undoing a bad change safely',
+        code: `$ git log --oneline
+a91c3e2 Change core uplink MTU to 9000   <-- caused the outage
+7f20b4d Add VLAN 30 (GUEST)
+$ git revert a91c3e2                      # new commit that reverses a91c3e2
+$ git push origin main                    # pipeline redeploys the known good configuration`,
+        note: `Revert preserves the history: you can see what went wrong and when it was fixed, which is better than silently overwriting.`,
+      },
+      {
+        title: 'What belongs in the repository, and what does not',
+        code: `Store in Git                          Do NOT store in Git
+------------------------------------  ----------------------------------------
+Config templates and golden configs   Passwords, SNMP communities, API tokens
+Automation playbooks and scripts      Private keys and certificates
+Network diagrams (source files)       Large binary firmware images (use artifact storage)
+IP plan (as text/CSV/YAML)            Personal data
+Documentation and runbooks            Generated output that can be rebuilt`,
+      },
+    ],
+    table: {
+      label: 'Table of Git terms',
+      head: ['Term', 'Meaning'],
+      rows: [
+        ['Repository', 'Project files plus complete history'],
+        ['Commit', 'Saved snapshot with a message'],
+        ['Branch', 'Separate line of work'],
+        ['Merge', 'Combine a branch into another'],
+        ['Pull / merge request', 'Request for review before merging'],
+        ['Conflict', 'Two changes to the same lines that need a human decision'],
+        ['Remote / central repository', 'Shared copy on a server such as GitHub or GitLab'],
+      ],
+      caption: 'Branch, commit, review, merge.',
+    },
+    example: `A junior engineer pushes a change straight to the live router and drops a route; nobody knows what changed. After moving to Git, every change is a pull request: a colleague reviews the diff, a lab pipeline tests it, and when an outage later occurs the team uses git log and git revert to return to the last known good configuration in minutes.`,
+    tips: [
+      `Branch for every change; never commit directly to main.`,
+      `Keep secrets out of the repository; if one is committed, rotate it, because history keeps it.`,
+      `Small, frequent changes mean fewer and easier conflicts.`,
+    ],
+    exam: `Know the vocabulary: version control, central repository, branching, merging, commit, and conflict identification. Know that source control gives history, rollback, review, and a single source of truth for IaC, and that it complements configuration management and change control.`,
+    mistakes: [
+      `Committing passwords or keys to the repository.`,
+      `Working directly on main without review.`,
+      `Resolving a conflict by choosing a side without understanding the change.`,
+    ],
+    terms: [
+      { term: 'Version control', def: `System that records changes to files over time so versions can be compared and restored.` },
+      { term: 'Central repository', def: `Shared remote copy of a project used by a team.` },
+      { term: 'Branch', def: `Independent line of changes that can later be merged.` },
+      { term: 'Merge conflict', def: `Overlapping changes that Git cannot combine automatically.` },
+      { term: 'Pull request', def: `Request to review and merge a branch.` },
+      { term: 'Commit', def: `A recorded snapshot of changes with author and message.` },
+    ],
+    commands: [
+      { os: 'Linux', cmd: 'git clone <url>', desc: `Copies a remote repository and its history to your computer.` },
+      { os: 'Linux', cmd: 'git checkout -b feature/add-vlan-30', desc: `Creates and switches to a new branch for a change.` },
+      { os: 'Linux', cmd: 'git diff', desc: `Shows exactly what changed before you commit.` },
+      { os: 'Linux', cmd: 'git revert <commit>', desc: `Creates a new commit that undoes an earlier change.` },
+    ],
+    checks: [
+      {
+        prompt: `Why do network teams create a branch for each configuration change?`,
+        options: [`To test and review a change without affecting the production version`, `To make the network faster`, `To avoid using commits`, `To change IP addresses automatically`],
+        correct: 0,
+        explanation: `Branches isolate changes until they are reviewed and merged.`,
+      },
+      {
+        prompt: `Two engineers edit the same line of a configuration on different branches. What happens when they merge?`,
+        options: [`A merge conflict that a person must resolve`, `Git deletes both changes`, `The newer change always wins silently`, `The device reboots`],
+        correct: 0,
+        explanation: `Git cannot decide between overlapping changes, so it marks a conflict for manual resolution.`,
+      },
+      {
+        prompt: `Which item should NOT be stored in a Git repository?`,
+        options: [`Plain-text passwords and API tokens`, `Configuration templates`, `Automation playbooks`, `Runbooks`],
+        correct: 0,
+        explanation: `Secrets belong in a vault; anything committed stays in the history.`,
+      },
+    ],
+    mini: {
+      prompt: `A bad change caused an outage and the team needs the previous configuration back right now while keeping a record of what happened.`,
+      task: `Which Git action fits, and why not just delete the commit?`,
+    },
+    recap: `Git stores every configuration and automation file with history, branching, review, and rollback. Work on branches, review through pull requests, merge to main, resolve conflicts carefully, revert bad changes, and keep secrets out.`,
+    classroom: `"Branch bago baguhin, review bago i-merge, at kapag sablay, revert — hindi burahin ang history."`,
+  });
 }(window.NetReady));

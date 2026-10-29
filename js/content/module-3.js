@@ -947,4 +947,270 @@
     recap: `WDM shares one fiber among many wavelengths: CWDM is coarse and cheaper, DWDM is dense and long-haul. BiDi optics use one strand, media converters join different media, and polarity and cleanliness solve many fiber link problems.`,
     classroom: `"Iisang fiber, maraming kulay ng ilaw. Coarse kung mura, Dense kung malayo."`,
   });
+
+  NetReady.LESSONS['3-11'] = NetReady.lesson(3, {
+    id: '3-11',
+    slug: 'structured-cabling-punch-blocks-and-patch-panels',
+    title: 'Structured Cabling: Patch Panels, 66 and 110 Blocks, Cross-Connects, and Cable Ratings',
+    minutes: 15,
+    outcomes: [
+      `Describe the parts of a structured cabling system from wall jack to switch.`,
+      `Compare 66 blocks, 110 blocks, patch panels, patch bays, and fiber distribution panels.`,
+      `Apply the 90 m and 100 m copper limits and the rules for labeling and separation.`,
+      `Choose between plenum, riser, and general-purpose cable jackets.`,
+    ],
+    why: `Cabling is the oldest source of network problems and a named exam topic. A neat structured cabling system is what makes moves, adds, and changes fast and troubleshooting possible.`,
+    simple: `Structured cabling is a standard layout. At each desk a keystone jack in a wall plate (the work area outlet) is connected by horizontal cabling, a fixed run of up to 90 meters, to a patch panel in the telecommunications room (IDF). A short patch cord links the patch panel port to a switch port. Patch cords at both ends can add up to 10 meters, so the whole channel stays within 100 meters for twisted pair Ethernet. Between the IDF and the main distribution frame (MDF) runs backbone cabling, usually fiber. Wires terminate on punchdown blocks or panels: older 66 blocks (mainly telephone) and the more compact 110 blocks (data and voice), seated with a punchdown tool. Fiber ends on a fiber distribution panel with adapters and splice trays.`,
+    taglish: `Ang structured cabling ay standard na ayos. Sa bawat mesa, may keystone jack sa wall plate (work area outlet) na konektado sa pamamagitan ng horizontal cabling, hanggang 90 metro ang haba, papunta sa patch panel sa telecommunications room (IDF). Isang maikling patch cord ang nag-uugnay sa port ng patch panel at sa port ng switch. Ang patch cords sa magkabilang dulo ay puwedeng umabot ng 10 metro lahat, kaya ang buong channel ay hanggang 100 metro. Sa pagitan ng IDF at MDF ay backbone cabling, karaniwang fiber. Ang mga wire ay tinatapos sa punchdown block: ang lumang 66 block (para sa telepono) at ang mas siksik na 110 block (data at voice). Ang fiber ay sa fiber distribution panel.`,
+    analogy: {
+      title: 'Tubo ng tubig sa gusali',
+      text: `Ang MDF ay main water tank, ang mga IDF ay pumping station sa bawat palapag, at ang horizontal cabling ay mga tubo papunta sa bawat gripo (wall jack). Ang patch panel ay mga balbula (valves) kung saan madali mong ililipat kung aling gripo ang kakabit sa aling linya nang hindi binabaklas ang pader.`,
+    },
+    steps: [
+      `Work area: the wall jack (keystone) and the patch cord from the jack to the PC. Terminate solid-core cable on the jack with a punchdown tool.`,
+      `Horizontal cabling: solid-core twisted pair from the work area outlet to the IDF patch panel. Permanent link maximum 90 m; with equipment and work-area patch cords the channel must not exceed 100 m (328 ft). Solid-core is for fixed runs; stranded cable is for flexible patch cords.`,
+      `Patch panel: a rack-mounted panel of ports where horizontal cables are punched down on the back and short patch cords connect on the front. A patch bay is the same idea; the term is common in audio, video, and telecom wiring. Cross-connect means linking two sets of wiring through patch cords or jumpers; an interconnect connects equipment directly to the cabling.`,
+      `66 block: older punchdown block with rows of split metal clips, used mainly for analog telephone wiring (25-pair). 110 block: a more compact design that supports higher frequencies, used for Cat 5e, Cat 6, and modern voice cross-connects. Both use a punchdown tool with the right blade; the 110 block uses a 110 blade.`,
+      `Backbone cabling: connects the IDF to the MDF (and buildings to each other); often multimode or single-mode fiber because of distance, bandwidth, and electrical isolation. Fiber terminates at a fiber distribution panel (also called a fiber patch panel or optical distribution frame) with SC or LC adapters, and long runs are fusion-spliced onto pigtails in splice trays.`,
+      `Demarc: the demarcation point where the provider's responsibility ends and the customer's begins; usually in the MDF or entrance facility. The smart jack or network interface device (NID) is the provider's equipment.`,
+      `Jacket ratings: CM or general purpose PVC (inside walls on one floor, not in air spaces), CMR riser (vertical shafts between floors), CMP plenum (air-handling spaces; made with fire-retardant, low-smoke materials such as FEP, and more expensive). Plenum cable can be used anywhere a lower rating is required, not the reverse.`,
+      `Labeling and documentation: label both ends of every cable and each patch panel port (a common standard is TIA-606), keep a cable map that ties the jack, panel port, and switch port together, and update diagrams after every change.`,
+      `Good practice: keep twisted pair away from power cables and fluorescent lighting (EMI), do not exceed bend radius, do not pull cables tight or over-tighten ties (use hook-and-loop), keep pairs twisted to within about 0.5 inch of the termination, and leave a service loop.`,
+    ],
+    deepDive: [
+      {
+        title: 'Counting the channel length: does this run pass?',
+        text: `A desk is 78 m of horizontal cable from the IDF patch panel. The installer uses a 3 m patch cord from the PC to the jack and a 2 m patch cord from the patch panel to the switch.`,
+        code: `Permanent link (horizontal run)   78 m   <= 90 m   OK
+Work-area patch cord               3 m
+Equipment patch cord               2 m
+Channel total                     83 m   <= 100 m  OK
+
+Now a bad design:
+Horizontal run                    92 m   > 90 m   FAILS the permanent link limit
+(even though 92 + 3 + 2 = 97 m is under 100 m)`,
+        note: `Both limits matter: 90 m for the permanent link and 100 m for the full channel. Exceeding them causes attenuation errors and failed certification.`,
+      },
+      {
+        title: 'Which block or panel for which job?',
+        code: `Component                 Medium            Typical use                         Tool
+------------------------  ----------------  ----------------------------------  ----------------------
+Keystone jack (wall)      Copper            Termination at the desk             Punchdown tool
+Patch panel / patch bay   Copper            IDF termination, easy changes       Punchdown tool
+66 block                  Copper (25-pair)  Legacy telephone cross-connects     66 punchdown blade
+110 block                 Copper            Data and voice cross-connects       110 punchdown blade
+Fiber distribution panel  Fiber             Terminate and patch backbone fiber  Fusion splicer, cleaner
+Patch cord                Copper or fiber   Short flexible jumper               Crimper (copper)`,
+      },
+      {
+        title: 'Cable jackets: where each may be installed',
+        code: `Rating   Name             Where it is allowed
+-------  ---------------  -------------------------------------------------------------
+CM/CMG   General purpose  Within a single floor, in walls (not in air-handling spaces)
+CMR      Riser            Vertical runs between floors
+CMP      Plenum           Plenum spaces (above drop ceilings used for air return, under raised floors)
+
+Rule of thumb: a higher fire rating may substitute for a lower one, never the reverse.`,
+      },
+      {
+        title: 'Tracing a problem through the system',
+        text: `A user's link is down. Work along the path and test each segment.`,
+        code: `Desk PC -> patch cord -> wall jack -> horizontal cable -> patch panel -> patch cord -> switch
+   1. Swap the PC patch cord with a known good one
+   2. Wire-map tester at the wall jack: opens, shorts, split pairs?
+   3. Tone generator and probe at the panel: is the right port labeled?
+   4. Swap the panel-to-switch patch cord
+   5. Try another switch port; check the interface status
+   6. Re-punch the jack or panel position if the test shows a bad termination`,
+      },
+    ],
+    table: {
+      label: 'Table of structured cabling parts and limits',
+      head: ['Part', 'Purpose', 'Limit or rule'],
+      rows: [
+        ['Work area outlet', 'Jack at the desk', 'Terminated with a punchdown tool'],
+        ['Horizontal cabling', 'Jack to IDF patch panel', 'Up to 90 m permanent link'],
+        ['Channel', 'Whole path including patch cords', 'Up to 100 m'],
+        ['Backbone cabling', 'IDF to MDF between floors or buildings', 'Usually fiber'],
+        ['MDF / IDF', 'Main / intermediate distribution frame', 'Racks, panels, switches'],
+        ['Plenum (CMP) jacket', 'Air-handling spaces', 'Fire-retardant, low smoke'],
+      ],
+      caption: 'Wall jack, horizontal run, patch panel, patch cord, switch.',
+    },
+    example: `A company moves 30 people to a new floor. Because every drop is labeled on both ends and documented in a cable map, the technician repatches users at the IDF in an afternoon without touching a wall. A year later a run found above a ceiling is the wrong jacket type (CM in a plenum space); the inspector requires replacement with CMP cable.`,
+    tips: [
+      `Test and certify every run after installation and keep the report with the documentation.`,
+      `Use solid-core cable for fixed runs and stranded cable for patch cords; a stranded cable on a jack or punchdown block will fail over time.`,
+      `Never terminate more than a half inch of untwisted wire, or crosstalk will fail certification.`,
+    ],
+    exam: `Be ready to recall 90 m and 100 m, solid versus stranded, 66 versus 110 blocks, patch panels and fiber distribution panels, MDF versus IDF, demarc, and plenum versus non-plenum cable.`,
+    mistakes: [
+      `Using riser or general-purpose cable in an air-handling space.`,
+      `Counting only the 100 m channel limit and ignoring the 90 m permanent link limit.`,
+      `Leaving cables unlabeled.`,
+    ],
+    terms: [
+      { term: 'Patch panel / patch bay', def: `Panel where cables terminate and short patch cords make connections.` },
+      { term: '66 block / 110 block', def: `Punchdown blocks for telephone / data and voice wiring.` },
+      { term: 'Horizontal cabling', def: `Permanent copper run from the work area to the telecom room, up to 90 m.` },
+      { term: 'Backbone cabling', def: `Cabling between distribution frames, floors, or buildings.` },
+      { term: 'Cross-connect', def: `Linking two sets of wiring with patch cords or jumpers at a panel or block.` },
+      { term: 'Plenum (CMP)', def: `Cable rated for air-handling spaces.` },
+    ],
+    checks: [
+      {
+        prompt: `What is the maximum length of a horizontal (permanent link) copper run in structured cabling?`,
+        options: [`50 m`, `90 m`, `100 m`, `150 m`],
+        correct: 1,
+        explanation: `The permanent link is limited to 90 m, leaving 10 m for patch cords in the 100 m channel.`,
+      },
+      {
+        prompt: `Which cable jacket is required in air-handling spaces above a drop ceiling?`,
+        options: [`CM general purpose`, `CMR riser`, `CMP plenum`, `Any stranded cable`],
+        correct: 2,
+        explanation: `Plenum-rated (CMP) cable is made of fire-retardant, low-smoke material for air-handling spaces.`,
+      },
+      {
+        prompt: `Which termination block is the older design used mostly for analog telephone cross-connects?`,
+        options: [`66 block`, `110 block`, `Fiber panel`, `Keystone jack`],
+        correct: 0,
+        explanation: `66 blocks are the legacy telephone punchdown blocks; 110 blocks support data speeds.`,
+      },
+    ],
+    mini: {
+      prompt: `A new run measures 94 m from the IDF patch panel to the wall jack.`,
+      task: `Does it meet the standard, and what are your options?`,
+    },
+    recap: `Structured cabling runs from jack to horizontal cable to patch panel to switch, within 90 m (permanent link) and 100 m (channel). Terminate with punchdown tools on 110 or 66 blocks, use fiber backbones with distribution panels, choose the right jacket rating, and label and document everything.`,
+    classroom: `"Maayos na cabling, maayos na troubleshooting: 90 metro, label sa dalawang dulo, at tamang jacket."`,
+  });
+
+  NetReady.LESSONS['3-12'] = NetReady.lesson(3, {
+    id: '3-12',
+    slug: 'fiber-splicing-testing-and-loss-budgets',
+    title: 'Fiber Splicing, Testing, and Loss Budgets: Fusion Splicers, Power Meters, OTDRs, and Cleaning',
+    minutes: 17,
+    outcomes: [
+      `Compare fusion splicing and mechanical splicing.`,
+      `Use an optical power meter, visual fault locator, and OTDR for the right task.`,
+      `Calculate a simple fiber loss budget and decide whether a link will work.`,
+      `Clean and inspect connectors correctly and safely.`,
+    ],
+    why: `Fiber hardware tools are in the troubleshooting objective (fusion splicer, optical power meter, OTDR, light meter, visual fault locator). A power meter and a loss budget turn a vague "the fiber is bad" into a number you can check.`,
+    simple: `Light loses strength as it travels through glass and at every connector and splice. That loss, measured in decibels (dB), must stay under the loss budget the transceivers can tolerate. A fusion splicer melts two fibers together with an electric arc for a permanent, very low-loss joint (about 0.1 dB). A mechanical splice aligns the fibers with a sleeve and gel, is quicker and cheaper but has higher loss (about 0.3 dB). To test, an optical light source and an optical power meter (OPM, also called a light meter) at the two ends measure the total loss. A visual fault locator (VFL) shines red light to show breaks and tight bends in short runs, and an OTDR sends pulses and shows a trace of every connector, splice, bend, and break with its distance. Dirty connectors are the most common cause of fiber problems, so inspect and clean before connecting.`,
+    taglish: `Humihina ang liwanag habang dumadaan sa salamin at sa bawat connector at splice. Ang pagkawalang ito, sinusukat sa decibel (dB), ay dapat nasa loob ng loss budget na kayang tanggapin ng transceiver. Ang fusion splicer ay tinutunaw ang dalawang fiber gamit ang electric arc para sa permanenteng at napakababang loss (mga 0.1 dB). Ang mechanical splice ay gumagamit ng sleeve at gel; mas mabilis at mura pero mas mataas ang loss (mga 0.3 dB). Para mag-test, ang light source at optical power meter (OPM o light meter) sa magkabilang dulo ang sumusukat ng kabuuang loss. Ang visual fault locator (VFL) ay pulang ilaw para makita ang putol at matalim na liko sa maikling cable, at ang OTDR ay nagpapakita ng bawat connector, splice, liko, at putol kasama ang distansya. Ang maruming connector ang pinakakaraniwang problema.`,
+    analogy: {
+      title: 'Hose na may mga butas at tagas',
+      text: `Isipin ang tubig na dumadaan sa hose na may mga koneksyon. Bawat koneksyon (connector) at tagpi (splice) ay may kaunting tagas. Ang OPM ay sumusukat ng lakas ng tubig sa dulo, ang OTDR ay nagsasabi kung nasaan ang bawat tagas, at ang VFL ay pulang ilaw na nagpapakita ng butas sa maikling hose.`,
+    },
+    steps: [
+      `Fiber types: single-mode (about 9 micron core, lasers, long distance) and multimode (50 or 62.5 micron core, LEDs or VCSELs, short distance). Mixing them causes high loss.`,
+      `Fusion splice: strip, clean, cleave (a precise flat cut), align in the splicer, and fuse with an arc. Typical loss 0.05 to 0.1 dB, permanent and strong. Used for pigtails and long runs.`,
+      `Mechanical splice: aligns the cleaved fibers in a sleeve with index-matching gel; typical loss about 0.3 dB; no arc needed but less durable and slightly higher loss.`,
+      `Typical losses for planning: connector pair 0.3 to 0.75 dB, fusion splice 0.1 dB, single-mode fiber about 0.35 to 0.4 dB per km (at 1310 nm), multimode about 3 dB per km at 850 nm.`,
+      `Optical power meter plus light source: measure the transmitted power and the received power across the link. Loss = power in minus power out. This is the pass-or-fail test against the loss budget (insertion loss test).`,
+      `Visual fault locator: a red laser (about 650 nm) injected into the fiber; light leaks out visibly at breaks, sharp bends, or bad connectors. Practical for short runs (up to a few km) and patch cords; the jacket may glow near the fault.`,
+      `OTDR (optical time-domain reflectometer): injects pulses and measures reflected light over time to plot a trace. Events appear as spikes (reflective events such as connectors) or steps (non-reflective such as splices and bends) with their distance from the OTDR. Use launch and tail cables so the first and last connectors are measured. It locates faults, but the OPM measures true end-to-end loss.`,
+      `Cleaning and inspection: inspect end faces with a fiber scope; clean dry with a lint-free wipe or click cleaner, and use a solvent only when needed. Always cap unused connectors. Never look into a fiber or port; infrared light is invisible and can harm the eye.`,
+      `Bend radius: avoid bending fiber tighter than the manufacturer's minimum (commonly about 10 times the cable diameter under no tension, 20 times under tension); tight bends cause macrobend loss.`,
+    ],
+    deepDive: [
+      {
+        title: 'Loss budget, worked: will this link work?',
+        text: `A 2 km single-mode link uses two connector pairs (one at each end through patch panels) and one fusion splice in the middle. The transceivers have a 6 dB budget (transmit power minus receiver sensitivity, with a margin).`,
+        code: `Fiber:      2 km x 0.4 dB/km          = 0.80 dB
+Connectors: 2 pairs x 0.5 dB            = 1.00 dB
+Splice:     1 fusion x 0.1 dB           = 0.10 dB
+------------------------------------------------
+Expected total loss                      = 1.90 dB
+
+Link budget 6.0 dB - 1.9 dB expected    = 4.1 dB margin   -> PASS
+
+If the power meter later measures 5.5 dB:
+  measured 5.5 dB vs expected 1.9 dB -> 3.6 dB of unexplained loss
+  -> dirty connector, tight bend, or damaged splice; use the OTDR to find it.`,
+        note: `Compare the measured loss with the expected loss, not only with the budget. A link can "pass" while hiding a fault that will worsen.`,
+      },
+      {
+        title: 'What an OTDR trace tells you',
+        code: `Distance (m)  Event                Type             Loss (dB)   Reflectance
+0             Launch connector     Reflective       0.4         -45 dB
+820           Fusion splice        Non-reflective   0.08        n/a
+1,410         Bend / stress        Non-reflective   1.3  <---   n/a     (macrobend, investigate)
+1,995         Patch panel connector Reflective      0.6         -38 dB
+2,000         End of fiber         Reflective       n/a         -14 dB`,
+        note: `A step of 1.3 dB at 1,410 m with no connector there points to a tight bend or damaged fiber at that spot: go to that distance and look.`,
+      },
+      {
+        title: 'Which tool for which question?',
+        code: `Question                                      Tool
+--------------------------------------------  ---------------------------------
+How much light arrives at the far end?        Optical power meter (+ light source)
+Is there a break or tight bend in this patch  Visual fault locator
+cord or short run?
+Where exactly is the fault, and how far?      OTDR
+Join two fibers permanently with low loss?    Fusion splicer
+Is this connector clean and undamaged?        Fiber inspection scope
+Remove contamination from a connector?        Lint-free wipe or click cleaner`,
+      },
+    ],
+    table: {
+      label: 'Table of fiber splice and connector losses',
+      head: ['Item', 'Typical loss', 'Notes'],
+      rows: [
+        ['Fusion splice', '0.05 to 0.1 dB', 'Permanent, best performance'],
+        ['Mechanical splice', 'About 0.3 dB', 'Quick, less durable'],
+        ['Connector pair', '0.3 to 0.75 dB', 'Depends on cleanliness and quality'],
+        ['Single-mode fiber', 'About 0.35 to 0.4 dB/km', 'At 1310 nm'],
+        ['Multimode fiber', 'About 3 dB/km', 'At 850 nm'],
+      ],
+      caption: 'Add every loss and compare it with the transceiver budget.',
+    },
+    example: `A 10 Gbps fiber link between two buildings flaps. The link light is on, but the switch shows a received optical power right at the minimum threshold. The OTDR trace shows a 1.8 dB event at a patch panel connector. Inspecting it with a scope shows a dust layer on the end face. Cleaning it brings the loss back to 0.4 dB and the link stays up.`,
+    tips: [
+      `Inspect before you connect, every time; a single dirty connector can cause days of intermittent faults.`,
+      `Use a VFL for quick checks on patch cords, and an OTDR when you need distance to a fault.`,
+      `Document the OTDR and power meter results when the link is installed so you can compare them after a fault.`,
+    ],
+    exam: `Match tools to jobs: fusion splicer joins fiber, OPM or light meter measures optical power and loss, OTDR locates faults with distance, VFL shows breaks visually, and a scope inspects connectors. Know that dirty connectors are the most common cause of fiber problems.`,
+    mistakes: [
+      `Looking into a live fiber or transmitter port.`,
+      `Connecting a connector without inspecting and cleaning it.`,
+      `Assuming an OTDR gives the true end-to-end loss without proper launch and tail cables.`,
+    ],
+    terms: [
+      { term: 'Fusion splicer', def: `Tool that permanently joins two fibers by melting them with an electric arc.` },
+      { term: 'Optical power meter (light meter)', def: `Instrument that measures optical power, used to find loss.` },
+      { term: 'OTDR', def: `Optical time-domain reflectometer that plots reflections and loss along a fiber.` },
+      { term: 'Visual fault locator (VFL)', def: `Red-light source for finding breaks and bends in short fibers.` },
+      { term: 'Loss budget', def: `Maximum total loss, in dB, a link can have and still work.` },
+      { term: 'Insertion loss', def: `Total signal loss added by a link or component.` },
+    ],
+    checks: [
+      {
+        prompt: `Which tool joins two fibers permanently with very low loss using an electric arc?`,
+        options: [`Fusion splicer`, `Crimper`, `Tone generator`, `Wire-map tester`],
+        correct: 0,
+        explanation: `A fusion splicer melts the glass of two fibers into a continuous, low-loss joint.`,
+      },
+      {
+        prompt: `A technician needs the distance to a break in a fiber run. Which tool provides it?`,
+        options: [`OTDR`, `Optical power meter alone`, `Loopback plug`, `Punchdown tool`],
+        correct: 0,
+        explanation: `An OTDR plots events along the fiber with their distance.`,
+      },
+      {
+        prompt: `A single-mode link of 3 km has two connector pairs (0.5 dB each) and no splices. Using 0.4 dB/km, what is the expected total loss?`,
+        options: [`1.2 dB`, `2.2 dB`, `3.4 dB`, `4.2 dB`],
+        correct: 1,
+        explanation: `3 km times 0.4 dB is 1.2 dB, plus 2 times 0.5 dB is 1.0 dB, for 2.2 dB total.`,
+      },
+    ],
+    mini: {
+      prompt: `A new fiber link has an expected loss of 2 dB but the power meter measures 5 dB.`,
+      task: `Name the next tool and two likely causes.`,
+    },
+    recap: `Fusion splices are the lowest-loss joins, power meters measure total loss against the budget, VFLs and OTDRs locate faults, and clean connectors are essential. Add up fiber, connector, and splice losses and compare with the measured value to decide whether a link is healthy.`,
+    classroom: `"Linisin muna bago ikabit, sukatin ang loss, at kapag mas malaki sa inaasahan, hanapin gamit ang OTDR."`,
+  });
 }(window.NetReady));

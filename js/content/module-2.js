@@ -406,4 +406,148 @@
     classroomAnswer:
       '"I trace it step by step — DNS, then TCP handshake, then routing, then the local link — because each step tells me exactly which layer actually broke."',
   };
+
+  NetReady.LESSONS['2-5'] = NetReady.lesson(2, {
+    id: '2-5',
+    slug: 'encapsulation-and-decapsulation-in-detail',
+    title: 'Encapsulation and Decapsulation in Detail: Headers, PDUs, and a Packet Followed Hop by Hop',
+    minutes: 18,
+    outcomes: [
+      `Name the PDU at each OSI layer and list what each header contains.`,
+      `Walk a packet down the sender's stack and up the receiver's stack.`,
+      `Explain what changes and what stays the same at each router hop.`,
+      `Calculate frame overhead and relate it to MTU and MSS.`,
+    ],
+    why: `The exam begins with the OSI model and explicitly lists encapsulation and decapsulation, the Ethernet, IP, and TCP/UDP headers, TCP flags, payload, and MTU. Everything else in networking (switching, routing, firewalls, troubleshooting) depends on knowing which header a device reads.`,
+    simple: `Encapsulation is wrapping data in headers as it moves down the layers. The application hands data to the transport layer, which adds a TCP or UDP header (making a segment or datagram). The network layer adds an IP header (making a packet). The data link layer adds an Ethernet header and a trailer (making a frame). The physical layer sends bits. At the receiver the process reverses: decapsulation removes each header in turn, passing the contents up. Each device reads only the headers at its own layer: a switch reads the Ethernet header, a router reads the IP header, a firewall may read up to the TCP or application data. At every router the Ethernet header is removed and replaced, but the IP addresses stay the same from source to destination.`,
+    taglish: `Ang encapsulation ay pagbabalot ng data ng header habang bumababa sa mga layer. Ibibigay ng application ang data sa transport layer na magdadagdag ng TCP o UDP header (segment o datagram). Magdadagdag ang network layer ng IP header (packet). Magdadagdag ang data link layer ng Ethernet header at trailer (frame). Ang physical layer ay nagpapadala ng bits. Sa receiver, baligtad: tinatanggal ang bawat header (decapsulation) at ipinapasa pataas. Ang bawat device ay binabasa lang ang header sa sarili niyang layer: switch ang Ethernet, router ang IP, firewall hanggang TCP o application. Sa bawat router, pinapalitan ang Ethernet header, pero hindi nagbabago ang IP address mula source hanggang destination.`,
+    analogy: {
+      title: 'Sulat sa loob ng sobre sa loob ng kahon',
+      text: `Ang sulat mo (data) ay inilalagay sa sobre na may pangalan ng tatanggap (TCP/UDP header), tapos sa kahon na may address ng bahay (IP header), tapos ilalagay sa trak ng LBC na may tag ng sangay ng pagdadalhan (Ethernet header). Sa bawat sangay, papalitan ang trak at tag, pero hindi binubuksan ang kahon at sobre. Sa dulo, binubuksan ang bawat balot (decapsulation) hanggang makuha ang sulat.`,
+    },
+    steps: [
+      `PDUs (protocol data units) by layer: Layers 5 to 7 data, Layer 4 segment (TCP) or datagram (UDP), Layer 3 packet, Layer 2 frame, Layer 1 bits.`,
+      `TCP header (at least 20 bytes): source port, destination port, sequence number, acknowledgment number, flags (SYN, ACK, FIN, RST, PSH, URG), window size, checksum. UDP header is only 8 bytes: source port, destination port, length, checksum.`,
+      `IP header (at least 20 bytes for IPv4): version, TTL, protocol number (6 TCP, 17 UDP, 1 ICMP, 47 GRE, 50 ESP, 51 AH, 89 OSPF), source IP, destination IP, header checksum, and fragmentation fields.`,
+      `Ethernet frame: 14-byte header (destination MAC 6 bytes, source MAC 6 bytes, EtherType 2 bytes, for example 0x0800 for IPv4, 0x86DD for IPv6, 0x0806 for ARP) plus a 4-byte frame check sequence (FCS) trailer. An 802.1Q tag adds 4 bytes between the source MAC and EtherType.`,
+      `Payload and MTU: the standard Ethernet payload limit (MTU) is 1500 bytes. The maximum frame is 1518 bytes (1522 with a VLAN tag): 14 + 1500 + 4 = 1518. For a TCP segment, the MSS is 1500 minus 20 (IP) minus 20 (TCP) = 1460 bytes of application data.`,
+      `Sending: the application data goes down; TCP adds ports, IP adds addresses, and the NIC adds MAC addresses and the FCS. For a destination on another subnet, the destination MAC is the default gateway's MAC while the destination IP is the real server.`,
+      `Switch: reads the destination MAC, forwards the frame, and does not change it. Router: decapsulates the frame, reads the destination IP, decrements TTL (and recalculates the checksum), looks up the route, and encapsulates the packet in a new frame with the next hop's MAC addresses.`,
+      `Receiving: the NIC checks the destination MAC and the FCS (drops corrupt frames, which count as CRC errors), the IP layer checks the destination IP and protocol field, TCP or UDP uses the destination port to find the application, and the data is delivered.`,
+      `Firewalls and NAT: a stateful firewall tracks TCP flags and ports; NAT rewrites IP addresses (and ports for PAT) in the IP and transport headers and fixes the checksums.`,
+    ],
+    deepDive: [
+      {
+        title: 'The headers, drawn out',
+        code: `Ethernet frame (Layer 2)
++-----------+-----------+----------+-----------------------------+-----+
+| Dest MAC  | Src MAC   | EtherType|       Payload (up to 1500)  | FCS |
+|  6 bytes  |  6 bytes  | 2 bytes  |                             | 4 B |
++-----------+-----------+----------+-----------------------------+-----+
+                                   |
+                        IP packet (Layer 3)
+                        +---------+---------+--------------------+
+                        | IP hdr  | TCP hdr | Application data   |
+                        | 20 B    | 20 B    | up to 1460 B (MSS) |
+                        +---------+---------+--------------------+
+
+IP header key fields:  version | TTL | protocol (6=TCP) | src IP | dst IP
+TCP header key fields: src port | dst port | seq | ack | flags | window`,
+        note: `Add it up: 14 + 20 + 20 + 1460 + 4 = 1518 bytes, the largest standard Ethernet frame.`,
+      },
+      {
+        title: 'A web request followed hop by hop',
+        text: `PC 192.168.1.10 (MAC AA:AA) requests a page from a web server at 203.0.113.80. The default gateway is 192.168.1.1 (MAC BB:BB). Watch which fields change at the router.`,
+        code: `At the PC (before the router)
+  Ethernet : dst MAC BB:BB (gateway)   src MAC AA:AA   type 0x0800
+  IP       : src 192.168.1.10          dst 203.0.113.80  TTL 128  proto 6
+  TCP      : src port 50412            dst port 443      flags SYN
+
+At the router (after routing; next hop is the ISP router with MAC CC:CC)
+  Ethernet : dst MAC CC:CC             src MAC DD:DD (router's WAN port)
+  IP       : src 203.0.113.2*          dst 203.0.113.80  TTL 127  proto 6
+  TCP      : src port 50412*           dst port 443      flags SYN
+  (*after NAT/PAT the source IP and port are rewritten; without NAT they stay)`,
+        note: `MAC addresses change at every Layer 3 hop; IP addresses stay end to end unless NAT rewrites them; TTL drops by 1 at each router; ports stay the same unless PAT rewrites them.`,
+      },
+      {
+        title: 'Which device reads which layer?',
+        code: `Device               Reads                         Typical decision
+-------------------  ----------------------------  ------------------------------------
+Hub / repeater       Nothing (signals)             Repeat bits to all ports
+Switch               Ethernet header (dst MAC)     Forward to the port with that MAC
+Router               IP header (dst IP, TTL)       Pick the next hop, rewrite Ethernet
+Stateful firewall    IP + TCP/UDP (ports, flags)   Permit or deny the connection
+Load balancer        TCP/UDP or HTTP (L4 or L7)    Choose a server for the session
+NIC                  Ethernet header and FCS       Accept or discard the frame`,
+      },
+      {
+        title: 'Decapsulation at the server, in order',
+        code: `1. NIC receives bits and builds the frame; FCS check passes (otherwise it counts as a CRC error)
+2. Destination MAC matches the NIC -> remove the Ethernet header and trailer
+3. IP layer: destination IP is this server -> remove the IP header; protocol 6 means pass to TCP
+4. TCP layer: check the sequence number, send an ACK; destination port 443 -> deliver to the web server process
+5. Application receives the HTTP request data`,
+        note: `A failure at any step produces a characteristic symptom: CRC errors (step 1), a silent drop on a wrong IP (3), a TCP reset from a closed port (4).`,
+      },
+    ],
+    table: {
+      label: 'Table of PDUs and headers by layer',
+      head: ['OSI layer', 'PDU', 'Key header information', 'Device that reads it'],
+      rows: [
+        ['7 to 5 Application, Presentation, Session', 'Data', 'Protocol content (HTTP, DNS)', 'Proxy, WAF, application firewall'],
+        ['4 Transport', 'Segment (TCP) / datagram (UDP)', 'Ports, sequence numbers, flags', 'Stateful firewall, load balancer'],
+        ['3 Network', 'Packet', 'Source and destination IP, TTL, protocol', 'Router, Layer 3 switch'],
+        ['2 Data Link', 'Frame', 'Source and destination MAC, EtherType, FCS', 'Switch, NIC'],
+        ['1 Physical', 'Bits', 'Signals on the medium', 'Hub, repeater, cabling'],
+      ],
+      caption: 'Each layer adds its own header; each device reads its own layer.',
+    },
+    example: `A user cannot reach a server in another VLAN. A packet capture at the user's PC shows frames with the correct destination IP but the destination MAC set to the server's MAC instead of the gateway's. The PC's subnet mask is wrong (/16 instead of /24), so it believed the server was on its own subnet and ARPed for it directly instead of sending to the gateway. Fixing the mask makes the PC use the gateway's MAC, and the router can forward the packet.`,
+    tips: [
+      `Remember: MAC addresses are for the next hop, IP addresses are for the end-to-end destination.`,
+      `A frame's FCS is checked at every hop; a bad FCS is dropped silently and shows up as a CRC error counter.`,
+      `To go from MTU to MSS, subtract 40 bytes for IPv4 plus TCP (60 for IPv6 plus TCP).`,
+    ],
+    exam: `Know the PDU names, what each header contains, that routers rewrite the Ethernet header but not the IP addresses, that TTL decreases per hop, and the frame size arithmetic (1500 MTU, 1518 frame). Be able to map a TCP flag or header field to the symptom it explains.`,
+    mistakes: [
+      `Saying the destination MAC is the final server's MAC for an off-subnet destination.`,
+      `Confusing a segment (Layer 4), a packet (Layer 3), and a frame (Layer 2).`,
+      `Forgetting that the FCS trailer is part of the Ethernet frame size.`,
+    ],
+    terms: [
+      { term: 'Encapsulation', def: `Adding a header (and sometimes a trailer) at each layer as data moves down the stack.` },
+      { term: 'Decapsulation', def: `Removing headers layer by layer as data moves up the stack at the receiver.` },
+      { term: 'PDU', def: `Protocol data unit: bits, frame, packet, segment or datagram, or data.` },
+      { term: 'EtherType', def: `Frame field that says which protocol the payload carries, such as IPv4 or ARP.` },
+      { term: 'FCS', def: `Frame check sequence, a trailer used to detect corrupted frames.` },
+      { term: 'MTU / MSS', def: `Largest packet an interface can send / largest TCP payload per segment.` },
+    ],
+    checks: [
+      {
+        prompt: `A packet crosses a router. Which header field is rewritten by the router even without NAT?`,
+        options: [`The destination MAC address (new frame for the next hop)`, `The source IP address`, `The destination port`, `The TCP sequence number`],
+        correct: 0,
+        explanation: `The router builds a new Ethernet frame for the next hop; the IP addresses and ports stay unchanged unless NAT is applied.`,
+      },
+      {
+        prompt: `What is the largest standard Ethernet frame, including header and FCS, for a 1500-byte MTU?`,
+        options: [`1500 bytes`, `1514 bytes`, `1518 bytes`, `9000 bytes`],
+        correct: 2,
+        explanation: `14 bytes of header plus 1500 bytes of payload plus 4 bytes of FCS equals 1518.`,
+      },
+      {
+        prompt: `Which PDU name belongs to Layer 3?`,
+        options: [`Frame`, `Segment`, `Packet`, `Bits`],
+        correct: 2,
+        explanation: `Layer 3 data is a packet; frames are Layer 2 and segments are Layer 4.`,
+      },
+    ],
+    mini: {
+      prompt: `A capture shows an Ethernet frame with EtherType 0x0806.`,
+      task: `What protocol does the payload carry, and what does the sender want?`,
+    },
+    recap: `Data is wrapped with a TCP or UDP header, an IP header, and an Ethernet header and trailer on the way down, and unwrapped in reverse at the receiver. Switches read MACs, routers read IPs and rewrite the frame at each hop, firewalls read ports and flags, and the MTU and MSS arithmetic follows from the header sizes.`,
+    classroom: `"Ang MAC ay para sa susunod na hakbang, ang IP ay para sa huling destinasyon."`,
+  });
 }(window.NetReady));

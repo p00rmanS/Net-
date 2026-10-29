@@ -1283,4 +1283,141 @@
     recap: `ICS and SCADA run physical processes, using PLCs, HMIs, and RTUs. OT puts availability and safety first, so protect it with segmentation, industrial DMZs, jump hosts, passive monitoring, and careful patching.`,
     classroom: `"Hindi pwedeng i-reboot ang planta para sa update. Kaya ihiwalay at bantayan, huwag basta galawin."`,
   });
+
+  NetReady.LESSONS['12-14'] = NetReady.lesson(12, {
+    id: '12-14',
+    slug: 'authorization-models-rbac-least-privilege-geofencing',
+    title: 'Authorization and Access Models: Least Privilege, RBAC, Geofencing, Time-Based Access, and Kerberos',
+    minutes: 17,
+    outcomes: [
+      `Separate authentication, authorization, and accounting and name the factors of authentication.`,
+      `Compare RBAC with DAC, MAC, and attribute-based access control.`,
+      `Apply least privilege, geofencing, and time-based restrictions.`,
+      `Explain Kerberos tickets and the joiner-mover-leaver account lifecycle.`,
+    ],
+    why: `Identity and access management is a major security objective. The exam lists least privilege, role-based access control, geofencing, and time-based authentication, along with MFA, SSO, RADIUS, LDAP, SAML, and TACACS+.`,
+    simple: `Authentication proves who you are; authorization decides what you may do; accounting records what you did (AAA). Least privilege means giving each person or system only the access it needs, no more. Role-based access control (RBAC) assigns permissions to roles such as "helpdesk" or "network admin", and people receive roles, which is far easier to manage than per-person permissions. Other models are discretionary (the owner decides), mandatory (labels and a central policy decide), and attribute-based (rules based on attributes such as department, device health, and location). Geofencing allows or blocks access based on location, and time-based restrictions allow access only during defined hours or for a limited period. Kerberos is a ticket-based authentication system for networks.`,
+    taglish: `Ang authentication ay nagpapatunay kung sino ka; ang authorization ay nagpapasya kung ano ang puwede mong gawin; ang accounting ay nagtatala ng ginawa mo (AAA). Ang least privilege ay pagbibigay lang ng access na kailangan, hindi higit. Ang role-based access control (RBAC) ay nagtatalaga ng permissions sa roles gaya ng "helpdesk" o "network admin", at ang tao ay binibigyan ng role — mas madaling pamahalaan kaysa permissions bawat tao. May iba pang modelo: discretionary (may-ari ang nagpapasya), mandatory (labels at sentral na patakaran), at attribute-based (batay sa department, kalusugan ng device, lokasyon). Ang geofencing ay nagpapahintulot o humaharang ayon sa lokasyon; ang time-based ay oras o tagal lang ng access. Ang Kerberos ay ticket-based na authentication.`,
+    analogy: {
+      title: 'Gusali na may mga key card',
+      text: `Ang authentication ay pagpapakita ng ID sa guwardiya. Ang authorization ay kung aling palapag ang bubuksan ng key card mo (role). Ang least privilege ay key card na bubukas lang sa palapag mo. Ang geofencing ay card na gumagana lang sa loob ng gusali, at ang time-based ay card na gumagana lang 8 a.m. hanggang 6 p.m. Ang accounting ay logbook ng bawat pasok mo.`,
+    },
+    steps: [
+      `AAA: authentication (who are you), authorization (what may you do), accounting (what did you do, for auditing and billing). RADIUS combines authentication and authorization and is common for network access (UDP 1812/1813); TACACS+ (TCP 49) separates the three functions, encrypts the whole payload, and supports per-command authorization on network devices.`,
+    `Authentication factors: something you know (password, PIN), something you have (token, smart card, phone), something you are (fingerprint, face), plus somewhere you are (location) and something you do (behavior). Multifactor authentication (MFA) combines two or more different factor types; two passwords is not MFA.`,
+      `Least privilege: grant the minimum rights needed for the job, for the shortest time needed. Related: separation of duties (no single person can complete a sensitive process alone) and need to know.`,
+      `Role-based access control (RBAC): permissions attach to roles; users are assigned roles. Benefits: consistency, easy onboarding and offboarding, easy audit ("who has the network-admin role?"). Role explosion is the risk when there are too many roles.`,
+      `Other models: discretionary (DAC): the resource owner sets permissions, flexible but harder to control. Mandatory (MAC): a central authority assigns security labels (such as Secret) and the system enforces them, used in high-security environments. Attribute-based (ABAC): decisions use attributes and policy, such as user department, device compliance, time, and location.`,
+      `Geofencing: restricts access based on geographic location (for example allow administrative logins only from the corporate network or specific countries, or block logins from unexpected regions). It is often combined with conditional access and impossible-travel detection.`,
+      `Time-based authentication and access: restrict login to business hours, grant temporary or just-in-time privileged access that expires, use one-time passwords (TOTP codes that change every 30 seconds), and expire vendor accounts automatically.`,
+      `Single sign-on (SSO): sign in once to access many applications, using federation protocols such as SAML (XML assertions between an identity provider and a service provider) and OAuth/OpenID Connect. Benefits: fewer passwords, central control; risk: the identity provider becomes a high-value target, so protect it with MFA.`,
+      `Directory services: LDAP (TCP 389, LDAPS 636) queries a directory such as Active Directory. Kerberos (UDP/TCP 88) uses a key distribution center (KDC): you authenticate once and receive a ticket-granting ticket (TGT), then request service tickets for each resource without sending your password again. Kerberos needs clocks synchronized within about five minutes.`,
+      `Account lifecycle: joiner (create the account with the right role), mover (change roles and remove old access), leaver (disable immediately and revoke tokens and keys). Regular access reviews catch privilege creep.`,
+    ],
+    deepDive: [
+      {
+        title: 'RBAC in practice: a small role matrix',
+        code: `Role              View configs  Change configs  Reset passwords  Delete users  Export logs
+----------------  ------------  --------------  ---------------  ------------  -----------
+Helpdesk          Yes           No              Yes              No            No
+Network operator  Yes           Limited (VLAN)  No               No            Yes
+Network admin     Yes           Yes             No               No            Yes
+Security admin    Yes           No              Yes              Yes           Yes
+Auditor           Yes           No              No               No            Read-only
+
+New hire in the NOC -> assigned "Network operator". When she moves to engineering the role is
+swapped, not extended; when she leaves, one account disable removes everything.`,
+        note: `Notice separation of duties: the person who changes configs cannot also delete audit logs or users.`,
+      },
+      {
+        title: 'Kerberos in four messages',
+        code: `1. Client -> KDC (Authentication Service): "I am alice" (proves identity using her key)
+   KDC -> Client: Ticket-Granting Ticket (TGT), valid for hours
+2. Client -> KDC (Ticket-Granting Service): "I want to use fileserver", presents the TGT
+   KDC -> Client: Service ticket for fileserver
+3. Client -> fileserver: presents the service ticket
+4. Fileserver verifies the ticket; access is granted. Alice's password never crosses the network.
+
+Failure clue: clock skew of more than about 5 minutes -> "ticket not yet valid" / login failures`,
+        note: `Kerberos uses tickets and time stamps, which is why time synchronization (NTP) matters for authentication.`,
+      },
+      {
+        title: 'Conditional access rule combining the ideas',
+        code: `Rule: Administrative access to network devices
+  WHO       members of role "Network admin"
+  WHAT      SSH to management interfaces
+  WHERE     only from the management VLAN or the corporate VPN; geofence: block outside country X
+  WHEN      Mon-Fri 06:00-20:00; outside hours requires approved emergency access (time-limited, 2 hours)
+  HOW       MFA required; device must be compliant (patched, encrypted)
+  AUDIT     every session logged; commands logged via TACACS+ accounting`,
+        note: `Strong access control combines identity, role, location, time, device state, and logging.`,
+      },
+      {
+        title: 'Choosing between RADIUS and TACACS+',
+        code: `                          RADIUS                         TACACS+
+Transport / ports         UDP 1812 (auth), 1813 (acct)   TCP 49
+Encryption                Password only                  Entire payload
+AAA separation            Auth and authz combined        Separate authentication, authorization, accounting
+Typical use               Network access (Wi-Fi, VPN, 802.1X)  Device administration (command authorization)
+Per-command authorization Limited                        Yes`,
+      },
+    ],
+    table: {
+      label: 'Table comparing access control models',
+      head: ['Model', 'Who decides', 'Typical use'],
+      rows: [
+        ['DAC (discretionary)', 'Resource owner', 'File shares, general business use'],
+        ['MAC (mandatory)', 'Central authority with labels', 'High-security and government systems'],
+        ['RBAC (role-based)', 'Roles assigned by administrators', 'Most enterprises and network devices'],
+        ['ABAC (attribute-based)', 'Policy using user, device, and context attributes', 'Zero trust and conditional access'],
+      ],
+      caption: 'RBAC is the one the exam names most often.',
+    },
+    example: `A helpdesk technician who needs to reset user passwords is given the "Helpdesk" role instead of full domain admin rights. When a contractor needs temporary switch access, the team grants a time-limited role that expires after two hours and logs every command through TACACS+. Later, a login from an unexpected country is blocked by a geofencing rule and triggers an alert.`,
+    tips: [
+      `Grant roles, not individual permissions, and review role membership regularly.`,
+      `MFA means different factor types; a password plus a security question is not true MFA.`,
+      `Disable leavers' accounts immediately; stale accounts are a common breach path.`,
+    ],
+    exam: `Know AAA, the factors of authentication, least privilege, RBAC versus DAC and MAC, geofencing, time-based access, SSO with SAML, RADIUS versus TACACS+, LDAP and LDAPS ports, and that Kerberos uses tickets and requires time synchronization.`,
+    mistakes: [
+      `Giving everyone administrator rights "to avoid tickets".`,
+      `Skipping access reviews so permissions pile up as people change jobs.`,
+      `Confusing authentication (identity) with authorization (permissions).`,
+    ],
+    terms: [
+      { term: 'Least privilege', def: `Giving users and systems only the access needed for their tasks.` },
+      { term: 'RBAC', def: `Role-based access control: permissions assigned to roles, roles assigned to users.` },
+      { term: 'Geofencing', def: `Allowing or denying access based on geographic location.` },
+      { term: 'SSO / SAML', def: `Single sign-on across applications using SAML assertions from an identity provider.` },
+      { term: 'TACACS+', def: `Device administration AAA protocol (TCP 49) with per-command authorization.` },
+      { term: 'Kerberos', def: `Ticket-based authentication using a KDC; sensitive to clock skew.` },
+    ],
+    checks: [
+      {
+        prompt: `Permissions are assigned to groups such as "Helpdesk" and "Network admin", and users receive the group that matches their job. What is this model?`,
+        options: [`Role-based access control (RBAC)`, `Mandatory access control`, `Discretionary access control`, `Geofencing`],
+        correct: 0,
+        explanation: `RBAC attaches permissions to roles and assigns roles to users.`,
+      },
+      {
+        prompt: `A policy blocks administrative logins from outside the company's country. What is this an example of?`,
+        options: [`Geofencing`, `Least privilege`, `Port security`, `Split tunneling`],
+        correct: 0,
+        explanation: `Geofencing allows or denies access based on location.`,
+      },
+      {
+        prompt: `Which protocol separates authentication, authorization, and accounting and supports per-command authorization on network devices?`,
+        options: [`TACACS+`, `RADIUS`, `SNMP`, `LLDP`],
+        correct: 0,
+        explanation: `TACACS+ (TCP 49) separates the AAA functions and can authorize individual commands.`,
+      },
+    ],
+    mini: {
+      prompt: `A vendor technician needs access to a router for one maintenance window next Tuesday.`,
+      task: `Describe an access design using least privilege and time-based access.`,
+    },
+    recap: `Authentication proves identity, authorization grants permissions, and accounting records activity. Use least privilege and RBAC, add geofencing and time-based limits, use SSO with MFA, choose RADIUS or TACACS+ appropriately, rely on Kerberos tickets with synchronized time, and manage the joiner-mover-leaver lifecycle.`,
+    classroom: `"Kaunti lang ang access na kailangan, para sa tamang tao, sa tamang lugar, sa tamang oras — at laging may log."`,
+  });
 }(window.NetReady));

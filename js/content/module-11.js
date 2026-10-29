@@ -937,4 +937,434 @@
     classroomAnswer:
       '"I know exactly what each SNMP piece does, I know the trap and poll ports cold, and I never trust a default community string — v3 with authentication and encryption, every time."',
   };
+
+  NetReady.LESSONS['11-10'] = NetReady.lesson(11, {
+    id: '11-10',
+    slug: 'monitoring-in-depth-logs-interfaces-sensors-apis',
+    title: 'Monitoring in Depth: Syslog Severity Levels, Interface Statistics, Environmental Sensors, and API Integration',
+    minutes: 18,
+    outcomes: [
+      `Read syslog messages and rank the eight severity levels.`,
+      `Interpret interface statistics and calculate utilization from counters.`,
+      `Name the environmental sensors a network operations team monitors.`,
+      `Explain baselines, anomaly alerting, availability percentages, and API-based integration.`,
+    ],
+    why: `The monitoring objective lists device logs (traffic, audit, syslog with severity levels), interface statistics, environmental sensors, baselines, anomaly alerts, and API integration. These are the signals operations teams use to find problems before users do.`,
+    simple: `Network devices produce three kinds of information. Logs record events: traffic logs show what passed or was blocked, audit logs record who logged in and what they changed, and syslog messages report system events, each tagged with a severity level from 0 (Emergency) to 7 (Debug). Metrics are numbers collected over time, such as interface state, speed and duplex, bytes and packets in and out, and error counters like CRC errors, giants, and runts. Sensors report the physical environment: temperature, humidity, electrical power, and water leaks. A baseline records what normal looks like, so anomaly alerts can fire when values deviate. Monitoring tools collect this by SNMP polling, SNMP traps, syslog, flow records, and increasingly through APIs.`,
+    taglish: `Tatlong uri ng impormasyon ang nagmumula sa network devices. Ang logs ay talaan ng mga pangyayari: traffic logs (ano ang pumasa o hinarang), audit logs (sino ang nag-login at ano ang binago), at syslog (mga pangyayari sa sistema) na may severity level mula 0 (Emergency) hanggang 7 (Debug). Ang metrics ay mga numerong kinokolekta sa paglipas ng panahon: link state, speed at duplex, bytes at packets, at error counters gaya ng CRC, giants, at runts. Ang sensors ay nag-uulat ng kapaligiran: temperatura, humidity, kuryente, at tagas ng tubig. Ang baseline ay talaan ng normal, kaya may anomaly alert kapag lumihis. Nangongolekta ang monitoring tools gamit ang SNMP polling, SNMP traps, syslog, flow records, at API.`,
+    analogy: {
+      title: 'Dashboard ng kotse',
+      text: `Ang dashboard ay may ilaw para sa seryosong problema (Emergency, Alert), numero para sa bilis at temperatura (metrics), at talaan ng mga biyahe at serbisyo (logs). Kapag alam mo ang normal na temperatura ng makina (baseline), makikita mo agad kapag mainit na.`,
+    },
+    steps: [
+      `Syslog: devices send log messages to a collector, normally over UDP 514 (TCP or TLS on 6514 for reliability and security). Each message has a facility (source type), a severity, a timestamp, the hostname, and text. Accurate time (NTP) is essential for correlating logs.`,
+      `Severity levels: 0 Emergency (system unusable), 1 Alert (act immediately), 2 Critical, 3 Error, 4 Warning, 5 Notice, 6 Informational, 7 Debug. Lower numbers are more severe. Setting a logging level of 4 sends messages of severity 4 and more severe (0 to 4).`,
+      `Log types: traffic logs (firewall permits and denies, flows), audit logs (authentication, configuration changes, privileged actions: who, what, when), system or event logs (interface up/down, reloads, hardware faults), and security logs (alerts from IDS/IPS).`,
+      `Interface statistics: link state (up/down), speed and duplex, bytes and packets sent and received (used to compute utilization), errors (CRC, runts, giants, input errors), discards or drops, and protocol packet and byte counts. A good monitor polls these regularly and graphs the rate of change.`,
+      `Utilization: utilization percent = (bits transferred in the interval divided by seconds) divided by interface speed. Compare 95th-percentile usage with capacity to plan upgrades.`,
+      `Environmental sensors: temperature, humidity, electrical (voltage, UPS battery and load), water or flood detection, smoke, and door or cabinet access. They are polled by SNMP or reported by traps, and raise alerts before equipment fails.`,
+      `Baselines and anomaly alerting: record normal traffic, CPU, memory, and error levels over a typical period. Static thresholds (CPU above 90 percent) catch known limits; anomaly detection flags deviations from the baseline (traffic at 3 a.m. ten times the normal).`,
+      `Availability: the percentage of time a service is up. 99.9 percent allows about 8.76 hours of downtime a year; 99.99 percent about 52.6 minutes; 99.999 percent about 5.26 minutes. Uptime and downtime are tracked against the service-level agreement (SLA).`,
+      `API integration: modern devices and cloud services expose REST (HTTP with JSON) or gRPC and streaming telemetry. Monitoring systems pull metrics through the API, platforms push events with webhooks, and automation tools use the same APIs to read state and make changes, replacing screen scraping of CLI output.`,
+    ],
+    deepDive: [
+      {
+        title: 'Reading a syslog message',
+        code: `Oct 28 14:03:11 core-sw1 %LINK-3-UPDOWN: Interface GigabitEthernet0/12, changed state to down
+Oct 28 14:03:12 core-sw1 %LINEPROTO-5-UPDOWN: Line protocol on Interface GigabitEthernet0/12, changed state to down
+Oct 28 14:05:40 core-sw1 %SYS-5-CONFIG_I: Configured from console by admin on vty0 (10.9.9.20)
+Oct 28 14:06:02 core-sw1 %PM-4-ERR_DISABLE: bpduguard error detected on Gi0/7, putting Gi0/7 in err-disable state
+
+Format: %FACILITY-SEVERITY-MNEMONIC: message
+  %LINK-3-UPDOWN     -> severity 3 (Error)
+  %SYS-5-CONFIG_I    -> severity 5 (Notice): an audit-style record of who changed the configuration
+  %PM-4-ERR_DISABLE  -> severity 4 (Warning)`,
+        note: `The number between the dashes is the severity. A config-change message with a user and source address is a basic audit trail.`,
+      },
+      {
+        title: 'Severity level memory aid and filtering',
+        code: `0 Emergency     system is unusable
+1 Alert         action must be taken immediately
+2 Critical      critical condition
+3 Error         error condition
+4 Warning       warning condition
+5 Notice        normal but significant
+6 Informational informational messages
+7 Debug         debug-level messages
+
+"logging trap 4"  -> sends severities 0, 1, 2, 3, and 4 only
+Mnemonic: Every Awesome Cisco Engineer Will Need Ice cream Daily`,
+        note: `A lower number means a more serious event, and a level setting includes that level and everything more severe.`,
+      },
+      {
+        title: 'Utilization calculated from interface counters',
+        text: `A 1 Gbps interface counter shows 450,000,000 bytes received in a 60 second polling interval.`,
+        code: `bits       = 450,000,000 bytes x 8       = 3,600,000,000 bits
+rate       = 3,600,000,000 bits / 60 s   = 60,000,000 bps = 60 Mbps
+utilization = 60 Mbps / 1,000 Mbps       = 6 percent
+
+Availability (downtime allowed per year, 365 days):
+  99.9%   -> 8.76 hours
+  99.99%  -> 52.6 minutes
+  99.999% -> 5.26 minutes`,
+        note: `Counters only increase; monitoring tools subtract two readings and divide by the time between them.`,
+      },
+      {
+        title: 'What each sensor protects against',
+        code: `Sensor                    Detects                         Typical alert action
+------------------------  ------------------------------  ------------------------------------
+Temperature               HVAC failure, blocked airflow   Warning at 80 F, critical higher
+Humidity                  Too dry (static) or too wet     Alert outside 40 to 60 percent
+Electrical / UPS          Power loss, low battery, load   Page on battery, graceful shutdown
+Water / flood             Leaks under the floor           Immediate critical alert
+Smoke / door contact      Fire risk, unauthorized access  Alert security team`,
+      },
+      {
+        title: 'API integration: pulling interface data with REST (illustrative)',
+        code: `$ curl -s -H "Authorization: Bearer <token>" https://netctl.example.com/api/v1/devices/core-sw1/interfaces/Gi0-12
+{
+  "name": "GigabitEthernet0/12",
+  "admin_state": "up",
+  "oper_state": "down",
+  "speed_mbps": 1000,
+  "duplex": "full",
+  "in_errors": 0,
+  "crc_errors": 482
+}`,
+        note: `Structured JSON lets scripts and dashboards use the same data. Tokens must be kept secret and rotated.`,
+      },
+    ],
+    table: {
+      label: 'Table of syslog severity levels',
+      head: ['Level', 'Name', 'Meaning'],
+      rows: [
+        ['0', 'Emergency', 'System unusable'],
+        ['1', 'Alert', 'Immediate action required'],
+        ['2', 'Critical', 'Critical condition'],
+        ['3', 'Error', 'Error condition'],
+        ['4', 'Warning', 'Warning condition'],
+        ['5', 'Notice', 'Normal but significant'],
+        ['6', 'Informational', 'Informational message'],
+        ['7', 'Debug', 'Detailed debugging'],
+      ],
+      caption: 'Lower is more severe; a setting includes that level and below it numerically.',
+    },
+    example: `A network operations team notices an interface on a core switch with a slowly rising CRC error counter. The syslog shows no link flaps, so no alert fired, but the monitoring graph of error rate against the baseline shows a clear anomaly. A technician replaces the cable the next morning, avoiding an outage that would have occurred when the connector failed completely.`,
+    tips: [
+      `Alert on rates of change (errors per minute), not only totals, because counters never reset on their own.`,
+      `Keep audit logs for the period your policy or regulations require and protect them from tampering.`,
+      `Set a sensible logging level; Debug in production can overload a device.`,
+    ],
+    exam: `Know the eight severity levels and that 0 is the most severe, the difference between traffic, audit, and syslog logs, the key interface statistics, the environmental sensors, how baselines support anomaly alerting, and that APIs allow tools to integrate. Be able to compute utilization from counters.`,
+    mistakes: [
+      `Assuming severity 7 is the most serious.`,
+      `Forgetting that interface counters are cumulative.`,
+      `Monitoring only devices and ignoring temperature, power, and water sensors.`,
+    ],
+    terms: [
+      { term: 'Syslog severity', def: `Level from 0 (Emergency) to 7 (Debug) describing how serious a log message is.` },
+      { term: 'Audit log', def: `Record of who did what and when, such as logins and configuration changes.` },
+      { term: 'Baseline', def: `Measurement of normal behavior used to detect anomalies.` },
+      { term: 'Anomaly alerting', def: `Notification triggered when a metric deviates from its baseline.` },
+      { term: 'Environmental sensor', def: `Device that measures temperature, humidity, power, or water in a facility.` },
+      { term: 'API integration', def: `Connecting systems by programmatic interfaces, usually REST with JSON.` },
+    ],
+    checks: [
+      {
+        prompt: `Which syslog severity level indicates that the system is unusable?`,
+        options: [`0 Emergency`, `3 Error`, `5 Notice`, `7 Debug`],
+        correct: 0,
+        explanation: `Level 0, Emergency, is the most severe and means the system is unusable.`,
+      },
+      {
+        prompt: `A 100 Mbps link transfers 75,000,000 bits during a 10 second interval. What is the utilization?`,
+        options: [`7.5 percent`, `75 percent`, `0.75 percent`, `750 percent`],
+        correct: 0,
+        explanation: `75,000,000 bits divided by 10 seconds is 7.5 Mbps, which is 7.5 percent of 100 Mbps.`,
+      },
+      {
+        prompt: `Which log type records who logged in and what configuration changes they made?`,
+        options: [`Audit log`, `Traffic log`, `Flow record`, `ARP table`],
+        correct: 0,
+        explanation: `Audit logs track authentication and administrative actions.`,
+      },
+    ],
+    mini: {
+      prompt: `A wiring closet's temperature has risen 12 degrees over a week though no alert fired because the fixed threshold is 90 F.`,
+      task: `Which monitoring idea would have caught this earlier?`,
+    },
+    recap: `Collect logs (traffic, audit, syslog with severity 0 to 7), interface statistics (state, speed, duplex, utilization, errors), environmental sensor data, and compare them to baselines to raise anomaly alerts. APIs let tools exchange this data automatically, and availability percentages show whether SLAs are met.`,
+    classroom: `"Ang log ay kuwento, ang metric ay numero, ang baseline ay kung ano ang normal. Kapag lumihis, doon ang problema."`,
+  });
+
+  NetReady.LESSONS['11-11'] = NetReady.lesson(11, {
+    id: '11-11',
+    slug: 'disaster-recovery-testing-and-high-availability',
+    title: 'Disaster Recovery Testing, High Availability, Backups, and Availability Math',
+    minutes: 17,
+    outcomes: [
+      `Compare active-active and active-passive designs and failover versus failback.`,
+      `Describe tabletop exercises, walkthroughs, simulations, and full failover tests.`,
+      `Explain validation tests for backups and the 3-2-1 backup rule.`,
+      `Calculate availability from MTBF and MTTR.`,
+    ],
+    why: `A disaster recovery plan that has never been tested is only a hope. The operations objective includes DR concepts and high availability, including tabletop exercises and validation tests.`,
+    simple: `High availability (HA) keeps a service running through failures by having redundant components. In an active-active design, two or more systems all serve users at the same time and share load, so if one fails the others absorb its work. In an active-passive design, one system serves while another waits on standby and takes over when the first fails. Moving to the standby is failover; returning to the original once it is repaired is failback. Disaster recovery (DR) is the plan for restoring service after a major event. To trust it, you test it. A tabletop exercise is a discussion-based walk through a scenario with no systems touched. A validation test proves a specific item works, such as restoring a backup to a test server and checking the data. A full failover test actually moves production to the DR site. Backups should follow the 3-2-1 rule: three copies, on two different media, with one offsite.`,
+    taglish: `Ang high availability (HA) ay pagpapatuloy ng serbisyo kahit may sira sa pamamagitan ng redundant na bahagi. Sa active-active, sabay-sabay na nagsisilbi ang dalawa o higit pang sistema at naghahati sa karga; kapag may nasira, sinasalo ng iba. Sa active-passive, isa ang nagsisilbi at ang isa ay naghihintay (standby) para pumalit. Ang paglipat sa standby ay failover; ang pagbalik sa orihinal pagkatapos maayos ay failback. Ang disaster recovery (DR) ay plano ng pagbabalik ng serbisyo pagkatapos ng malaking pangyayari. Para magtiwala dito, kailangang i-test: ang tabletop ay talakayan lang; ang validation test ay pagpapatunay ng isang bahagi gaya ng restore ng backup; ang full failover test ay aktuwal na paglipat ng production sa DR site. Sa backup, sundin ang 3-2-1: tatlong kopya, dalawang uri ng media, isa ay nasa ibang lugar.`,
+    analogy: {
+      title: 'Fire drill sa opisina',
+      text: `Ang tabletop ay pag-uusap kung ano ang gagawin kapag may sunog. Ang validation test ay pagsusuri kung gumagana ang fire extinguisher. Ang full failover ay tunay na fire drill na lahat ay lalabas ng gusali. Ang plano na hindi pa nasusubukan ay baka hindi pala gumagana sa tunay na sunog.`,
+    },
+    steps: [
+      `Redundancy patterns: N+1 (one spare for N components), 2N (a full duplicate), and geographic redundancy (multiple sites). Redundancy applies to power, cooling, links, devices, and sites.`,
+      `Active-active: all nodes serve traffic (load balanced), no idle capacity, but each must handle the full load alone if the other fails (plan capacity accordingly). Needs good state synchronization.`,
+      `Active-passive: a standby takes over on failure (as in FHRP, clustered firewalls, or a warm DR site). Simpler, but the standby is idle and failover takes some seconds or minutes. After repair, failback returns service to the primary, usually in a planned window.`,
+      `DR site types revisited: hot (current data, ready within minutes), warm (equipment ready, data restored in hours), cold (space and power only, days). The choice follows the RTO and RPO and the cost.`,
+      `Backups: full (everything), incremental (changes since the last backup of any kind), differential (changes since the last full). Restore time is shortest with full, then differential, then incremental (which needs the full plus every increment). Follow 3-2-1: three copies, two media types, one offsite (and increasingly one offline or immutable copy against ransomware).`,
+      `Types of DR exercises: tabletop (discussion), walkthrough or checklist review, simulation (a realistic scenario with some actions performed), parallel test (run the DR site alongside production), and full interruption or failover test (production moves). Start with discussions and progress to technical tests.`,
+      `Validation tests: restore a sample of backups regularly and verify the data and application work; test failover of a redundant link or device; test that alerts and contact lists work; confirm the documented runbook steps are correct.`,
+      `After every test or real event hold a lessons-learned review, update the plan, and track fixes. DR documentation must include contact lists, the order of recovery, credentials stored securely, vendor contacts, and diagrams, and be available offline.`,
+      `Availability math: availability = MTBF divided by (MTBF plus MTTR). Redundancy raises availability: two independent components each 99 percent available in parallel give 1 minus (0.01 times 0.01) = 99.99 percent.`,
+    ],
+    deepDive: [
+      {
+        title: 'Availability calculations, worked',
+        code: `Single device:  MTBF = 1,000 hours   MTTR = 10 hours
+  Availability = 1000 / (1000 + 10) = 0.9901 = 99.01 percent
+  Downtime/year ~ (1 - 0.9901) x 8760 h = 86.7 hours
+
+Two such devices in parallel (active-active or active-passive, failover perfect):
+  Unavailability each = 0.0099
+  Both down at once   = 0.0099 x 0.0099 = 0.000098
+  Availability        = 1 - 0.000098 = 99.99 percent  (about 52 minutes/year)
+
+Reducing MTTR is as valuable as raising MTBF:
+  MTBF 1000 h, MTTR 1 h -> 1000/1001 = 99.9 percent`,
+        note: `Redundancy only helps if failover works. Testing failover is how you know the 99.99 percent is real.`,
+      },
+      {
+        title: 'Choosing a backup scheme: restore effort',
+        code: `Sunday full, then daily backups. Restore needed on Thursday morning.
+
+Scheme         Backups required to restore               Backup size/time   Restore effort
+-------------  ----------------------------------------  -----------------  --------------
+Daily full     Thursday's full only                      Largest            Simplest
+Differential   Sunday full + Wednesday differential      Grows during week  2 sets
+Incremental    Sunday full + Mon + Tue + Wed increments  Smallest           Up to 4 sets`,
+        note: `Choose by backup window, storage, and how quickly you must restore (RTO).`,
+      },
+      {
+        title: 'A sample DR test plan, escalating in realism',
+        code: `Quarter 1  Tabletop      Walk through "main data center loses power" with IT, security, business owners
+Quarter 2  Validation    Restore the file server and database backups into an isolated test network; check data
+Quarter 3  Failover test Fail the internet circuits and the core firewall pair over; time it against RTO
+Quarter 4  Full DR test  Move one non-critical application to the DR site for a day; fail back; review
+
+After each: record RTO/RPO achieved, problems found, owners and dates for fixes.`,
+      },
+      {
+        title: 'Failover and failback checklist',
+        code: `Failover:  detect failure -> declare (per criteria) -> promote standby -> redirect traffic (DNS, VIP, routing)
+           -> verify applications and data -> notify users
+Failback:  repair primary -> resync data -> schedule a window -> switch back -> verify -> restore redundancy
+Both:      document timings, decisions, and surprises for the lessons-learned review`,
+      },
+    ],
+    table: {
+      label: 'Table comparing active-active and active-passive',
+      head: ['', 'Active-active', 'Active-passive'],
+      rows: [
+        ['Normal operation', 'All nodes serve traffic', 'One node serves; standby waits'],
+        ['Capacity use', 'High (shared load)', 'Standby idle'],
+        ['Failover', 'Remaining nodes absorb load', 'Standby promoted'],
+        ['Complexity', 'Higher (state sync, load balancing)', 'Lower'],
+        ['Example', 'Load-balanced web farm', 'Firewall HA pair, FHRP gateway'],
+      ],
+      caption: 'Both give redundancy; test the failover either way.',
+    },
+    example: `A company's DR plan says it can recover its billing system in 4 hours. During a tabletop exercise the team realizes nobody has the offsite backup encryption key and the only copy of the runbook is on the failed file server. They add an offline key safe, print the runbook, and next quarter's validation test restores the system in 3 hours 20 minutes, proving the RTO.`,
+    tips: [
+      `A backup that has never been restored is not yet a backup.`,
+      `Test during safe windows, but test: failover tests reveal missing steps that no document review will.`,
+      `Keep one backup copy offline or immutable so ransomware cannot encrypt it too.`,
+    ],
+    exam: `Know active-active versus active-passive, failover and failback, the hot, warm, and cold DR sites, the purpose of tabletop exercises and validation tests, the 3-2-1 backup rule, and the formulas for RPO, RTO, MTTR, MTBF, and availability.`,
+    mistakes: [
+      `Never testing the DR plan.`,
+      `Counting on a redundant pair without testing that failover works.`,
+      `Keeping all backup copies in the same building and on the same network.`,
+    ],
+    terms: [
+      { term: 'Active-active', def: `Redundant nodes that all serve traffic and share load.` },
+      { term: 'Active-passive', def: `One node serves while a standby waits to take over.` },
+      { term: 'Failover / failback', def: `Switching to the standby / returning to the primary after repair.` },
+      { term: 'Tabletop exercise', def: `Discussion-based walkthrough of a disaster scenario.` },
+      { term: 'Validation test', def: `Test that proves a specific recovery capability, such as a backup restore.` },
+      { term: '3-2-1 rule', def: `Three copies of data on two media types with one copy offsite.` },
+    ],
+    checks: [
+      {
+        prompt: `Two firewalls are deployed so that one handles all traffic and the other takes over only if the first fails. What is this design?`,
+        options: [`Active-passive`, `Active-active`, `Load balancing`, `Link aggregation`],
+        correct: 0,
+        explanation: `A standby unit that takes over on failure is an active-passive design.`,
+      },
+      {
+        prompt: `Which exercise is discussion-based and does not touch any production systems?`,
+        options: [`Tabletop exercise`, `Full failover test`, `Parallel test`, `Backup restore`],
+        correct: 0,
+        explanation: `A tabletop exercise walks through a scenario in conversation only.`,
+      },
+      {
+        prompt: `A device has an MTBF of 2,000 hours and an MTTR of 20 hours. What is its availability (to the nearest whole percent)?`,
+        options: [`99 percent`, `90 percent`, `98 percent`, `100 percent`],
+        correct: 0,
+        explanation: `2000 divided by 2020 is about 0.99, or 99 percent.`,
+      },
+    ],
+    mini: {
+      prompt: `A company keeps three copies of its data on the same storage array in one data center.`,
+      task: `Which parts of the 3-2-1 rule does this violate?`,
+    },
+    recap: `High availability uses active-active or active-passive redundancy with failover and failback. DR plans must be tested through tabletop exercises, validation tests, and failover tests, and backups must follow 3-2-1 and be restored to prove they work. Availability math relates MTBF and MTTR.`,
+    classroom: `"Hindi pa plano ang plano hangga't hindi nasusubukan. Subukan, itala, ayusin."`,
+  });
+
+  NetReady.LESSONS['11-12'] = NetReady.lesson(11, {
+    id: '11-12',
+    slug: 'configuration-management-and-asset-lifecycle',
+    title: 'Configuration Management and Asset Lifecycle: Golden Configs, Backups, EOL/EOS, Licensing, and Decommissioning',
+    minutes: 15,
+    outcomes: [
+      `Distinguish production, backup, and baseline (golden) configurations.`,
+      `List what an asset inventory should record, including licensing and warranty.`,
+      `Explain end-of-life, end-of-support, and the steps to decommission a device.`,
+      `Describe how patches and firmware are tested and rolled out.`,
+    ],
+    why: `Documentation, life-cycle, change, and configuration management are in the operations objective. Knowing what to track and when to retire a device is what keeps a network secure and supportable.`,
+    simple: `Configuration management keeps every device's settings known, consistent, and recoverable. The production configuration is what is running now. A backup configuration is a saved copy you can restore. A baseline or golden configuration is the approved standard template for a device type. Comparing production to the baseline reveals drift. An asset inventory records each device's hardware model and serial number, software and firmware versions, licenses, warranty and support contracts, location, owner, and purchase and end-of-life dates. Every device has a life cycle: procurement, deployment, operation and maintenance, then end-of-sale, end-of-life (EOL), and end-of-support (EOS), when the vendor stops fixing security bugs. Retiring a device properly is decommissioning.`,
+    taglish: `Ang configuration management ay nagpapanatiling kilala, pare-pareho, at nababawi ang settings ng bawat device. Ang production configuration ay ang tumatakbo ngayon. Ang backup configuration ay naka-save na kopya na puwedeng ibalik. Ang baseline o golden configuration ay aprubadong template para sa uri ng device. Ang paghahambing ng production sa baseline ay nagpapakita ng drift. Ang asset inventory ay nagtatala ng modelo at serial number, bersyon ng software at firmware, license, warranty at support contract, lokasyon, may-ari, at petsa ng pagbili at EOL. May life cycle ang bawat device: pagbili, deployment, operasyon, tapos end-of-sale, end-of-life (EOL), at end-of-support (EOS) kung kailan hihinto ang vendor sa pag-ayos ng security bugs. Ang tamang pagreretiro ay decommissioning.`,
+    analogy: {
+      title: 'Talaan ng sasakyan ng kumpanya',
+      text: `Ang inventory ay talaan ng lahat ng sasakyan: plate number, taon, insurance, kailan mag-eexpire ang warranty, at kailan ito ibebenta. Ang golden config ay manual ng tamang settings ng bawat model. Ang decommissioning ay hindi basta pag-iwan ng lumang sasakyan sa garahe — tatanggalin ang GPS at susi, ilalagay sa tamang rekord, at ibebenta o itatapon nang maayos.`,
+    },
+    steps: [
+      `Configuration types: running (active in memory) versus startup (saved to flash and loaded at boot); production (live), backup (stored copies), and baseline or golden (the approved reference). Save the running configuration to startup after approved changes or it is lost at reboot.`,
+      `Backups: automate configuration backups after every change and on a schedule, store them securely (they contain secrets), keep versions, and test a restore. A configuration backup plus the device model and firmware version lets you replace failed hardware quickly.`,
+      `Baseline compliance: periodically compare production with the golden configuration to detect drift and unauthorized changes; automation tools and source control make this routine.`,
+      `Change management links to configuration management: each change has a request, approval, risk assessment, maintenance window, implementation plan, test plan, and rollback plan, and ends with updated documentation.`,
+      `Asset inventory fields: asset tag, serial number, model, location (site, rack, U position), IP and MAC address, owner, role, hardware revision, OS and firmware version, license type and expiry, warranty and support contract dates, purchase date, and vendor lifecycle dates.`,
+      `Lifecycle stages: plan and procure, deploy, operate and maintain, then retire. End-of-sale: vendor stops selling. End-of-life (EOL): the product is withdrawn. End-of-support (EOS): no more patches, security fixes, or technical support. Devices past EOS are a security and compliance risk and should be replaced before that date.`,
+      `Patch and firmware management: read release notes, test in a lab or on a pilot group, schedule through change management, back up the configuration first, upgrade in stages (one of a redundant pair at a time), verify, and keep a rollback image.`,
+      `Decommissioning steps: schedule through change management; back up the final configuration if needed; remove the device from monitoring, IPAM, DNS, and the firewall rules; deprovision licenses and accounts; wipe configurations, keys, and data (secure erase); remove from the rack, labeling, and diagrams; update the inventory; recycle or dispose of the hardware according to policy and regulations.`,
+      `Licensing and warranty: track license counts and renewal dates so features do not lapse unexpectedly, and warranty and support contracts (such as next-business-day replacement) so a failed device can be replaced within the SLA.`,
+    ],
+    deepDive: [
+      {
+        title: 'Spotting configuration drift against a golden config',
+        code: `golden-access-switch.cfg (approved)        switch-17 running config (production)
+-----------------------------------------  -----------------------------------------
+service password-encryption                service password-encryption
+no ip http server                          ip http server                  <-- DRIFT
+snmp-server community <redacted> RO        snmp-server community public RW <-- DRIFT (weak, read-write)
+logging host 10.9.9.50                     (missing)                       <-- DRIFT
+line vty 0 4                               line vty 0 4
+ transport input ssh                        transport input ssh telnet     <-- DRIFT (telnet enabled)
+
+Result: 4 deviations; open a change ticket and re-apply the baseline during the maintenance window.`,
+        note: `Drift often comes from emergency manual fixes that were never recorded. Automated comparison finds them quickly.`,
+      },
+      {
+        title: 'An inventory record (example)',
+        code: `Asset tag        : NET-000417
+Device           : Access switch, 48-port PoE
+Model / serial   : ACME-X48P / SN 8F2210334
+Location         : HQ, IDF-2, rack 3, U12
+Management IP    : 10.20.2.12
+Firmware         : 17.9.4
+Owner / role     : Network team / floor 2 access
+License          : Advanced features, expires 2027-03-31
+Warranty/support : Next-business-day, ends 2028-01-15
+Vendor EOS date  : 2030-06-30   -> plan replacement in FY2029`,
+      },
+      {
+        title: 'Lifecycle dates and what to do at each',
+        code: `Milestone            Meaning                                  Action
+-------------------  ---------------------------------------  ---------------------------------
+End-of-sale          Vendor stops selling the model           Choose the replacement model
+End-of-life (EOL)    Product withdrawn, limited support       Budget and schedule replacement
+End-of-support (EOS) No patches or help from the vendor       Must be replaced; risk and audit finding
+Warranty end         Free hardware replacement ends           Renew support or accept risk`,
+      },
+      {
+        title: 'Decommissioning checklist',
+        code: `[ ] Change approved, window scheduled, users informed
+[ ] Final configuration backed up (if needed), then device taken offline
+[ ] Removed from monitoring, IPAM, DNS, DHCP reservations, firewall and ACL rules
+[ ] Licenses released; accounts, SNMP credentials, and keys revoked
+[ ] Configuration and stored data securely wiped (factory reset plus verification)
+[ ] Cables removed and labeled; rack and diagrams updated
+[ ] Inventory status set to retired; hardware recycled or destroyed per policy; certificate of disposal kept`,
+        note: `Forgotten devices with old credentials and stale firewall rules are a common audit finding.`,
+      },
+    ],
+    table: {
+      label: 'Table of configuration types and lifecycle terms',
+      head: ['Term', 'Meaning'],
+      rows: [
+        ['Production configuration', 'The configuration currently in service'],
+        ['Backup configuration', 'Saved copy for restoration'],
+        ['Baseline / golden configuration', 'Approved standard to compare against'],
+        ['EOL', 'Vendor has withdrawn the product'],
+        ['EOS', 'Vendor no longer provides patches or support'],
+        ['Decommissioning', 'Formal, secure retirement of a device'],
+      ],
+      caption: 'Know what is running, what it should be, and when it must be replaced.',
+    },
+    example: `An audit finds three branch routers past their vendor's end-of-support date with a known unpatched vulnerability. The inventory shows exactly which devices, their locations, and warranty dates. The team schedules replacements through change management, restores each site's configuration onto the new router from the stored backup, and decommissions the old ones by wiping them, removing them from monitoring and the firewall rules, and recording the disposal.`,
+    tips: [
+      `Update the inventory and diagrams as part of every change, not afterwards.`,
+      `Treat configuration backups as sensitive; they contain keys and community strings.`,
+      `Plan replacement before end-of-support, not after the vulnerability notice.`,
+    ],
+    exam: `Know production versus backup versus baseline or golden configurations, what an asset inventory tracks (hardware, software, licensing, warranty), EOL versus EOS, patch and firmware management through change control, and the steps of decommissioning.`,
+    mistakes: [
+      `Keeping devices in service past end-of-support.`,
+      `Forgetting to save the running configuration to startup.`,
+      `Decommissioning a device without removing its firewall rules, DNS entries, and credentials.`,
+    ],
+    terms: [
+      { term: 'Golden configuration', def: `Approved standard configuration used as the baseline for a device type.` },
+      { term: 'Configuration drift', def: `Gradual divergence of a device from its approved baseline.` },
+      { term: 'EOL / EOS', def: `End-of-life and end-of-support dates published by the vendor.` },
+      { term: 'Asset inventory', def: `Record of devices, software, licenses, and support details.` },
+      { term: 'Decommissioning', def: `Securely retiring and removing a device from service and records.` },
+    ],
+    checks: [
+      {
+        prompt: `A vendor announces that it will no longer issue security patches for a router model after next year. What date is this?`,
+        options: [`End-of-support (EOS)`, `Purchase date`, `Warranty start`, `Baseline date`],
+        correct: 0,
+        explanation: `End-of-support means no more patches or support, making the device a growing risk.`,
+      },
+      {
+        prompt: `Which type of configuration is the approved standard used to detect drift?`,
+        options: [`Baseline (golden) configuration`, `Startup configuration only`, `Guest configuration`, `Debug configuration`],
+        correct: 0,
+        explanation: `The golden configuration is the reference that production devices are compared against.`,
+      },
+      {
+        prompt: `Which step belongs in decommissioning a switch?`,
+        options: [`Securely wipe it and remove it from monitoring, IPAM, and firewall rules`, `Leave its IP address in DNS`, `Keep SNMP credentials active`, `Unplug it without telling anyone`],
+        correct: 0,
+        explanation: `Decommissioning removes the device from all systems and securely erases its data.`,
+      },
+    ],
+    mini: {
+      prompt: `You are about to upgrade the firmware on a pair of core switches.`,
+      task: `List four steps in order before and during the upgrade.`,
+    },
+    recap: `Manage production, backup, and golden configurations, compare them to find drift, keep an inventory with licensing and warranty data, replace devices before EOL and EOS, roll out patches through change control with backups and rollback, and decommission devices securely.`,
+    classroom: `"Alamin kung ano ang tumatakbo, kung ano ang dapat tumakbo, at kung kailan ito dapat palitan."`,
+  });
 }(window.NetReady));
