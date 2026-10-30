@@ -1777,4 +1777,244 @@ line vty 0 4
     classroom: `"SSH hindi Telnet. Dumaan sa jump box. May out-of-band para kapag patay ang network, may pasukan ka pa rin."`,
   });
 
+  NetReady.LESSONS['12-18'] = NetReady.lesson(12, {
+    id: '12-18',
+    slug: 'identity-federation-sso-saml-oauth-ldap-and-802-1x-eap',
+    title: 'Identity Federation: SSO, SAML, OAuth, LDAP, and 802.1X EAP Methods',
+    minutes: 16,
+    outcomes: [
+      `Explain directory services and LDAP.`,
+      `Compare SSO, federation, SAML, OAuth, and OpenID Connect.`,
+      `Describe the 802.1X roles and the common EAP methods.`,
+      `Match each identity technology to its purpose.`,
+    ],
+    why: `Modern networks authenticate users against central directories and cloud identity providers, and wired and wireless access is controlled by 802.1X. The exam expects you to know the acronyms and what each one does.`,
+    simple: `Instead of every system keeping its own passwords, a central directory (such as Active Directory) stores identities. Single sign-on lets you log in once and use many apps. Federation extends that trust to other organizations and cloud services using standards such as SAML. 802.1X applies the same central login to a network port or Wi-Fi: the switch or AP passes your credentials to a RADIUS server before letting you on.`,
+    taglish: `Sa halip na bawat sistema ay may sariling password, may sentral na directory (tulad ng Active Directory). Ang SSO ay isang login para sa maraming app. Ang federation ay nagpapalawak ng tiwala sa ibang organisasyon at cloud gamit ang SAML. Ang 802.1X ay ganoon din para sa network port o Wi-Fi: ipinapasa ng switch o AP ang credentials sa RADIUS bago payagan.`,
+    analogy: {
+      title: 'Pasaporte at visa',
+      text: `Ang directory ay tanggapan ng pagkakakilanlan ng iyong bansa. Ang SSO ay isang pasaporte na tinatanggap sa buong gusali. Ang federation ay visa agreement: pinagkakatiwalaan ng ibang bansa ang pasaporte mo. Ang 802.1X ay guwardiya sa pinto na tumatawag sa tanggapan bago ka papasukin.`,
+    },
+    steps: [
+      `Directory services store users, groups, computers, and policies in a hierarchy. Microsoft Active Directory (AD) is the common one, and the open standard protocol to query a directory is LDAP (Lightweight Directory Access Protocol): TCP/UDP 389 and LDAPS (LDAP over TLS) on TCP 636. Entries are identified by a distinguished name such as CN=Maria,OU=Sales,DC=corp,DC=example,DC=com. Always use LDAPS or StartTLS so credentials are not sent in cleartext.`,
+      `Kerberos is the ticket-based authentication protocol used by AD (UDP/TCP 88). RADIUS (UDP 1812 and 1813) and TACACS+ (TCP 49) are AAA protocols for network access and device administration, as covered earlier.`,
+      `SSO (single sign-on): authenticate once to an identity provider (IdP) and access many applications without further prompts. Benefits: fewer passwords, better user experience, and central control and revocation. Risk: one compromised account opens many doors, so combine SSO with MFA.`,
+      `Federation: trust between separate organizations or domains so that an identity from one can be used at another. The identity provider (IdP) authenticates the user, and the service provider (SP, the application) trusts the IdP's assertion. Examples: signing in to a SaaS app with your corporate account.`,
+      `SAML (Security Assertion Markup Language): XML-based standard for exchanging authentication and authorization assertions between an IdP and an SP, mostly for web SSO in enterprises. The user is redirected to the IdP, authenticates, and the IdP returns a signed assertion to the SP. SAML is about authentication (who you are) and attributes.`,
+      `OAuth 2.0: an authorization framework that lets an app access resources on your behalf using tokens without receiving your password (for example allowing a calendar app to read your contacts). OpenID Connect (OIDC) adds an identity layer on top of OAuth 2.0 for authentication, using JSON web tokens (JWT). Remember: OAuth is authorization, OIDC and SAML are authentication.`,
+      `802.1X port-based network access control has three roles: the supplicant (client device software), the authenticator (the switch or AP that blocks traffic until authentication succeeds), and the authentication server (RADIUS). Until authenticated, only EAPOL (EAP over LAN) frames are allowed. After success, the switch can place the port in a VLAN chosen by RADIUS (dynamic VLAN assignment).`,
+      `EAP (Extensible Authentication Protocol) methods: EAP-TLS uses client and server certificates (strongest, needs a PKI); PEAP wraps an inner login (such as MSCHAPv2 username and password) inside a TLS tunnel built with a server certificate; EAP-TTLS is similar to PEAP; EAP-FAST is Cisco's tunneled method using protected access credentials (PAC); LEAP is Cisco's old method and is insecure. Use EAP-TLS where possible; validate the server certificate on clients to prevent evil twin attacks.`,
+      `Related controls: MAC authentication bypass (MAB) for devices that cannot run a supplicant (printers), network access control (NAC) posture checks for patch level and antivirus, guest portals, and provisioning protocols for devices (certificates by SCEP or an MDM). Conditional access can require MFA based on risk, location, and device compliance.`,
+    ],
+    deepDive: [
+      {
+        title: 'A SAML login, step by step',
+        text: `A user opens the HR application (the SP). The SP sees no session and redirects the browser to the corporate IdP with an authentication request. The IdP authenticates the user (with MFA), then returns a signed SAML assertion through the browser to the SP. The SP checks the signature and the audience, then creates a session. The application never sees the user's password.`,
+        code: `1. Browser -> SP (hr.example.com)         "I want the app"
+2. SP -> Browser: redirect to IdP        (AuthnRequest)
+3. Browser -> IdP (login.corp.example)   user logs in + MFA
+4. IdP -> Browser: signed SAML assertion
+5. Browser -> SP: assertion              SP validates signature and grants access`,
+        note: `The trust is set up beforehand by exchanging metadata and certificates between the IdP and the SP.`,
+      },
+      {
+        title: '802.1X on a switch port',
+        text: `The port is set to require 802.1X. A laptop with a supplicant sends EAPOL start, the switch relays the EAP exchange to RADIUS over UDP 1812, and RADIUS validates the certificate or credentials and replies Access-Accept with VLAN 10. A printer without a supplicant fails 802.1X and falls back to MAB.`,
+        code: `aaa new-model
+radius server RAD1
+  address ipv4 10.9.9.10 auth-port 1812 acct-port 1813
+  key SharedSecret
+dot1x system-auth-control
+interface Gi1/0/12
+  switchport mode access
+  authentication port-control auto
+  dot1x pae authenticator
+  mab`,
+      },
+    ],
+    table: {
+      label: 'Identity technologies compared',
+      head: ['Technology', 'Purpose', 'Remember'],
+      rows: [
+        ['LDAP / LDAPS', 'Query a directory', 'TCP 389; secure 636'],
+        ['Kerberos', 'Ticket-based authentication in AD', 'Port 88, needs time sync'],
+        ['SAML', 'Web SSO between IdP and SP', 'XML assertions'],
+        ['OAuth 2.0', 'Delegated authorization with tokens', 'Authorization, not authentication'],
+        ['OpenID Connect', 'Authentication layer on OAuth', 'JSON web tokens'],
+        ['802.1X', 'Port-based network access control', 'Supplicant, authenticator, RADIUS'],
+        ['EAP-TLS', 'Mutual certificate authentication', 'Strongest EAP method'],
+        ['PEAP', 'Password inside a TLS tunnel', 'Server certificate only'],
+      ],
+      caption: 'Directory stores identity; protocols prove and carry it.',
+    },
+    example: `A company signs employees in to dozens of cloud apps using SAML SSO with MFA. Laptops join the corporate Wi-Fi with EAP-TLS certificates, and RADIUS places them in the staff VLAN. Printers use MAC authentication bypass into a locked-down printer VLAN.`,
+    tips: [
+      `OAuth equals authorization; SAML and OIDC equal authentication.`,
+      `Supplicant (client), authenticator (switch or AP), authentication server (RADIUS).`,
+      `EAP-TLS needs certificates on both sides; PEAP needs a certificate only on the server.`,
+    ],
+    exam: `Know LDAP ports, Kerberos, SSO and federation, SAML versus OAuth, the 802.1X roles, and the differences between EAP-TLS, PEAP, and EAP-FAST.`,
+    mistakes: [
+      `Using plain LDAP on port 389 across the network for sign-ins.`,
+      `Configuring PEAP clients not to validate the server certificate, enabling evil twin attacks.`,
+      `Calling OAuth an authentication protocol.`,
+    ],
+    terms: [
+      { term: 'LDAP', def: `Protocol for querying and modifying directory services.` },
+      { term: 'SSO', def: `Single sign-on: authenticate once to access multiple applications.` },
+      { term: 'Federation', def: `Trust relationship that lets identities from one domain be used in another.` },
+      { term: 'SAML', def: `XML standard for exchanging authentication assertions between an IdP and an SP.` },
+      { term: 'OAuth', def: `Framework for delegated authorization using access tokens.` },
+      { term: 'Supplicant', def: `Client software that authenticates to the network in 802.1X.` },
+      { term: 'EAP-TLS', def: `EAP method using certificates on both client and server.` },
+    ],
+    commands: [
+      { os: 'Cisco IOS', cmd: 'show authentication sessions', desc: `Lists ports, the authenticated user or MAC, and the method (dot1x or mab).` },
+      { os: 'Cisco IOS', cmd: 'show dot1x all', desc: `Displays 802.1X configuration and status for the switch.` },
+      { os: 'Windows', cmd: 'klist', desc: `Shows the Kerberos tickets held by the current user.` },
+    ],
+    checks: [
+      {
+        prompt: `In 802.1X, which component is the switch or access point that blocks traffic until authentication succeeds?`,
+        options: [`Supplicant`, `Authenticator`, `Authentication server`, `Certificate authority`],
+        correct: 1,
+        explanation: `The authenticator controls the port and relays EAP messages to the RADIUS authentication server.`,
+      },
+      {
+        prompt: `Which technology lets a third-party app access your photos without receiving your password by using an access token?`,
+        options: [`LDAP`, `OAuth`, `RADIUS`, `Kerberos`],
+        correct: 1,
+        explanation: `OAuth is a delegated authorization framework that issues tokens instead of sharing passwords.`,
+      },
+      {
+        prompt: `Which EAP method requires certificates on both the client and the server?`,
+        options: [`PEAP`, `EAP-TLS`, `LEAP`, `EAP-MD5`],
+        correct: 1,
+        explanation: `EAP-TLS provides mutual authentication with client and server certificates.`,
+      },
+    ],
+    mini: {
+      prompt: `Wi-Fi laptops using PEAP connect to a rogue AP with the same SSID and give away their credentials.`,
+      task: `Explain what setting was missing and what stronger method you would move to.`,
+    },
+    recap: `Directories hold identities and LDAP queries them (use LDAPS). SSO and federation share one login across apps and organizations using SAML or OIDC, while OAuth delegates authorization. 802.1X uses a supplicant, authenticator, and RADIUS server, and EAP-TLS is the strongest EAP method.`,
+    classroom: `"OAuth: pahintulot. SAML at OIDC: pagkakakilanlan. 802.1X: supplicant, authenticator, RADIUS. EAP-TLS ang pinakamatibay."`,
+  });
+
+  NetReady.LESSONS['12-19'] = NetReady.lesson(12, {
+    id: '12-19',
+    slug: 'incident-response-digital-forensics-and-security-monitoring',
+    title: 'Incident Response, Digital Forensics, and Security Monitoring',
+    minutes: 15,
+    outcomes: [
+      `List the phases of incident response.`,
+      `Explain evidence handling: order of volatility and chain of custody.`,
+      `Describe SIEM, IDS/IPS, and log sources.`,
+      `Apply containment actions such as isolation and DNS sinkholes.`,
+    ],
+    why: `When something goes wrong, what you do in the first minutes matters. The exam tests the order of the response steps, how to preserve evidence, and the role of monitoring tools. It is also the practical side of the security domain.`,
+    simple: `Incident response is a planned process: prepare, detect, contain, remove the cause, recover, and learn. Forensics is collecting evidence so it can be trusted later, which means collecting the most fragile data first and recording who handled it. Monitoring tools such as a SIEM collect logs from everywhere and alert you when patterns look wrong.`,
+    taglish: `Ang incident response ay may plano: maghanda, tuklasin, i-contain, alisin ang sanhi, mag-recover, at matuto. Ang forensics ay pagkolekta ng ebidensya na mapagkakatiwalaan, kaya unahin ang pinakamabilis mawala at itala kung sino ang humawak. Ang SIEM ay nangongolekta ng logs mula sa lahat at nagbibigay-alerto kapag kahina-hinala.`,
+    analogy: {
+      title: 'Sunog sa gusali',
+      text: `May plano ng paglikas (preparation). Tumutunog ang alarma (detection). Isinasara ang pinto para hindi kumalat ang apoy (containment). Pinapatay ang apoy at inaalis ang sanhi (eradication). Binabalik ang operasyon (recovery). Sinusuri kung ano ang natutunan (lessons learned). Ang imbestigador ay hindi gagalaw ng ebidensya nang walang tala.`,
+    },
+    steps: [
+      `Incident response lifecycle (NIST): preparation (policy, plan, team, tools, training), detection and analysis (identify and confirm the incident, determine scope and severity), containment, eradication, and recovery (together), and post-incident activity (lessons learned, report, improvements). A common six-step version: preparation, identification, containment, eradication, recovery, lessons learned.`,
+      `Preparation includes an incident response plan with roles and contact lists, a communication plan, a defined severity scale, playbooks for common events (malware, DDoS, phishing, data loss), logging and time synchronization (NTP) set up before it is needed, and regular tabletop exercises.`,
+      `Containment: stop the spread while keeping evidence. Short-term options: disconnect or isolate the device (VLAN quarantine, disabling the switch port or Wi-Fi), block IPs and domains at the firewall, disable accounts, and use a DNS sinkhole that returns a harmless address for malicious domains. Long-term containment may include rebuilding systems in a clean segment. Do not power off a compromised machine before collecting volatile data unless required.`,
+      `Eradication removes the cause: delete malware, close the vulnerability, patch, reset credentials, and remove persistence. Recovery restores systems from known-good backups, validates them, monitors closely for reinfection, and returns to production in stages.`,
+      `Order of volatility (collect the most volatile first): CPU registers and cache, then RAM and running processes and network connections, then temporary files and swap, then disk, then remote logs and monitoring data, then archival media and backups. Take a forensic image with a write blocker and hash it (SHA-256) so you can prove it did not change; work on copies.`,
+      `Chain of custody: a documented record of who collected, handled, transferred, and stored each piece of evidence, with date, time, and purpose. A break in the chain can make evidence inadmissible. Label and seal evidence, store it securely, and keep logs of every access. Legal hold means preserving relevant data when litigation is expected.`,
+      `Monitoring sources: firewall, IDS/IPS, router and switch logs, authentication logs (RADIUS, AD), DNS and DHCP logs, NetFlow and packet captures, endpoint (EDR) alerts, and cloud audit logs. Correct timestamps matter, so synchronize every device with NTP and use one time zone (usually UTC).`,
+      `SIEM (security information and event management): collects and normalizes logs from many sources, correlates events (for example 50 failed logins then a success from a new country), raises alerts, and keeps searchable history for compliance. SOAR adds automated response playbooks. IDS detects and alerts; IPS sits inline and blocks. Honeypots and honeytokens detect attackers touching decoy resources. Threat intelligence feeds supply known bad IPs and domains.`,
+      `Reporting and lessons learned: hold a review within days, document timeline, root cause, impact, and what worked or did not, update the plan, controls, and training, and notify the required parties (management, legal, regulators, customers) according to policy and law. Metrics include time to detect and time to contain.`,
+    ],
+    deepDive: [
+      {
+        title: 'A ransomware outbreak on a file server',
+        text: `At 09:12 the SIEM alerts on thousands of file renames from one workstation and the file server. Detection and analysis confirm ransomware and show it is spreading by SMB. The responders isolate the infected workstation by disabling its switch port, block SMB between user VLANs, and snapshot the memory of the server for analysis before changing anything. They find the entry point (a phishing attachment), remove the malware, reset credentials, restore the files from last night's offline backup, and monitor for 30 days. The post-incident review adds email attachment filtering and removes admin rights.`,
+        code: `09:12  Detect     SIEM rule: mass file rename
+09:20  Contain    Disable Gi1/0/14; ACL deny SMB between VLANs
+09:35  Preserve   RAM capture + disk image, hash SHA-256, log in chain of custody
+11:00  Eradicate  Remove malware, patch, reset passwords
+13:30  Recover    Restore from offline backup, verify, monitor
+Day 5  Lessons    Update filters, remove local admin, tabletop in 90 days`,
+        note: `Notice the order: contain before cleanup, and preserve evidence before wiping anything.`,
+      },
+      {
+        title: 'Why time synchronization decides an investigation',
+        text: `If the firewall clock is 7 minutes behind the server clock, an investigator cannot tell whether the connection came before or after the login. Correlation in the SIEM fails and the evidence is weaker in court. All devices should use NTP from trusted sources and the same time zone.`,
+        code: `Firewall log: 14:03:10 allow 203.0.113.9 -> 10.1.1.5:3389   (clock 7 min slow)
+Server log:   14:10:25 Logon success user=admin src=203.0.113.9
+Real order is a 15-second gap, not a 7 minute one.
+Fix:  ntp server 10.0.0.1  (all devices, UTC)`,
+      },
+    ],
+    table: {
+      label: 'Incident response phases and key actions',
+      head: ['Phase', 'Goal', 'Example actions'],
+      rows: [
+        ['Preparation', 'Be ready before it happens', 'Plan, team, tools, NTP, training'],
+        ['Detection and analysis', 'Confirm and scope', 'SIEM alerts, log review, triage'],
+        ['Containment', 'Stop the spread', 'Isolate host, block IP, sinkhole DNS'],
+        ['Eradication', 'Remove the cause', 'Delete malware, patch, reset passwords'],
+        ['Recovery', 'Restore normal operations', 'Restore backups, validate, monitor'],
+        ['Lessons learned', 'Improve', 'Review, update plan, training'],
+      ],
+      caption: 'Prepare, detect, contain, eradicate, recover, learn.',
+    },
+    example: `A SIEM correlates a DNS query for a known malware domain with a workstation's outbound traffic. The analyst isolates the workstation by VLAN quarantine, captures memory, records each step in a chain-of-custody form, and gives the image to the forensics team, who confirm a banking trojan. The domain is added to the DNS sinkhole.`,
+    tips: [
+      `Contain first, then eradicate. Never wipe a machine before you have preserved the evidence you need.`,
+      `Most volatile first: memory before disk.`,
+      `Chain of custody means documentation of every person and time.`,
+    ],
+    exam: `Know the response phases in order, order of volatility, chain of custody and legal hold, what a SIEM does, the difference between IDS and IPS, and containment techniques.`,
+    mistakes: [
+      `Rebooting or reimaging an infected host before capturing memory and logs.`,
+      `Skipping the post-incident review.`,
+      `Leaving device clocks unsynchronized, which breaks log correlation.`,
+    ],
+    terms: [
+      { term: 'Containment', def: `Actions that stop an incident from spreading.` },
+      { term: 'Order of volatility', def: `Sequence for collecting evidence from most to least short-lived.` },
+      { term: 'Chain of custody', def: `Documented history of who handled evidence and when.` },
+      { term: 'SIEM', def: `System that collects, correlates, and alerts on logs from many sources.` },
+      { term: 'DNS sinkhole', def: `DNS that returns a harmless address for malicious domains to block or detect malware.` },
+      { term: 'Legal hold', def: `Requirement to preserve data that may be relevant to litigation.` },
+    ],
+    commands: [
+      { os: 'Linux', cmd: 'sha256sum evidence.img', desc: `Computes a hash to prove an evidence image has not changed.` },
+      { os: 'Linux', cmd: 'dd if=/dev/sdb of=evidence.img bs=4M conv=noerror,sync', desc: `Creates a bit-for-bit image of a disk (use a write blocker for real evidence).` },
+      { os: 'Cisco IOS', cmd: 'interface Gi1/0/14 / shutdown', desc: `Isolates an infected host by disabling its switch port.` },
+    ],
+    checks: [
+      {
+        prompt: `During an incident, a server is confirmed infected and is spreading malware. What should the responder do first?`,
+        options: [`Contain it by isolating the server from the network`, `Reimage it immediately`, `Ignore it until the next maintenance window`, `Delete all log files`],
+        correct: 0,
+        explanation: `Containment stops the spread while preserving evidence, before eradication and recovery.`,
+      },
+      {
+        prompt: `Which evidence should be collected first according to the order of volatility?`,
+        options: [`Backup tapes`, `Hard disk image`, `RAM contents and running processes`, `Printed reports`],
+        correct: 2,
+        explanation: `Memory is the most volatile and is lost when the system powers off, so it is captured first.`,
+      },
+      {
+        prompt: `What does a chain of custody document?`,
+        options: [`Who collected, handled, and stored evidence and when`, `The network topology`, `The SLA with the ISP`, `The password policy`],
+        correct: 0,
+        explanation: `It records every transfer and access so the evidence can be trusted and admitted.`,
+      },
+    ],
+    mini: {
+      prompt: `An analyst finds a compromised workstation and wants to wipe it right away to be safe.`,
+      task: `Explain why that is a mistake and list the correct order of actions.`,
+    },
+    recap: `Respond in phases: prepare, detect, contain, eradicate, recover, and learn. Preserve evidence by order of volatility with hashing and chain of custody, synchronize clocks, and use SIEM, IDS/IPS, logs, and sinkholes to detect and contain.`,
+    classroom: `"I-contain bago linisin. Memory muna bago disk. Isulat sa chain of custody kung sino ang humawak."`,
+  });
+
 }(window.NetReady));

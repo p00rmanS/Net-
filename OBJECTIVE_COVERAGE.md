@@ -14,11 +14,11 @@ at a glance that nothing is missing. Lesson IDs match the website (`#/lesson/<id
 
 | Objective | Lessons |
 |---|---|
-| 1.1 OSI model, encapsulation and decapsulation, headers, MTU | 2-1, 2-3, 2-4, 2-5, 1-5 |
+| 1.1 OSI model, encapsulation and decapsulation, headers, MTU, TCP/UDP internals | 2-6, 2-1, 2-3, 2-4, 2-5, 1-5 |
 | 1.2 Appliances, applications, functions | 7-6, 6-6, 12-11, 6-12, 7-8 |
 | 1.3 Cloud concepts (models, NFV, VPC, gateways, connectivity, storage) | 10-1, 10-2, 10-4, 10-5, 10-9, 10-10, 10-12 |
 | 1.4 Ports, protocols, IP protocol types, traffic types, QoS | 6-13, 6-1, 6-4, 6-5, 6-8, 6-9, 6-10, 1-5, 12-9 |
-| 1.5 Transmission media, transceivers, connectors, cable management | 3-1 to 3-4, 3-6, 3-7, 3-8, 3-10, 3-11, 9-1, 9-6 |
+| 1.5 Transmission media, transceivers, connectors, cable management, WAN access | 8-11, 3-1 to 3-4, 3-6, 3-7, 3-8, 3-10, 3-11, 9-1, 9-6 |
 | 1.6 Topologies and architectures (three-tier, spine-leaf, storage) | 7-7, 10-8, 10-14, 10-15, 3-5, 3-9 |
 | 1.7 IPv4 addressing and subnetting | 4-1 to 4-6 |
 | 1.8 Modern environments (SDN, SD-WAN, VXLAN, ZTA, SASE, IaC, containers, source control, IPv6 transition) | 10-16, 5-6, 7-12, 10-3, 10-6, 10-7, 10-11, 10-13, 8-5, 5-1 to 5-5 |
@@ -27,9 +27,9 @@ at a glance that nothing is missing. Lesson IDs match the website (`#/lesson/<id
 
 | Objective | Lessons |
 |---|---|
-| 2.1 Routing (static, dynamic, AD, BGP, NAT, FHRP) | 8-1 to 8-4, 8-7, 8-9, 8-10, 6-11 |
+| 2.1 Routing (static, dynamic, AD, summarization, BGP, NAT, FHRP) | 4-7, 8-12, 7-12, 8-1 to 8-4, 8-7, 8-9, 8-10, 6-11 |
 | 2.2 Switching (VLAN, trunking, STP, LACP, port security, PoE, MTU) | 7-1 to 7-5, 7-9, 7-10, 7-11, 3-6 |
-| 2.3 Wireless (standards, bands, channels, security, deployment, cellular) | 9-1 to 9-8, 9-10, 9-11, 9-12, 9-13 |
+| 2.3 Wireless (standards, bands, channels, RF, site surveys, IoT, security, cellular) | 9-14, 9-15, 9-16, 9-1 to 9-8, 9-10, 9-11, 9-12, 9-13 |
 | 2.4 Physical installation (MDF/IDF, racks, power, environment, data center) | 3-5, 3-9, 10-14, 11-7 |
 | WAN and VPN | 8-5, 8-6, 8-8, 11-8 |
 
@@ -37,7 +37,7 @@ at a glance that nothing is missing. Lesson IDs match the website (`#/lesson/<id
 
 | Objective | Lessons |
 |---|---|
-| 3.1 Organizational processes (documentation, life cycle, change, configuration, policies) | 11-1, 11-2, 11-6, 11-12 |
+| 3.1 Organizational processes (documentation, diagrams, labeling, IPAM, life cycle, change, configuration, policies) | 11-13, 11-1, 11-2, 11-6, 11-12 |
 | 3.2 Monitoring (SNMP, flow, packet capture, logs and severity, interface stats, sensors, baselines, APIs) | 11-3, 11-9, 11-10, 12-10, 13-10 |
 | 3.3 Disaster recovery (RPO, RTO, MTTR, site types, HA, testing) | 11-4, 11-7, 11-11, 15-5 |
 | 3.4 IPv4/IPv6 services (DHCP, DNS, NTP, SLAAC) | 6-2, 6-3, 6-7, 5-3, 11-5 |
@@ -47,7 +47,7 @@ at a glance that nothing is missing. Lesson IDs match the website (`#/lesson/<id
 
 | Objective | Lessons |
 |---|---|
-| 4.1 Security concepts (CIA, PKI, AAA, RBAC, least privilege, geofencing, certificates, physical, deception, compliance, segmentation, ICS/OT) | 12-1, 12-2, 12-3, 12-12, 12-14, 12-6, 12-7, 12-8, 12-13 |
+| 4.1 Security concepts (CIA, PKI, AAA, SSO, SAML, 802.1X, incident response, RBAC, least privilege, geofencing, certificates, physical, deception, compliance, segmentation, ICS/OT) | 12-1, 12-2, 12-3, 12-12, 12-14, 12-18, 12-19, 12-6, 12-7, 12-8, 12-13 |
 | 4.2 Attacks (DoS, VLAN hopping, ARP/DNS poisoning, rogue devices, social engineering, wireless attacks) | 12-15, 12-16, 12-5, 7-5, 7-10, 9-4, 9-11, 15-4, 15-6 |
 | 4.3 Security features and defense (hardening, NAC, ACLs, zones, filtering, IDS/IPS, remote access) | 12-17, 12-4, 12-6, 12-9, 12-10, 12-11, 10-10 |
 

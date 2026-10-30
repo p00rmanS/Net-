@@ -1253,4 +1253,341 @@
     recap: `Cellular evolved from GSM/CDMA through 3G and all-IP LTE to 5G with low, mid, and mmWave bands and slicing. SIM and eSIM identify subscribers, APNs choose the data gateway, and private 5G gives organizations control.`,
     classroom: `"Mas mabilis ang mmWave pero mas maikli; mas malawak ang low-band pero mas mabagal."`,
   });
+
+  NetReady.LESSONS['9-14'] = NetReady.lesson(9, {
+    id: '9-14',
+    slug: 'wi-fi-6-6e-and-7-ofdma-mu-mimo-and-channel-bonding',
+    title: 'Wi-Fi 5, 6, 6E, and 7: OFDMA, MU-MIMO, and Channel Bonding',
+    minutes: 15,
+    outcomes: [
+      `Match 802.11n, ac, ax, and be to their Wi-Fi generation names, bands, and features.`,
+      `Explain MIMO, MU-MIMO, OFDMA, and channel bonding.`,
+      `Describe the 6 GHz band and why it helps.`,
+      `Choose channel widths for dense and sparse deployments.`,
+    ],
+    why: `Wireless standards are a guaranteed exam topic. You need to know which standard uses which band, what each new generation adds, and why wider channels are not always better.`,
+    simple: `Each Wi-Fi generation is faster mainly because it squeezes more data into each signal (better modulation), uses more antennas at once (MIMO), and uses wider channels (channel bonding). Wi-Fi 6 adds OFDMA, which lets one transmission serve many devices at once, improving efficiency in crowded places. Wi-Fi 6E and 7 open up the 6 GHz band with a lot of clean channels.`,
+    taglish: `Mas mabilis ang bawat henerasyon dahil mas siksik ang data sa signal (modulation), mas maraming antenna (MIMO), at mas malapad na channel. Ang Wi-Fi 6 ay may OFDMA na naglilingkod ng maraming device sa isang transmisyon, mabisa sa siksikang lugar. Ang Wi-Fi 6E at 7 ay gumagamit ng 6 GHz na maraming malinis na channel.`,
+    analogy: {
+      title: 'Trak na naghahatid ng mga kahon',
+      text: `Ang lumang Wi-Fi ay trak na isang customer lang ang dala kada biyahe kahit maliit ang order. Ang OFDMA ay trak na may maraming kompartimento: sabay-sabay na hinahatid ang maliliit na order ng maraming customer. Ang malapad na channel ay mas malawak na kalsada, pero kapag siksik ang kapitbahay ay nagkakabanggaan din.`,
+    },
+    steps: [
+      `Generations and bands: 802.11b (2.4 GHz, 11 Mbps), 802.11a (5 GHz, 54 Mbps), 802.11g (2.4 GHz, 54 Mbps), 802.11n Wi-Fi 4 (2.4 and 5 GHz, up to 600 Mbps with 4 streams and 40 MHz), 802.11ac Wi-Fi 5 (5 GHz only, up to several Gbps, 80 or 160 MHz), 802.11ax Wi-Fi 6 (2.4 and 5 GHz; Wi-Fi 6E adds 6 GHz), and 802.11be Wi-Fi 7 (2.4, 5, and 6 GHz, up to 320 MHz channels).`,
+      `MIMO (multiple input, multiple output) uses several antennas to send multiple spatial streams on the same channel. 802.11n introduced it. SU-MIMO serves one device at a time. MU-MIMO (introduced downstream in 802.11ac Wave 2, and both directions in 802.11ax) serves several devices simultaneously, each on its own stream. A 4x4 radio has four transmit and four receive chains.`,
+      `Modulation: more bits per symbol with denser constellations. 802.11ac uses up to 256-QAM, 802.11ax up to 1024-QAM, and 802.11be up to 4096-QAM. Denser modulation needs a strong clean signal, so the highest rates only work close to the AP.`,
+      `Channel bonding: combining adjacent 20 MHz channels into 40, 80, 160 (and 320 MHz in Wi-Fi 7) for more throughput. Wider channels leave fewer non-overlapping channels, pick up more noise, and increase interference. In 2.4 GHz only three non-overlapping channels exist (1, 6, 11 in North America), so use 20 MHz there.`,
+      `OFDMA (orthogonal frequency-division multiple access, Wi-Fi 6): divides a channel into small resource units (RUs) so that several clients, including low-bandwidth IoT devices, share one transmission. It cuts latency and wasted airtime in dense environments such as stadiums and classrooms. Wi-Fi 5 and earlier use plain OFDM, where one client uses the whole channel at a time.`,
+      `Other Wi-Fi 6 features: BSS coloring (a tag that helps APs ignore neighbors on the same channel and reuse the channel), Target Wake Time (TWT, which schedules when devices wake to save battery), and WPA3 being mandatory for certification.`,
+      `6 GHz band (Wi-Fi 6E and 7): adds up to 1,200 MHz of spectrum with up to seven 160 MHz channels or three 320 MHz channels (in regions that allow it), with no legacy devices. It requires WPA3 (and OWE for open networks) and has a shorter range than 5 GHz, since higher frequencies attenuate faster and penetrate walls less.`,
+      `Wi-Fi 7 (802.11be) adds multi-link operation (MLO, one device uses several bands at once for speed and reliability), 320 MHz channels, 4096-QAM, and puncturing (using a wide channel even when a slice is occupied by interference).`,
+      `Design choices: 2.4 GHz has the longest range and the most interference (microwaves, Bluetooth, neighbors); 5 GHz offers more channels and speed with moderate range; 6 GHz is clean and fast but short range. Use band steering to push capable clients to 5 or 6 GHz, and keep channel widths narrower (20 or 40 MHz) in dense deployments.`,
+    ],
+    deepDive: [
+      {
+        title: 'Why OFDMA helps a crowded classroom',
+        text: `Thirty students each send a few small packets (chat messages, quiz answers). In Wi-Fi 5, each packet needs its own transmission slot with a full preamble and a contention delay, so airtime is mostly overhead. In Wi-Fi 6, the AP assigns small resource units to many clients and receives their uplink data in one scheduled transmission. Total throughput is not larger, but the efficiency and latency are much better.`,
+        code: `Wi-Fi 5 (OFDM):    | C1 | C2 | C3 | C4 | ...   one client per transmission
+Wi-Fi 6 (OFDMA):   | C1 | C2 | C3 | C4 |        four clients share one transmission
+                   (each box is a resource unit in the same channel)`,
+        note: `OFDMA improves efficiency for many small transfers. It does not make a single large download faster than the channel allows.`,
+      },
+      {
+        title: 'Channel plan for a 5 GHz office',
+        text: `The 5 GHz band has 25 non-overlapping 20 MHz channels, but some (DFS channels, 52 to 144) must yield to radar and may be unavailable at times. With 80 MHz width, only about six non-overlapping channels exist, which is barely enough to avoid co-channel interference in a large building. Dropping to 40 MHz gives more reuse and often better real-world performance.`,
+        code: `Width    Non-overlapping channels (5 GHz, North America, approx.)
+20 MHz   25
+40 MHz   12
+80 MHz    6
+160 MHz   2`,
+      },
+    ],
+    table: {
+      label: 'Wi-Fi generations compared',
+      head: ['Standard', 'Name', 'Bands', 'Key features'],
+      rows: [
+        ['802.11n', 'Wi-Fi 4', '2.4 and 5 GHz', 'MIMO, 40 MHz channels'],
+        ['802.11ac', 'Wi-Fi 5', '5 GHz', 'MU-MIMO downstream, 80 and 160 MHz, 256-QAM'],
+        ['802.11ax', 'Wi-Fi 6 / 6E', '2.4, 5 GHz (6E adds 6 GHz)', 'OFDMA, uplink MU-MIMO, 1024-QAM, BSS coloring, TWT'],
+        ['802.11be', 'Wi-Fi 7', '2.4, 5, and 6 GHz', 'MLO, 320 MHz, 4096-QAM'],
+      ],
+      caption: 'Each generation adds efficiency, width, or spectrum.',
+    },
+    example: `A university lecture hall upgrades from Wi-Fi 5 to Wi-Fi 6 access points and 20 MHz channels on 5 GHz. Because OFDMA serves many students at the same time, chat apps and quizzes no longer stall. The IT team also moves laptops to the new 6 GHz band using a separate SSID with WPA3.`,
+    tips: [
+      `ac is 5 GHz only. ax adds back 2.4 GHz and (6E) 6 GHz. n is the first MIMO standard.`,
+      `More channel width does not always mean better performance. In dense areas use narrower channels.`,
+      `6 GHz needs WPA3, has very little interference, and a shorter range.`,
+    ],
+    exam: `Match standards to Wi-Fi names, bands, and features: n (MIMO), ac (5 GHz, MU-MIMO), ax (OFDMA, 6E adds 6 GHz), be (MLO). Know channel bonding widths and the 3 non-overlapping 2.4 GHz channels.`,
+    mistakes: [
+      `Using 40 MHz or wider channels on 2.4 GHz, leaving no non-overlapping channels.`,
+      `Expecting 6 GHz to reach as far as 2.4 GHz.`,
+      `Assuming all clients benefit from OFDMA or 6 GHz when the client hardware is older.`,
+    ],
+    terms: [
+      { term: 'MIMO', def: `Using multiple antennas to send multiple spatial streams on one channel.` },
+      { term: 'MU-MIMO', def: `MIMO that serves multiple client devices at the same time.` },
+      { term: 'OFDMA', def: `Wi-Fi 6 technique that splits a channel into resource units shared by many clients.` },
+      { term: 'Channel bonding', def: `Combining adjacent channels into a wider one for more throughput.` },
+      { term: 'BSS coloring', def: `Tag in Wi-Fi 6 frames that helps reduce co-channel interference.` },
+      { term: 'MLO', def: `Multi-link operation: a Wi-Fi 7 device uses several bands at once.` },
+    ],
+    commands: [
+      { os: 'Windows', cmd: 'netsh wlan show interfaces', desc: `Shows the connected radio type (802.11ax), channel, band, and signal strength.` },
+      { os: 'Linux', cmd: 'iw dev wlan0 link', desc: `Shows the AP, frequency, signal, and bitrate of the current Wi-Fi connection.` },
+    ],
+    checks: [
+      {
+        prompt: `Which Wi-Fi 6 feature lets an access point serve multiple clients in one transmission by dividing the channel into resource units?`,
+        options: [`MU-MIMO only`, `OFDMA`, `Channel bonding`, `Band steering`],
+        correct: 1,
+        explanation: `OFDMA splits the channel into resource units shared by several clients in the same transmission.`,
+      },
+      {
+        prompt: `Which standard operates only in the 5 GHz band?`,
+        options: [`802.11n`, `802.11g`, `802.11ac`, `802.11b`],
+        correct: 2,
+        explanation: `802.11ac (Wi-Fi 5) is 5 GHz only. 802.11n supports both bands.`,
+      },
+      {
+        prompt: `Why is using 160 MHz channels in a dense office usually a poor choice?`,
+        options: [`They only work on 2.4 GHz`, `Few non-overlapping channels remain, so interference rises`, `They disable encryption`, `They need Ethernet cabling`],
+        correct: 1,
+        explanation: `Wide channels consume more spectrum, leaving fewer separate channels and increasing co-channel interference.`,
+      },
+    ],
+    mini: {
+      prompt: `A stadium has thousands of phones sending small updates, and Wi-Fi 5 APs show high airtime use but low throughput.`,
+      task: `Which Wi-Fi 6 features help and what channel width would you choose?`,
+    },
+    recap: `Wi-Fi 4 (n) brought MIMO, Wi-Fi 5 (ac) is 5 GHz with MU-MIMO and wide channels, Wi-Fi 6 (ax) adds OFDMA and efficiency (6E adds 6 GHz), and Wi-Fi 7 (be) adds MLO and 320 MHz. Wider channels raise speed but reduce channel reuse.`,
+    classroom: `"n: MIMO. ac: 5 GHz lang. ax: OFDMA. 6E: 6 GHz. Mas malapad ang channel, mas kaunti ang pagpipilian."`,
+  });
+
+  NetReady.LESSONS['9-15'] = NetReady.lesson(9, {
+    id: '9-15',
+    slug: 'rf-fundamentals-antennas-signal-strength-and-site-surveys',
+    title: 'RF Fundamentals: Antennas, Signal Strength, and Site Surveys',
+    minutes: 16,
+    outcomes: [
+      `Explain RSSI, noise floor, SNR, and dBm values.`,
+      `Compare omnidirectional, directional, and other antenna types.`,
+      `Explain attenuation, interference, reflection, and the Fresnel zone.`,
+      `Plan and perform a wireless site survey.`,
+    ],
+    why: `Wi-Fi problems are usually radio problems: weak signal, noise, interference, or poor AP placement. The exam tests the vocabulary and expects you to know how a site survey and a heat map help design coverage.`,
+    simple: `A wireless signal gets weaker with distance and when it passes through walls, so the AP must be close enough for the client to hear it, and the signal must be much louder than the background noise. Antennas focus the signal in certain directions. A site survey measures the real signal in the real building so APs can be placed in the right spots on the right channels.`,
+    taglish: `Humihina ang signal ng wireless habang lumalayo at kapag dumadaan sa pader, kaya dapat sapat ang lapit ng AP, at mas malakas ang signal kaysa sa ingay sa paligid. Ang antenna ang nagtutuon ng signal sa direksyon. Ang site survey ay sinusukat ang totoong signal sa totoong gusali para mailagay ang AP sa tamang lugar.`,
+    analogy: {
+      title: 'Pag-uusap sa maingay na party',
+      text: `Mas madaling marinig ang kausap kapag malapit siya (distansya), walang makapal na pader sa pagitan (attenuation), at hindi masyadong maingay ang paligid (noise). Ang antenna ay parang megaphone na nakatutok sa isang direksyon.`,
+    },
+    steps: [
+      `Signal strength: RSSI (received signal strength indicator) is a relative measure of received power, usually shown in dBm. dBm is decibels relative to 1 milliwatt, so values are negative: -30 dBm is excellent (very close), -67 dBm is the usual minimum for voice and video, -70 dBm is good for data, and -80 dBm or weaker is unreliable. Every 3 dB change is a doubling or halving of power; every 10 dB is ten times.`,
+      `Noise floor is the background RF energy, typically about -90 to -95 dBm. SNR (signal-to-noise ratio) equals the signal minus the noise floor (in dB). A signal of -65 dBm with noise of -95 dBm gives 30 dB SNR. Around 25 dB or more is good; below 15 dB is poor. Higher SNR allows higher data rates.`,
+      `Transmit power, gain, and EIRP: AP transmit power is measured in dBm or mW. Antenna gain in dBi adds to the effective radiated power. EIRP (effective isotropic radiated power) equals transmitter power minus cable loss plus antenna gain. Regulators limit EIRP. Raising AP power does not fix a weak client, because the client's own transmitter is weaker (an asymmetric link).`,
+      `Antenna types: omnidirectional (dipole or rubber duck) radiates in a 360 degree donut around the antenna, with the best coverage on the horizontal plane; directional (Yagi, patch or panel, parabolic dish) focuses energy in a narrow beam for longer range and point-to-point links; sector antennas cover wedges at towers. Higher gain narrows the beam. Antenna polarization (vertical or horizontal) should match at both ends.`,
+      `Loss and impairments: attenuation (signal weakens with distance, called free-space path loss, and through materials such as concrete, metal, glass, and water), reflection (bounces off metal, causing multipath), refraction, diffraction, and absorption. Multipath can cause the same signal to arrive multiple times, which MIMO uses constructively. Fresnel zone: an ellipse-shaped area around the line of sight between two antennas that should stay at least about 60 percent clear of obstacles for a point-to-point link.`,
+      `Interference: co-channel interference (neighbors on the same channel, which share airtime) is normal; adjacent channel interference (overlapping channels) is worse and avoidable; non-Wi-Fi interference comes from microwave ovens, cordless phones, Bluetooth, baby monitors, and motors. Use a spectrum analyzer to see non-Wi-Fi interference. Also watch for the hidden node problem and the near/far problem.`,
+      `Site survey types: predictive (software model from a floor plan and materials, done before installation), passive (laptop listens and records signal, noise, and channels of existing APs), active (laptop joins the SSID and measures throughput, roaming, and retries), and post-installation validation. Tools: Ekahau, NetSpot, and other analyzers.`,
+      `Heat map: color overlay on the floor plan showing signal strength, SNR, or channel overlap. Use it to find dead zones and coverage overlap. Typical AP cell overlap target is 15 to 20 percent for roaming, with at least -67 dBm for voice at the edge. AP count is driven by capacity (number of users and applications) more than just coverage.`,
+      `Placement and mounting: mount APs on ceilings at 8 to 12 feet, avoid placing them next to metal and thick walls, and provide power by PoE. Roaming needs overlapping cells on non-overlapping channels, plus fast roaming standards (802.11r, 802.11k, 802.11v). Document AP names, locations, channels, and power settings.`,
+    ],
+    deepDive: [
+      {
+        title: 'Calculating SNR and judging the link',
+        text: `A laptop reports a signal of -62 dBm and the noise floor measures -94 dBm. SNR = -62 - (-94) = 32 dB, which is excellent. In another room the signal is -78 dBm with noise at -88 dBm (a neighbor's microwave raised the noise). SNR = -78 - (-88) = 10 dB, which is poor, even though -78 dBm alone looks usable. The cure for the second room is not more AP power, but removing the interference or moving to another band.`,
+        code: `Room A:  signal -62 dBm, noise -94 dBm  ->  SNR = 32 dB   (excellent)
+Room B:  signal -78 dBm, noise -88 dBm  ->  SNR = 10 dB   (poor)
+
+Rule of thumb: +3 dB = 2x power, +10 dB = 10x power`,
+        note: `Signal strength alone can mislead. Always check noise and retries as well as RSSI.`,
+      },
+      {
+        title: 'EIRP example',
+        text: `An AP transmits at 20 dBm, loses 2 dB in the cable, and has a 6 dBi antenna. EIRP = 20 - 2 + 6 = 24 dBm (about 250 mW). If the regulatory limit is 30 dBm, this is allowed. Swapping to a 12 dBi directional antenna gives 30 dBm, right at the limit, and creates a narrower beam that is good for a long hallway but poor for a room.`,
+        code: `EIRP (dBm) = transmit power (dBm) - cable loss (dB) + antenna gain (dBi)
+         = 20 - 2 + 6 = 24 dBm`,
+      },
+    ],
+    table: {
+      label: 'RF terms and typical values',
+      head: ['Term', 'Meaning', 'Typical value'],
+      rows: [
+        ['RSSI / signal', 'Received power in dBm', '-67 dBm minimum for voice'],
+        ['Noise floor', 'Background RF energy', '-90 to -95 dBm'],
+        ['SNR', 'Signal minus noise (dB)', '25 dB or more is good'],
+        ['dBi', 'Antenna gain compared with isotropic', 'Dipole 2 to 5 dBi'],
+        ['EIRP', 'Radiated power incl. gain, minus loss', 'Limited by regulator'],
+        ['Cell overlap', 'Coverage overlap between APs for roaming', '15 to 20 percent'],
+      ],
+      caption: 'Good Wi-Fi is strong signal, low noise, and the right antenna in the right place.',
+    },
+    example: `A hospital needs reliable voice over Wi-Fi. A predictive survey sets AP positions, then an active survey after installation finds a weak corridor near the lead-lined X-ray room. Adding one AP with a directional antenna in the hall raises the signal to -65 dBm with 30 dB SNR, and the heat map confirms the fix.`,
+    tips: [
+      `Less negative is stronger: -55 dBm beats -75 dBm.`,
+      `SNR beats raw signal. A strong signal in loud noise is still slow.`,
+      `A spectrum analyzer finds non-Wi-Fi interference; a Wi-Fi analyzer shows APs and channels.`,
+    ],
+    exam: `Know RSSI, noise floor, SNR, dBm and dBi, omni versus directional antennas, causes of attenuation and interference, and the types of site surveys with heat maps.`,
+    mistakes: [
+      `Turning every AP to maximum power, causing interference and one-way links.`,
+      `Putting APs in closets or above metal ceilings.`,
+      `Surveying an empty building and forgetting that people absorb signals.`,
+    ],
+    terms: [
+      { term: 'RSSI', def: `Measure of received signal strength, often shown in dBm.` },
+      { term: 'Noise floor', def: `Level of background RF noise on a channel.` },
+      { term: 'SNR', def: `Signal minus noise floor in dB; higher means a cleaner link.` },
+      { term: 'EIRP', def: `Effective radiated power including antenna gain and cable loss.` },
+      { term: 'Omnidirectional antenna', def: `Antenna that radiates in all horizontal directions.` },
+      { term: 'Fresnel zone', def: `Elliptical area around the line of sight that should be kept mostly clear.` },
+      { term: 'Heat map', def: `Floor plan overlay showing signal strength or other measurements.` },
+    ],
+    commands: [
+      { os: 'Windows', cmd: 'netsh wlan show networks mode=bssid', desc: `Lists nearby APs with signal percentage, channel, and radio type.` },
+      { os: 'Linux', cmd: 'iw dev wlan0 scan | grep -E "SSID|signal|freq"', desc: `Scans for APs and shows SSID, signal strength in dBm, and frequency.` },
+    ],
+    checks: [
+      {
+        prompt: `A client sees a signal of -70 dBm and a noise floor of -95 dBm. What is the SNR?`,
+        options: [`165 dB`, `25 dB`, `-25 dB`, `70 dB`],
+        correct: 1,
+        explanation: `SNR = signal minus noise = -70 - (-95) = 25 dB.`,
+      },
+      {
+        prompt: `Which antenna type is best for a long point-to-point link between two buildings?`,
+        options: [`Omnidirectional`, `Directional (Yagi or parabolic)`, `Rubber duck dipole`, `Ceiling bubble`],
+        correct: 1,
+        explanation: `Directional antennas focus energy into a narrow beam for longer range.`,
+      },
+      {
+        prompt: `Which survey method uses floor plans and building materials in software before any equipment is installed?`,
+        options: [`Passive survey`, `Active survey`, `Predictive survey`, `Post-installation audit`],
+        correct: 2,
+        explanation: `A predictive survey models coverage from plans and materials to estimate AP positions in advance.`,
+      },
+    ],
+    mini: {
+      prompt: `Wi-Fi in a kitchen shows -60 dBm signal but constant slowness whenever the microwave oven runs.`,
+      task: `What is the cause, what tool confirms it, and what are two fixes?`,
+    },
+    recap: `Measure signal in dBm, noise floor, and SNR (signal minus noise). Choose omni or directional antennas, account for attenuation, reflection, and interference, and use predictive, passive, and active site surveys with heat maps to place APs with 15 to 20 percent cell overlap.`,
+    classroom: `"Mas mababa ang negatibong numero, mas malakas. SNR = signal minus noise. Survey bago mag-install."`,
+  });
+
+  NetReady.LESSONS['9-16'] = NetReady.lesson(9, {
+    id: '9-16',
+    slug: 'iot-and-short-range-wireless-bluetooth-zigbee-z-wave-nfc-and-rfid',
+    title: 'IoT and Short-Range Wireless: Bluetooth, Zigbee, Z-Wave, NFC, and RFID',
+    minutes: 14,
+    outcomes: [
+      `Compare Bluetooth, Zigbee, Z-Wave, NFC, and RFID by range and use.`,
+      `Explain mesh versus star topologies for IoT.`,
+      `Identify security risks of IoT devices.`,
+      `Describe how to secure and segment IoT on a network.`,
+    ],
+    why: `Smart devices are everywhere, and the exam expects you to recognize the short-range technologies and their typical uses, and to know how to keep insecure devices from endangering the network.`,
+    simple: `Not every wireless device uses Wi-Fi. Small battery devices use low-power, short-range radios: Bluetooth connects headphones and keyboards, Zigbee and Z-Wave link smart-home sensors in a mesh, NFC works only a few centimeters away for payments and badges, and RFID tags are read by scanners from a distance. Many IoT devices have weak security, so they should be isolated on their own network.`,
+    taglish: `Hindi lahat ng wireless ay Wi-Fi. Ang maliliit na gadget na de-baterya ay gumagamit ng mababang-lakas na radyo: Bluetooth para sa headphones, Zigbee at Z-Wave para sa smart-home sensors, NFC para sa ilang sentimetro lang (bayad at badge), at RFID na binabasa ng scanner. Madalas mahina ang seguridad ng IoT kaya ihiwalay sila sa sariling network.`,
+    analogy: {
+      title: 'Iba-ibang paraan ng pagtawag',
+      text: `Ang Wi-Fi ay malakas na megaphone sa bahay. Ang Bluetooth ay bulungan sa kabilang upuan. Ang Zigbee ay hilera ng magkakapitbahay na nagpapasa ng mensahe. Ang NFC ay pagdikit ng tenga sa tenga. Ang RFID ay barcode na kusang sumasagot kapag tinawag.`,
+    },
+    steps: [
+      `Bluetooth: 2.4 GHz, personal area network (PAN). Classic range is about 10 meters (Class 2) up to 100 meters (Class 1); Bluetooth Low Energy (BLE) saves power for sensors and beacons. Devices pair with a PIN or confirmation. Attacks: bluejacking (unsolicited messages), bluesnarfing (stealing data), and bluebugging (taking control). Defenses: turn off discoverable mode, use current versions, and unpair unknown devices.`,
+      `Zigbee (IEEE 802.15.4): low power, low data rate, 2.4 GHz (also 868 and 915 MHz), mesh network. Used for smart lighting, sensors, and locks. Coordinator, router, and end-device roles. Range is 10 to 100 meters per hop; mesh hops extend it.`,
+      `Z-Wave: proprietary low-power mesh protocol for home automation, using sub-GHz frequencies (908 MHz in North America, 868 MHz in Europe), which gives better wall penetration and less interference than 2.4 GHz. A single hub (controller) and up to 232 devices per network, with a maximum of four hops.`,
+      `NFC (near field communication): 13.56 MHz, range about 4 cm or less, two-way communication. Used for contactless payments, badges, and quick pairing. The short range is itself a security feature, but relay and skimming attacks exist.`,
+      `RFID (radio frequency identification): a reader powers or queries a tag. Passive tags have no battery and are read at centimeters to a few meters; active tags have a battery and reach farther (up to hundreds of meters). Frequencies: low (125 kHz), high (13.56 MHz), and ultra-high (860 to 960 MHz). Used for inventory, access cards, and toll tags. Risks: cloning and eavesdropping.`,
+      `Other wireless: infrared (line of sight only, remote controls), satellite and cellular for wide area, and 802.11ah (Wi-Fi HaLow) for long-range low-power IoT in sub-GHz bands. IoT cellular options include NB-IoT and LTE-M.`,
+      `IoT security issues: default or hard-coded passwords, no patching or end of support, unencrypted protocols, unneeded open ports, and little logging. Compromised cameras and smart devices have formed botnets such as Mirai, used for DDoS attacks.`,
+      `Securing IoT: change default credentials, update firmware, disable unused services (UPnP, Telnet), place IoT devices on a separate VLAN or SSID with firewall rules that allow only needed destinations and block lateral movement, use a guest or IoT network at home, monitor traffic, and keep an inventory.`,
+      `Related environments: ICS (industrial control systems) and SCADA use protocols such as Modbus and DNP3, and building systems use BACnet. They often cannot be patched, so they should be segmented from the corporate network, sometimes air-gapped, with a firewall or data diode between them.`,
+    ],
+    deepDive: [
+      {
+        title: 'A mesh network healing itself',
+        text: `In a Zigbee smart-home network, a sensor in the garden is too far to reach the hub. It sends its message to a nearby lamp (a router device), which forwards it to the kitchen outlet, which forwards it to the hub. If the lamp loses power, the sensor discovers another neighbor and finds a new path. A star network (such as one hub and Bluetooth devices) has no such route: the loss of the hub or distance to it breaks the link.`,
+        code: `Mesh:  Sensor -> Lamp -> Outlet -> Hub
+              \\-> Thermostat -> Hub     (alternate path)
+Star:  Sensor ---------------------> Hub    (one hop, no alternate)`,
+        note: `Mesh equals multiple paths and self-healing. Star equals one central point and a single point of failure.`,
+      },
+      {
+        title: 'Segmenting IoT with a VLAN and ACL',
+        text: `The company puts security cameras in VLAN 70. The firewall allows the cameras to talk only to the recorder at 10.9.9.20 on TCP 443 and blocks everything else, including access to user VLANs. Even if a camera is compromised, the attacker cannot reach laptops or servers.`,
+        code: `ip access-list extended IOT-IN
+  permit tcp 10.70.0.0 0.0.0.255 host 10.9.9.20 eq 443
+  permit udp 10.70.0.0 0.0.0.255 any eq 123      (NTP)
+  deny   ip any any log`,
+      },
+    ],
+    table: {
+      label: 'Short-range wireless technologies compared',
+      head: ['Technology', 'Frequency and range', 'Typical use'],
+      rows: [
+        ['Bluetooth / BLE', '2.4 GHz, about 10 to 100 m', 'Headsets, keyboards, beacons'],
+        ['Zigbee', '2.4 GHz and sub-GHz, mesh', 'Smart lights, sensors'],
+        ['Z-Wave', 'Sub-GHz (908/868 MHz), mesh', 'Home automation, locks'],
+        ['NFC', '13.56 MHz, about 4 cm', 'Payments, badges, pairing'],
+        ['RFID passive', '125 kHz to UHF, cm to meters', 'Inventory, access cards'],
+        ['RFID active', 'Battery tag, long range', 'Vehicle and asset tracking'],
+      ],
+      caption: 'Range, power, and topology decide which one fits.',
+    },
+    example: `A warehouse tracks pallets with passive UHF RFID tags read at the dock doors. The office badge system uses NFC cards. Smart thermostats and sensors form a Zigbee mesh, and all IoT devices sit on their own VLAN where the firewall blocks them from reaching the finance servers.`,
+    tips: [
+      `NFC means a few centimeters. Z-Wave means sub-GHz and mesh. Zigbee means 802.15.4.`,
+      `Default passwords on IoT devices are the first thing to change.`,
+      `Isolate IoT and ICS from the business network with VLANs or firewalls.`,
+    ],
+    exam: `Match technologies to range and use, identify mesh versus star, know bluejacking and bluesnarfing, and know that IoT devices should be segmented and have default credentials changed.`,
+    mistakes: [
+      `Putting smart devices on the same VLAN as workstations and servers.`,
+      `Leaving Bluetooth discoverable all the time.`,
+      `Assuming short range (NFC, RFID) makes a system immune to attack.`,
+    ],
+    terms: [
+      { term: 'Bluetooth', def: `Short-range 2.4 GHz wireless standard for personal area networks.` },
+      { term: 'Zigbee', def: `Low-power mesh protocol based on IEEE 802.15.4.` },
+      { term: 'Z-Wave', def: `Sub-GHz mesh protocol for smart-home devices.` },
+      { term: 'NFC', def: `Near field communication with a range of a few centimeters.` },
+      { term: 'RFID', def: `Technology that identifies tags using radio signals from a reader.` },
+      { term: 'Bluesnarfing', def: `Unauthorized theft of data from a Bluetooth device.` },
+      { term: 'Mirai', def: `Botnet that infected IoT devices with default passwords to launch DDoS attacks.` },
+    ],
+    commands: [
+      { os: 'Linux', cmd: 'bluetoothctl devices', desc: `Lists paired Bluetooth devices so unknown ones can be removed.` },
+      { os: 'Linux', cmd: 'nmap -sV 10.70.0.0/24', desc: `Finds IoT devices and the services they expose (only on a network you are authorized to scan).` },
+    ],
+    checks: [
+      {
+        prompt: `Which technology works at a range of only a few centimeters and is commonly used for contactless payments?`,
+        options: [`Zigbee`, `NFC`, `Bluetooth Class 1`, `Wi-Fi 6`],
+        correct: 1,
+        explanation: `NFC operates at 13.56 MHz with a range of about 4 cm.`,
+      },
+      {
+        prompt: `Which protocol uses IEEE 802.15.4 to form a low-power mesh for smart lighting?`,
+        options: [`Zigbee`, `NFC`, `Bluetooth Classic`, `802.11ac`],
+        correct: 0,
+        explanation: `Zigbee builds on 802.15.4 and forms self-healing mesh networks.`,
+      },
+      {
+        prompt: `What is the best way to limit the damage if an internet-connected camera is compromised?`,
+        options: [`Put it on the same VLAN as servers for fast access`, `Place it on an isolated IoT VLAN with restrictive firewall rules`, `Disable the camera password`, `Enable UPnP`],
+        correct: 1,
+        explanation: `Segmentation with restrictive rules stops a compromised device from reaching other systems.`,
+      },
+    ],
+    mini: {
+      prompt: `An office has smart bulbs, badge readers, and a thermostat all on the main employee VLAN.`,
+      task: `Describe a safer design and the first three settings you would change on the devices.`,
+    },
+    recap: `Bluetooth is PAN, Zigbee and Z-Wave are low-power meshes, NFC works at about 4 cm, and RFID tags are read by readers. IoT devices are often insecure, so change defaults, patch, disable unneeded services, and segment them from the business network.`,
+    classroom: `"NFC: dikit lang. Zigbee at Z-Wave: mesh. Palitan ang default password at ihiwalay ang IoT sa sariling VLAN."`,
+  });
+
 }(window.NetReady));

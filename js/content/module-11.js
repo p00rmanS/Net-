@@ -1367,4 +1367,119 @@ Warranty end         Free hardware replacement ends           Renew support or a
     recap: `Manage production, backup, and golden configurations, compare them to find drift, keep an inventory with licensing and warranty data, replace devices before EOL and EOS, roll out patches through change control with backups and rollback, and decommission devices securely.`,
     classroom: `"Alamin kung ano ang tumatakbo, kung ano ang dapat tumakbo, at kung kailan ito dapat palitan."`,
   });
+
+  NetReady.LESSONS['11-13'] = NetReady.lesson(11, {
+    id: '11-13',
+    slug: 'network-diagrams-labeling-and-ip-address-management',
+    title: 'Network Diagrams, Labeling, and IP Address Management',
+    minutes: 14,
+    outcomes: [
+      `Tell physical, logical, and wiring diagrams apart and when each is used.`,
+      `Read common diagram symbols and a rack diagram.`,
+      `Apply a consistent labeling scheme to cables, ports, and devices.`,
+      `Explain IPAM, site survey reports, and keeping documentation current.`,
+    ],
+    why: `Documentation is an exam objective and the difference between a ten-minute fix and a two-hour search. Questions ask which diagram shows what, which document you need for a task, and what good labeling looks like.`,
+    simple: `A network diagram is a map. A physical diagram shows where the equipment and cables really are, a logical diagram shows how traffic and addresses are organized, and a wiring diagram shows which port connects to which. Labels on cables and ports let you trace a link without guessing. IPAM is a database that records who uses which IP address.`,
+    taglish: `Ang network diagram ay mapa. Ang physical diagram ay nagpapakita kung nasaan ang mga kagamitan at cable, ang logical diagram ay kung paano naka-organisa ang traffic at address, at ang wiring diagram ay kung aling port ang konektado kanino. Ang label ay para masundan ang link nang walang hula. Ang IPAM ay talaan ng gumagamit ng bawat IP.`,
+    analogy: {
+      title: 'Mapa ng lungsod at plano ng tubo',
+      text: `Ang physical diagram ay larawan ng gusali at kung saan dumadaan ang tubo. Ang logical diagram ay mapa ng ruta ng tubig: aling barangay ang kabilang sa aling linya. Ang label sa tubo ay sticker na nagsasabi kung ano ang laman at saan papunta.`,
+    },
+    steps: [
+      `Physical network diagram: shows the real layout: buildings, floors, closets (MDF and IDF), racks, patch panels, device models, and cable runs, with distances and media types. Used for installation, cable tracing, and replacing equipment.`,
+      `Logical network diagram: shows how the network works without the physical layout: subnets and masks, VLANs, router and firewall interfaces, routing protocols, default gateways, and the flow between zones. Used for design, troubleshooting traffic, and security review. Layer 3 diagrams focus on routing, Layer 2 diagrams on switching and VLANs.`,
+      `Wiring diagram or cable map: lists every cable with its two ends (panel and port to switch and port), cable type, length, and color. Floor plan: building drawing marking outlets, AP positions, and closets. Rack diagram: front view of each rack showing devices by rack unit (U) position, with power and weight.`,
+      `Common symbols: router (circle with arrows), switch (rectangle with arrows), firewall (brick wall), server, cloud (internet or provider network), wireless AP, and a straight line for a link with its speed and label. Use a consistent legend and include the date, version, author, and scope in the diagram title block.`,
+      `Labeling: every cable at both ends (and near the middle of long runs), every patch panel port, every outlet, every device, and every rack carries a unique label. Typical scheme: ROOM-RACK-PANEL-PORT such as IDF2-R03-PP1-24. Labels must be machine-printed, durable, readable, and match the documentation. Color coding of patch cords (for example blue for users, yellow for PoE, red for uplinks) helps tracing but never replaces the label.`,
+      `Naming conventions for devices: use a pattern with location, role, and number, such as nyc-sw-access-03, so the name tells you what and where the device is. Avoid names that become wrong, such as a person's name or a temporary project.`,
+      `IPAM (IP address management): a tool or spreadsheet that tracks subnets, assigned addresses, DHCP scopes, reservations, static ranges, VLAN IDs, and owners, and often integrates DNS and DHCP. It prevents duplicate IPs and subnet overlaps and shows utilization so you can plan growth.`,
+      `Other documents: baseline configurations and performance baselines, configuration backups, a site survey report (heat maps and AP placement), network inventory with asset tags and warranty, circuit and provider contact lists, and the as-built drawings after installation. Policies and procedures include change records and the disaster recovery plan.`,
+      `Keep it current: update diagrams and labels as part of change management and after every move, add, and change, review on a schedule, store documents in a controlled repository with version history, and protect them (they are a roadmap for attackers). Outdated documentation is worse than none because it misleads you under pressure.`,
+    ],
+    deepDive: [
+      {
+        title: 'Tracing a link from labels alone',
+        text: `A user at outlet B-214-07 has no link. The technician reads the outlet label, which maps to patch panel IDF-B2 port 7. At the IDF, panel port 7 is patched to switch SW-B2-01 port Gi1/0/7. The switch shows the port as notconnect. The technician tests the cable, finds a break in the wall run, and it is fixed without opening ceilings or guessing which cable is the right one.`,
+        code: `Outlet:   B-214-07
+Panel:    IDF-B2-PP1-07
+Patch:    IDF-B2-PP1-07  <->  SW-B2-01 Gi1/0/7
+Switch:   show interfaces status  ->  Gi1/0/7  notconnect  VLAN 10`,
+        note: `Each hop has a label that matches the documentation. Without labels the same trace takes a tone generator and an hour.`,
+      },
+      {
+        title: 'An IPAM record',
+        text: `A simple IPAM entry shows each subnet with its purpose, VLAN, gateway, DHCP range, static range, and utilization. Before assigning a new server, the administrator checks the free addresses in the static range and avoids a conflict.`,
+        code: `Subnet          VLAN  Purpose     Gateway     DHCP pool        Static range    Used
+10.10.10.0/24   10    Staff       10.10.10.1  .100-.200        .2-.50          62%
+10.10.20.0/24   20    Servers     10.10.20.1  none             .10-.250        41%
+10.10.70.0/24   70    IoT         10.10.70.1  .50-.200         .2-.20          18%`,
+      },
+    ],
+    table: {
+      label: 'Documentation types and what each shows',
+      head: ['Document', 'Shows', 'Used for'],
+      rows: [
+        ['Physical diagram', 'Real locations, racks, cable runs', 'Installation and cable tracing'],
+        ['Logical diagram', 'Subnets, VLANs, routing, zones', 'Design and traffic troubleshooting'],
+        ['Wiring diagram / cable map', 'Port-to-port connections and cable types', 'Patching and moves'],
+        ['Floor plan', 'Outlets, APs, closets in the building', 'Cabling and wireless planning'],
+        ['Rack diagram', 'Devices by rack unit', 'Capacity, power, and space planning'],
+        ['IPAM', 'Subnets and address assignments', 'Preventing conflicts, growth planning'],
+      ],
+      caption: 'Choose the document that matches the question you need to answer.',
+    },
+    example: `After an office move, the team updates the floor plan, the cable map, and the IPAM records as part of the change ticket. Three months later a switch fails, and the replacement technician rebuilds all connections from the cable map in under an hour.`,
+    tips: [
+      `Physical equals where things are. Logical equals how traffic flows. Wiring equals which port to which port.`,
+      `Label both ends of every cable.`,
+      `Update documentation as part of each change ticket, not later.`,
+    ],
+    exam: `Be able to choose the right diagram type, know common labeling and naming practices, define IPAM, and explain why documentation must be kept current and protected.`,
+    mistakes: [
+      `Labeling only one end of a cable or using handwriting that fades.`,
+      `Leaving diagrams outdated after changes.`,
+      `Storing network diagrams on a public share without access control.`,
+    ],
+    terms: [
+      { term: 'Physical diagram', def: `Drawing of actual equipment locations and cabling.` },
+      { term: 'Logical diagram', def: `Drawing of subnets, VLANs, and traffic flows, independent of physical location.` },
+      { term: 'Cable map', def: `Table of every cable with its endpoints, type, and length.` },
+      { term: 'Rack diagram', def: `Front view showing equipment positions by rack unit.` },
+      { term: 'IPAM', def: `IP address management: tracking subnets and address assignments.` },
+      { term: 'As-built drawing', def: `Final documentation showing the network exactly as it was installed.` },
+    ],
+    commands: [
+      { os: 'Cisco IOS', cmd: 'show cdp neighbors detail', desc: `Discovers directly connected devices and ports to verify or build a diagram.` },
+      { os: 'Cisco IOS', cmd: 'show lldp neighbors', desc: `Lists LLDP neighbors (vendor-neutral) with their port and device names.` },
+      { os: 'Cisco IOS', cmd: 'interface Gi1/0/7 / description SW-B2-PP1-07 user outlet B-214-07', desc: `Records the cable label in the interface description so the switch matches the documentation.` },
+    ],
+    checks: [
+      {
+        prompt: `A technician needs to see how VLANs, subnets, and gateways are organized, regardless of where the equipment sits. Which document is best?`,
+        options: [`Physical diagram`, `Logical diagram`, `Rack diagram`, `Floor plan`],
+        correct: 1,
+        explanation: `A logical diagram shows addressing, VLANs, and flows without regard to physical location.`,
+      },
+      {
+        prompt: `Which document would you use to find which switch port a wall outlet is connected to?`,
+        options: [`Cable map or wiring diagram`, `Heat map`, `Service level agreement`, `Business continuity plan`],
+        correct: 0,
+        explanation: `The cable map records each cable's two endpoints, including the patch panel port and switch port.`,
+      },
+      {
+        prompt: `Which tool helps prevent duplicate IP addresses and subnet overlaps by tracking assignments?`,
+        options: [`IPAM`, `SPAN`, `OTDR`, `NetFlow`],
+        correct: 0,
+        explanation: `IPAM records subnets, scopes, and address assignments, and shows utilization.`,
+      },
+    ],
+    mini: {
+      prompt: `A new technician finds that none of the cables in a closet are labeled and the diagram is two years old.`,
+      task: `List the steps you would take to restore reliable documentation.`,
+    },
+    recap: `Physical diagrams show where, logical diagrams show how, and wiring diagrams show which port to which. Label both cable ends with a consistent scheme, name devices with a pattern, track addresses in IPAM, and update and protect documentation as part of change management.`,
+    classroom: `"Physical: nasaan. Logical: paano dumadaloy. Wiring: saang port. I-label ang dalawang dulo at i-update tuwing may change."`,
+  });
+
 }(window.NetReady));

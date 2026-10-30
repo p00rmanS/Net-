@@ -550,4 +550,125 @@ NIC                  Ethernet header and FCS       Accept or discard the frame`,
     recap: `Data is wrapped with a TCP or UDP header, an IP header, and an Ethernet header and trailer on the way down, and unwrapped in reverse at the receiver. Switches read MACs, routers read IPs and rewrite the frame at each hop, firewalls read ports and flags, and the MTU and MSS arithmetic follows from the header sizes.`,
     classroom: `"Ang MAC ay para sa susunod na hakbang, ang IP ay para sa huling destinasyon."`,
   });
+
+  NetReady.LESSONS['2-6'] = NetReady.lesson(2, {
+    id: '2-6',
+    slug: 'tcp-and-udp-internals-handshake-flags-windows-and-retransmission',
+    title: 'TCP and UDP Internals: Handshake, Flags, Windows, and Retransmission',
+    minutes: 16,
+    outcomes: [
+      `Walk through the TCP three-way handshake and connection teardown.`,
+      `Name the TCP flags and what each does.`,
+      `Explain sequence numbers, acknowledgments, and the sliding window.`,
+      `Explain when UDP is a better choice than TCP.`,
+    ],
+    why: `Layer 4 behavior explains many symptoms: slow transfers, half-open connections, resets, and choppy voice. The exam expects you to know how TCP guarantees delivery and how UDP gives up guarantees for speed.`,
+    simple: `TCP is like a phone call: you dial, the other side answers, you confirm, and then you talk while checking that every sentence was heard. UDP is like dropping postcards in a mailbox: fast and simple, with no confirmation. TCP numbers every byte, waits for acknowledgments, resends what is lost, and slows down when the network or the receiver is overloaded.`,
+    taglish: `Ang TCP ay parang tawag sa telepono: tatawag, sasagot, magkukumpirmahan, saka mag-uusap habang tinitiyak na narinig ang bawat pangungusap. Ang UDP ay parang postcard na ihuhulog lang: mabilis, walang kumpirmasyon. Binibilang ng TCP ang bawat byte, naghihintay ng ACK, at nagpapadala ulit ng nawala.`,
+    analogy: {
+      title: 'Registered mail at postcard',
+      text: `Ang TCP ay registered mail na may resibo: kapag walang resibo, ipadadala ulit. Ang UDP ay postcard: hindi mo alam kung dumating, pero mura at mabilis, tama para sa live na tawag kung saan walang silbi ang lumang mensahe.`,
+    },
+    steps: [
+      `TCP is connection-oriented, reliable, and ordered. It uses sequence numbers, acknowledgments, flow control, and congestion control. UDP is connectionless and unreliable (best effort): no handshake, no retransmission, no ordering, and an 8-byte header compared with TCP's minimum of 20 bytes.`,
+      `Three-way handshake: the client sends SYN with an initial sequence number (ISN), the server replies SYN-ACK with its own ISN and an acknowledgment of the client's ISN plus 1, and the client sends ACK. The connection is now ESTABLISHED. A server that has sent SYN-ACK and is waiting for the ACK is in SYN_RECEIVED (half-open).`,
+      `TCP flags: SYN (synchronize, start), ACK (acknowledgment valid), FIN (finish, graceful close), RST (reset, abort immediately), PSH (push data to the application now), URG (urgent pointer valid). Nmap scans and firewalls use unusual flag combinations such as NULL (no flags), FIN, and Xmas (FIN, PSH, URG) to probe.`,
+      `Teardown: each side closes its own direction with FIN and the other side acknowledges, so a normal close takes four steps (FIN, ACK, FIN, ACK). The side that closes first enters TIME_WAIT (about 30 to 120 seconds) so late packets are not mistaken for a new connection. RST ends a connection abruptly, for example when a client contacts a closed port.`,
+      `Sequence and acknowledgment numbers: the sequence number identifies the first byte in a segment, and the acknowledgment number is the next byte the receiver expects. Missing numbers tell the receiver that data was lost, and out-of-order segments are reassembled before delivery to the application.`,
+      `Retransmission: if the sender does not get an ACK before the retransmission timeout (RTO), or receives three duplicate ACKs (fast retransmit), it resends the segment. Frequent retransmits show packet loss or congestion.`,
+      `Flow control with the sliding window: the receiver advertises a window size (how many bytes it can accept before sending an ACK). The sender may have that much data in flight. A zero window means the receiver is full and the sender must pause. Window scaling allows windows beyond 64 KB on fast, long links.`,
+      `Congestion control: TCP starts slowly (slow start), grows the congestion window until loss occurs, then backs off (congestion avoidance, multiplicative decrease). This is why one lost packet on a high-latency link cuts the throughput sharply. The bandwidth-delay product (bandwidth multiplied by round-trip time) tells how much data must be in flight to fill a link.`,
+      `MSS (maximum segment size) is the largest TCP payload, usually 1460 bytes on Ethernet (1500 MTU minus 20 IP and 20 TCP header bytes). It is negotiated in the handshake. A mismatch with path MTU causes fragmentation or black-hole problems.`,
+      `UDP is chosen when speed and low delay matter more than perfect delivery or when the application handles reliability itself: DNS queries, DHCP, TFTP, SNMP, NTP, VoIP and video streams (RTP), online games, and QUIC (which builds reliability on top of UDP). A late voice packet is useless, so retransmitting it would make things worse.`,
+    ],
+    deepDive: [
+      {
+        title: 'A handshake and a close in a packet capture',
+        text: `This capture shows a client at 10.1.1.25 opening a web connection, sending a request, and closing. Notice the acknowledgment values: each ACK is the sender's last sequence number plus the number of bytes it carries (SYN and FIN each count as one).`,
+        code: `1  10.1.1.25:51514 -> 203.0.113.9:443   [SYN]      seq=1000
+2  203.0.113.9:443   -> 10.1.1.25:51514 [SYN, ACK] seq=5000 ack=1001
+3  10.1.1.25:51514 -> 203.0.113.9:443   [ACK]      seq=1001 ack=5001
+4  10.1.1.25:51514 -> 203.0.113.9:443   [PSH, ACK] seq=1001 ack=5001 len=300
+5  203.0.113.9:443   -> 10.1.1.25:51514 [ACK]      seq=5001 ack=1301
+...
+9  10.1.1.25:51514 -> 203.0.113.9:443   [FIN, ACK]
+10 203.0.113.9:443   -> 10.1.1.25:51514 [ACK]
+11 203.0.113.9:443   -> 10.1.1.25:51514 [FIN, ACK]
+12 10.1.1.25:51514 -> 203.0.113.9:443   [ACK]        (client enters TIME_WAIT)`,
+        note: `Packets 1 to 3 are the handshake. If you see only SYN packets with no replies, a firewall is dropping them. If you see SYN followed by RST, the port is closed.`,
+      },
+      {
+        title: 'Why a long link needs a big window',
+        text: `A 1 Gbps link with 100 ms round-trip time can hold 1,000,000,000 x 0.1 / 8 = 12.5 MB in flight. With the old 64 KB maximum window, a single connection could send only 65,535 bytes per round trip, which is about 5.2 Mbps. Window scaling (RFC 7323) lifts the limit so one transfer can fill the pipe.`,
+        code: `BDP = bandwidth x RTT = 1 Gbps x 0.1 s = 100 Mb = 12.5 MB
+Max throughput with 64 KB window = 65,535 B x 8 / 0.1 s = about 5.2 Mbps`,
+      },
+    ],
+    table: {
+      label: 'TCP compared with UDP',
+      head: ['Feature', 'TCP', 'UDP'],
+      rows: [
+        ['Connection', 'Connection-oriented, handshake', 'Connectionless'],
+        ['Reliability', 'Acknowledgments and retransmission', 'Best effort, none'],
+        ['Ordering', 'Sequence numbers, reordered', 'Not guaranteed'],
+        ['Header size', '20 bytes minimum', '8 bytes'],
+        ['Flow and congestion control', 'Yes, sliding window', 'No'],
+        ['Typical uses', 'Web, email, file transfer, SSH', 'DNS, DHCP, VoIP, video, games, NTP'],
+      ],
+      caption: 'TCP trades speed for reliability; UDP trades reliability for speed.',
+    },
+    example: `A branch office complains that file copies to the data center crawl at 6 Mbps on a 1 Gbps link, while pings look fine. A capture shows a small receive window and no window scaling because a firewall was stripping TCP options. After the firewall change, one transfer reaches several hundred megabits per second.`,
+    tips: [
+      `SYN, SYN-ACK, ACK. Memorize it, and remember FIN closes gracefully while RST aborts.`,
+      `Many SYNs without completed handshakes point to a SYN flood or a firewall dropping replies.`,
+      `Voice and video use UDP because a late packet is worse than a lost packet.`,
+    ],
+    exam: `Know the three-way handshake order, the TCP flags (SYN, ACK, FIN, RST, PSH, URG), that the window controls flow, that UDP is connectionless, and which services use UDP.`,
+    mistakes: [
+      `Believing UDP is always faster in practice. It only avoids overhead; it does not fix a congested path.`,
+      `Treating RST as a normal close. It is an abrupt abort.`,
+      `Forgetting that retransmissions and a shrinking window are signs of packet loss, not of a slow server.`,
+    ],
+    terms: [
+      { term: 'Three-way handshake', def: `SYN, SYN-ACK, ACK exchange that opens a TCP connection.` },
+      { term: 'Sequence number', def: `Counter that identifies the position of data bytes in a TCP stream.` },
+      { term: 'Sliding window', def: `Flow control where the receiver advertises how much data it can accept.` },
+      { term: 'RST', def: `TCP flag that aborts a connection immediately.` },
+      { term: 'MSS', def: `Maximum segment size: the largest TCP payload in one segment.` },
+      { term: 'TIME_WAIT', def: `State held by the closing side so late packets do not corrupt a new connection.` },
+      { term: 'Bandwidth-delay product', def: `Bandwidth times round-trip time: the data needed in flight to fill a link.` },
+    ],
+    commands: [
+      { os: 'Windows', cmd: 'netstat -an | find "SYN_RECEIVED"', desc: `Counts half-open connections that may indicate a SYN flood.` },
+      { os: 'Linux', cmd: 'ss -tan state established', desc: `Lists established TCP connections.` },
+      { os: 'Linux', cmd: 'sudo tcpdump -nn "tcp[tcpflags] & tcp-syn != 0"', desc: `Captures packets with the SYN flag set to watch connection attempts.` },
+    ],
+    checks: [
+      {
+        prompt: `What is the correct order of the TCP three-way handshake?`,
+        options: [`SYN, ACK, SYN-ACK`, `SYN, SYN-ACK, ACK`, `ACK, SYN, FIN`, `SYN-ACK, SYN, ACK`],
+        correct: 1,
+        explanation: `The client sends SYN, the server answers SYN-ACK, and the client completes with ACK.`,
+      },
+      {
+        prompt: `A client contacts a port where nothing is listening, and the server immediately sends back a segment that ends the attempt. Which TCP flag is used?`,
+        options: [`FIN`, `PSH`, `RST`, `URG`],
+        correct: 2,
+        explanation: `A closed port answers a SYN with RST, which resets the connection.`,
+      },
+      {
+        prompt: `Which protocol is the best choice for a live voice call and why?`,
+        options: [`TCP, because it retransmits every lost packet`, `UDP, because late packets are useless and delay must stay low`, `TCP, because it uses less overhead`, `UDP, because it encrypts the media`],
+        correct: 1,
+        explanation: `Voice tolerates a little loss but not delay. UDP avoids retransmission delays.`,
+      },
+    ],
+    mini: {
+      prompt: `A capture shows hundreds of SYN packets from random addresses to the web server and no final ACKs.`,
+      task: `Name the attack and two defenses.`,
+    },
+    recap: `TCP opens with SYN, SYN-ACK, ACK, numbers bytes, acknowledges data, retransmits losses, and controls flow with the sliding window. FIN closes gracefully and RST aborts. UDP is connectionless and light, ideal for DNS, DHCP, voice, and video.`,
+    classroom: `"TCP: SYN, SYN-ACK, ACK. May resibo ang bawat byte. UDP: postcard, walang resibo, pero mabilis."`,
+  });
+
 }(window.NetReady));

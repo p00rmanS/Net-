@@ -561,4 +561,124 @@
     recap: `Know the classes by first octet, the default masks, the private, loopback, APIPA, and multicast ranges, and that CIDR replaced rigid classes to stop address waste.`,
     classroom: `"Una ang unang octet: 1-126 A, 128-191 B, 192-223 C. Ang 127 ay para sa sarili mo."`,
   });
+
+  NetReady.LESSONS['4-7'] = NetReady.lesson(4, {
+    id: '4-7',
+    slug: 'nat-in-depth-static-dynamic-pat-port-forwarding-and-cgnat',
+    title: 'NAT in Depth: Static, Dynamic, PAT, Port Forwarding, and CGNAT',
+    minutes: 16,
+    outcomes: [
+      `Explain why NAT exists and how it translates addresses.`,
+      `Compare static NAT, dynamic NAT, and PAT.`,
+      `Use the inside local, inside global, outside local, and outside global terms.`,
+      `Explain port forwarding, hairpin NAT, and carrier-grade NAT.`,
+    ],
+    why: `NAT and PAT are on every exam and in every home and office. They also cause real problems: servers that are unreachable from outside, VoIP that fails, and VPNs that break. Knowing the types and the translation table lets you predict and fix those issues.`,
+    simple: `Private addresses such as 192.168.1.10 cannot be routed on the internet. NAT rewrites the source address of outgoing packets to a public address and keeps a table so the replies come back to the right device. PAT goes further and also changes port numbers, so thousands of private hosts can share one public address. To let the outside reach a server inside, you create a static mapping or a port forward.`,
+    taglish: `Hindi pwedeng i-route sa internet ang private address. Pinapalitan ng NAT ang source address ng lumalabas na packet ng public address at itinatala sa table para makabalik ang sagot sa tamang device. Ang PAT ay pati port number ang pinapalitan kaya iisang public IP ang magagamit ng libu-libong host. Para maabot mula sa labas ang server, gumagamit ng static mapping o port forward.`,
+    analogy: {
+      title: 'Receptionist ng malaking kumpanya',
+      text: `Isang pampublikong numero lang ang kumpanya. Kapag may tumawag palabas, itinatala ng receptionist kung sino ang tumawag at saang extension. Pagbalik ng sagot, ang talaan ang magsasabi kung kaninong mesa ito ihahatid. Ang port forward ay nakatakdang utos: "lahat ng tawag sa extension 80 ay sa web server."`,
+    },
+    steps: [
+      `NAT conserves public IPv4 addresses and hides the internal addressing scheme. It is performed by a router or firewall at the network edge. NAT is not a security feature by itself: it only blocks unsolicited inbound traffic as a side effect of having no translation entry.`,
+      `Static NAT: a permanent one-to-one mapping of an inside address to a public address, such as 192.168.10.5 to 203.0.113.5. It is used so a server is reachable from outside at a fixed address, and both directions work.`,
+      `Dynamic NAT: many-to-many mapping from a pool of public addresses, assigned as needed to inside hosts. When the pool is exhausted, new hosts cannot connect, so the number of simultaneous users is limited by the pool size.`,
+      `PAT (Port Address Translation, also NAT overload): many-to-one. All inside hosts share one public address and are told apart by the source port number. This is what home routers do. Each translation entry holds inside address, inside port, public address, and public port. It supports about 65,000 ports per public address and per protocol.`,
+      `Terminology (Cisco): inside local is the private address of the inside host as seen on the inside; inside global is the public address that represents that host on the outside; outside global is the real address of the outside host; outside local is how the outside host appears to the inside network (usually the same as the outside global).`,
+      `Port forwarding (destination NAT): an inbound rule that maps a public address and port to a private address and port, such as public TCP 443 to 192.168.1.50:443. Port triggering opens an inbound port temporarily after the inside host makes an outbound connection on a trigger port. A DMZ host on a home router forwards all unsolicited traffic to one device and is risky.`,
+      `Hairpin NAT (NAT loopback, NAT reflection): lets an inside client reach an inside server by its public address. Without it, the request leaves, reaches the router, and the router cannot send it back out the same interface it came in on. Split DNS (internal name resolves to the private address) is the usual alternative.`,
+      `CGNAT (carrier-grade NAT, NAT444, using 100.64.0.0/10 shared address space, RFC 6598): the ISP puts many customers behind one public IPv4 address. Customers cannot port-forward, and peer-to-peer apps, game hosting, and some VPNs have problems. A router WAN address in 100.64.0.0/10 is a clue that you are behind CGNAT.`,
+      `Troubleshooting: protocols that carry IP addresses inside their data (older FTP active mode, SIP, H.323) need an ALG (application layer gateway) or helper. IPsec ESP has no port numbers and needs NAT-T (UDP 4500). Check the translation table, the timeouts, and double NAT (two routers in a row), which breaks port forwarding.`,
+    ],
+    deepDive: [
+      {
+        title: 'Reading a PAT translation table',
+        text: `Three inside PCs browse the web through one public address 203.0.113.1. The router keeps one row per connection. The inside hosts all use ports such as 51000 but the router assigns unique public ports so replies can be matched.`,
+        code: `Router# show ip nat translations
+Pro Inside global        Inside local         Outside local        Outside global
+tcp 203.0.113.1:1024     192.168.1.10:51000   198.51.100.7:443     198.51.100.7:443
+tcp 203.0.113.1:1025     192.168.1.11:51000   198.51.100.7:443     198.51.100.7:443
+tcp 203.0.113.1:1026     192.168.1.12:49200   93.184.216.34:80     93.184.216.34:80`,
+        note: `Two PCs use the same inside port 51000, and the router tells them apart with public ports 1024 and 1025. When the table fills or timeouts expire, new connections fail.`,
+      },
+      {
+        title: 'Configuring PAT and a port forward on Cisco IOS',
+        text: `The first block overloads all of the 192.168.1.0/24 network onto the outside interface address. The static line forwards public TCP 443 to an internal web server.`,
+        code: `interface Gi0/0
+  ip nat outside
+interface Gi0/1
+  ip nat inside
+access-list 1 permit 192.168.1.0 0.0.0.255
+ip nat inside source list 1 interface Gi0/0 overload
+
+ip nat inside source static tcp 192.168.1.50 443 interface Gi0/0 443`,
+      },
+    ],
+    table: {
+      label: 'NAT types compared',
+      head: ['Type', 'Mapping', 'Typical use'],
+      rows: [
+        ['Static NAT', 'One to one, permanent', 'Servers that must be reachable'],
+        ['Dynamic NAT', 'Many to many from a pool', 'Limited public address pool'],
+        ['PAT / overload', 'Many to one by port', 'Home and office internet access'],
+        ['Port forwarding', 'Public port to private host and port', 'Hosting a service behind NAT'],
+        ['CGNAT', 'ISP-level PAT over 100.64.0.0/10', 'ISPs short of IPv4 addresses'],
+      ],
+      caption: 'Ports are what let one public address serve many private hosts.',
+    },
+    example: `A small business hosts a web server on 192.168.1.50. The router forwards public TCP 443 to it. Staff cannot reach the site by its public name from inside, so the administrator enables hairpin NAT and, later, creates an internal DNS record pointing to the private address. A new branch behind a CGNAT ISP cannot host anything, so it uses a VPN to a cloud relay instead.`,
+    tips: [
+      `One public IP for many private hosts equals PAT. A permanent one-to-one mapping equals static NAT.`,
+      `A WAN address of 100.64.x.x to 100.127.x.x means CGNAT, so inbound port forwarding will not work.`,
+      `NAT is not a firewall. Add real firewall rules.`,
+    ],
+    exam: `Know static, dynamic, and PAT, that PAT uses ports, what port forwarding does, that NAT hides internal addressing but does not replace a firewall, and the problems of double NAT and CGNAT.`,
+    mistakes: [
+      `Calling NAT a security control that replaces a firewall.`,
+      `Port forwarding behind a second router without also forwarding on the first (double NAT).`,
+      `Forgetting NAT-T when an IPsec VPN must cross a NAT device.`,
+    ],
+    terms: [
+      { term: 'NAT', def: `Network Address Translation: rewriting IP addresses as packets cross a boundary.` },
+      { term: 'PAT', def: `Port Address Translation: many hosts share one public address using different ports.` },
+      { term: 'Port forwarding', def: `Static inbound rule mapping a public port to a private host.` },
+      { term: 'Hairpin NAT', def: `Allows inside clients to reach an inside server using its public address.` },
+      { term: 'CGNAT', def: `ISP-scale NAT that places many customers behind shared public addresses.` },
+      { term: 'Inside global', def: `Public address that represents an inside host to the outside world.` },
+      { term: 'ALG', def: `Application layer gateway: NAT helper that fixes addresses embedded in application data.` },
+    ],
+    commands: [
+      { os: 'Cisco IOS', cmd: 'show ip nat translations', desc: `Displays the active NAT translation table.` },
+      { os: 'Cisco IOS', cmd: 'show ip nat statistics', desc: `Shows hits, misses, and pool usage.` },
+      { os: 'Cisco IOS', cmd: 'clear ip nat translation *', desc: `Clears dynamic translation entries.` },
+    ],
+    checks: [
+      {
+        prompt: `Which NAT type allows hundreds of inside hosts to share a single public IP address by using different port numbers?`,
+        options: [`Static NAT`, `Dynamic NAT`, `PAT`, `NAT64`],
+        correct: 2,
+        explanation: `PAT (NAT overload) maps many inside hosts to one public address, distinguishing them by port.`,
+      },
+      {
+        prompt: `A home router WAN interface shows the address 100.72.14.9. What does this most likely mean?`,
+        options: [`The router has a static public address`, `The ISP uses carrier-grade NAT`, `The router uses APIPA`, `IPv6 is disabled`],
+        correct: 1,
+        explanation: `100.64.0.0/10 is shared address space used for CGNAT, so inbound port forwarding will not work.`,
+      },
+      {
+        prompt: `Users inside the office cannot open the company web server using its public address, but outside users can. What feature fixes this?`,
+        options: [`Hairpin NAT or split DNS`, `Link aggregation`, `PoE`, `VLAN trunking`],
+        correct: 0,
+        explanation: `Hairpin NAT (or an internal DNS record) lets inside clients reach an inside server through its public name.`,
+      },
+    ],
+    mini: {
+      prompt: `You forwarded TCP 443 on your home router to a server, but it is still unreachable from the internet. The router WAN IP is 100.66.5.20.`,
+      task: `Explain why and suggest two workarounds.`,
+    },
+    recap: `Static NAT is one-to-one, dynamic NAT uses a pool, and PAT shares one public address by port. Port forwarding exposes an inside service, hairpin NAT fixes inside access by public name, and CGNAT (100.64.0.0/10) puts many customers behind one address. NAT is not a firewall.`,
+    classroom: `"Static: isa-isa. Dynamic: pool. PAT: port ang pagkakaiba. 100.64 ang tanda ng CGNAT. Hindi firewall ang NAT."`,
+  });
+
 }(window.NetReady));

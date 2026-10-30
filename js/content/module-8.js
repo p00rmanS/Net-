@@ -988,4 +988,244 @@
     recap: `BGP connects autonomous systems over TCP 179. eBGP runs between ASes (AD 20), iBGP inside one (AD 200). It is a path-vector protocol selecting by policy and AS path, with transit and peering describing business relationships and filters guarding against hijacks.`,
     classroom: `"OSPF sa loob ng bahay, BGP sa pagitan ng mga bansa."`,
   });
+
+  NetReady.LESSONS['8-11'] = NetReady.lesson(8, {
+    id: '8-11',
+    slug: 'wan-and-internet-access-technologies-dsl-cable-fiber-satellite-and-cellular',
+    title: 'WAN and Internet Access: DSL, Cable, Fiber, Satellite, Cellular, and Metro Ethernet',
+    minutes: 16,
+    outcomes: [
+      `Compare DSL, cable, fiber (PON and FTTx), satellite, and cellular access.`,
+      `Explain leased lines, MPLS, and metro Ethernet.`,
+      `Identify the demarcation point and the CSU/DSU or modem.`,
+      `Choose a WAN technology for a given requirement.`,
+    ],
+    why: `Every site needs a way to reach the internet or other sites, and the exam asks you to match the technology to its medium, speed, and drawbacks. It also tests who owns what at the demarcation point.`,
+    simple: `Each access technology reuses a different physical path: DSL uses telephone wire, cable uses the TV coax, fiber uses glass, satellite uses radio to space, and cellular uses radio towers. Businesses that need guaranteed speed and low delay buy private services such as leased lines, MPLS, or metro Ethernet from a provider, instead of using the shared internet.`,
+    taglish: `Iba-iba ang daan ng bawat teknolohiya: DSL sa telephone line, cable sa coax ng TV, fiber sa salamin, satellite sa radyo papunta sa kalawakan, cellular sa cell tower. Ang negosyong nangangailangan ng garantisadong bilis ay bumibili ng leased line, MPLS, o metro Ethernet sa provider.`,
+    analogy: {
+      title: 'Iba-ibang daan papunta sa lungsod',
+      text: `Ang DSL ay makitid na lumang kalsada, ang cable ay shared na highway, ang fiber ay napakalawak na expressway, ang satellite ay helicopter na mabagal umalis pero nakararating kahit saan, at ang leased line ay sariling pribadong daan na walang kasabay.`,
+    },
+    steps: [
+      `DSL (digital subscriber line): uses existing copper telephone wire. ADSL has faster download than upload, VDSL is faster over shorter distances. Speed drops with distance from the provider's DSLAM (typically a few kilometers maximum). Dedicated line to the provider, but the voice and data share the pair, separated by a filter. Uses PPPoE or DHCP.`,
+      `Cable broadband: uses the cable TV coaxial network with DOCSIS (3.1 offers multi-gigabit downstream). The neighborhood segment is shared, so speeds can drop at busy hours. The device is a cable modem and the head-end device is the CMTS. Upload speed is usually much lower than download.`,
+      `Fiber to the home (FTTH) and FTTx (fiber to the curb, node, building): fiber carries gigabit or higher speeds, symmetric upload and download, and low latency. Most residential fiber uses PON (passive optical network): one fiber from the provider's OLT is split passively and shared among many customers, each with an ONT at the premises. GPON gives 2.5 Gbps down and 1.25 Gbps up shared among a split.`,
+      `Satellite: a dish talks to a satellite. Geostationary (GEO, about 35,786 km up) has high latency (around 600 ms round trip) but wide coverage; low Earth orbit (LEO, such as Starlink, hundreds of kilometers up) has latency of tens of milliseconds. Weather (rain fade) and line of sight affect it. Good for remote areas, ships, and aircraft.`,
+      `Cellular (4G LTE and 5G): radio access through towers, used for mobile devices, fixed wireless access, and backup links for branches. Latency and speed vary with signal and congestion. 5G uses low, mid, and high (mmWave) bands. Cellular is an excellent out-of-band and failover path.`,
+      `Fixed wireless and WISP: point-to-point or point-to-multipoint radio links to a nearby tower, used where cable and fiber are not available. Needs line of sight and suffers from interference and weather.`,
+      `Leased line (dedicated circuit): a private point-to-point circuit with guaranteed bandwidth and an SLA. Classic digital hierarchies: T1 at 1.544 Mbps (24 channels of 64 kbps) and T3 at 44.736 Mbps in North America, E1 at 2.048 Mbps and E3 at 34.368 Mbps in Europe. Optical carrier levels (OC-3 at 155 Mbps, OC-12 at 622 Mbps, OC-48 at about 2.5 Gbps) run over SONET/SDH. They are expensive but predictable.`,
+      `MPLS (multiprotocol label switching): the provider forwards your traffic by short labels instead of IP lookups, giving private any-to-any connectivity between sites with QoS classes. It is sometimes called a Layer 2.5 technology. The customer edge (CE) router connects to the provider edge (PE) router. SD-WAN is often used to replace or supplement MPLS with internet circuits.`,
+      `Metro Ethernet (Metro-E): the provider offers Ethernet service between sites in a city, such as E-Line (point-to-point) and E-LAN (multipoint). It presents an Ethernet handoff, so the customer uses ordinary switches or routers.`,
+      `Demarcation point (demarc) is where the provider's responsibility ends and yours begins, often a network interface device (NID) or a smart jack. The provider tests up to the demarc. Your CSU/DSU, modem, ONT, or router is on your side of the demarc, depending on the contract. A loopback test at the smart jack proves the provider's line.`,
+    ],
+    deepDive: [
+      {
+        title: 'Choosing a link for a remote clinic',
+        text: `A rural clinic needs a primary link and a backup. Fiber and cable are not available. DSL is possible but only 8 Mbps at that distance. A LEO satellite service gives 100 Mbps with moderate latency, and cellular 5G fixed wireless gives about 60 Mbps. The designer picks satellite as primary (higher capacity) and 5G as automatic failover, because they use different physical paths and different providers, which makes simultaneous failure unlikely.`,
+        code: `Option         Speed        Latency     Notes
+DSL            8 Mbps       30 ms       distance limited
+GEO satellite  50 Mbps      600 ms      voice and VPN suffer
+LEO satellite  100 Mbps     40 ms       dish needs sky view
+5G fixed       60 Mbps      30 ms       signal dependent
+Choice: LEO primary + 5G failover (diverse paths)`,
+        note: `The idea tested is diversity: a backup that uses the same cable or the same provider is not really a backup.`,
+      },
+      {
+        title: 'Who fixes what at the demarc',
+        text: `The branch loses internet. The technician plugs a loopback plug or runs the provider's test at the smart jack. If the line tests good to the demarc, the fault is on the customer side (router, CSU/DSU, cable). If it fails at the demarc, the provider must repair it. This single test saves hours of blame.`,
+        code: `Provider network ---[ demarc / smart jack ]--- CSU/DSU or modem --- Router --- LAN
+   provider's problem        <-- loopback test -->     your problem`,
+      },
+    ],
+    table: {
+      label: 'WAN and access technologies compared',
+      head: ['Technology', 'Medium', 'Key facts'],
+      rows: [
+        ['DSL', 'Copper telephone wire', 'Distance limited, DSLAM, dedicated to the subscriber'],
+        ['Cable (DOCSIS)', 'Coaxial', 'Shared neighborhood bandwidth, CMTS'],
+        ['Fiber (FTTH, PON)', 'Optical fiber', 'Fast, symmetric, OLT and ONT'],
+        ['GEO satellite', 'Radio to orbit', 'About 600 ms latency, weather affected'],
+        ['LEO satellite', 'Radio to low orbit', 'Lower latency, needs clear sky'],
+        ['Cellular 4G/5G', 'Radio towers', 'Mobile, backup, fixed wireless access'],
+        ['Leased line (T1, T3)', 'Dedicated circuit', 'Guaranteed bandwidth, expensive'],
+        ['MPLS', 'Provider label-switched network', 'Private, QoS classes, CE and PE'],
+        ['Metro Ethernet', 'Ethernet over provider network', 'E-Line, E-LAN, Ethernet handoff'],
+      ],
+      caption: 'Match the medium and its weakness to the requirement.',
+    },
+    example: `A bank joins 40 branches with MPLS for predictable voice and payment traffic and adds a cable internet circuit at each branch under SD-WAN for bulk traffic. Rural branches use cellular as failover. When a branch goes down, the technician tests the smart jack first to decide whether to call the provider.`,
+    tips: [
+      `Latency around 600 ms points to GEO satellite. Shared neighborhood bandwidth points to cable.`,
+      `T1 is 1.544 Mbps with 24 channels. E1 is 2.048 Mbps. Remember the two.`,
+      `A backup link should use a different medium and provider from the primary.`,
+    ],
+    exam: `Match technology to medium and drawback: DSL to copper and distance, cable to shared coax, PON to fiber with OLT and ONT, satellite to latency, MPLS to labels and provider edge, and demarc to the limit of provider responsibility.`,
+    mistakes: [
+      `Choosing GEO satellite for latency-sensitive voice or interactive applications.`,
+      `Buying a backup circuit in the same conduit as the primary.`,
+      `Blaming the provider without testing at the demarc.`,
+    ],
+    terms: [
+      { term: 'DSL', def: `Broadband over telephone copper pairs, limited by distance.` },
+      { term: 'DOCSIS', def: `Standard for data over cable TV coaxial networks.` },
+      { term: 'PON', def: `Passive optical network sharing one fiber among many subscribers with passive splitters.` },
+      { term: 'MPLS', def: `Label-based forwarding used by providers for private WAN services.` },
+      { term: 'Metro Ethernet', def: `Provider Ethernet service connecting sites in a metropolitan area.` },
+      { term: 'Demarcation point', def: `Boundary between provider and customer responsibility.` },
+      { term: 'CSU/DSU', def: `Device that interfaces a digital leased line such as T1 with customer equipment.` },
+    ],
+    commands: [
+      { os: 'Windows', cmd: 'ping -n 20 8.8.8.8', desc: `Measures average latency, useful to recognize satellite (hundreds of ms) versus fiber (few ms).` },
+      { os: 'Cisco IOS', cmd: 'show controllers t1', desc: `Shows T1 line status, alarms, and errors on a serial interface.` },
+    ],
+    checks: [
+      {
+        prompt: `A rural site uses a geostationary satellite link and users complain that interactive remote sessions feel sluggish. What is the main reason?`,
+        options: [`Very high latency`, `A duplex mismatch`, `Too many VLANs`, `A bad DNS server`],
+        correct: 0,
+        explanation: `GEO satellites are about 36,000 km up, giving roughly 600 ms round-trip delay.`,
+      },
+      {
+        prompt: `Which residential technology uses a passive splitter to share one fiber among many customers, ending at an ONT?`,
+        options: [`DOCSIS`, `ADSL`, `PON`, `T1`],
+        correct: 2,
+        explanation: `A passive optical network connects the provider OLT to many customer ONTs through passive splitters.`,
+      },
+      {
+        prompt: `A technician must prove whether an outage is the provider's fault or the customer's. Where should the first test be performed?`,
+        options: [`At the demarcation point`, `At the DNS server`, `At the DHCP server`, `At the user's laptop`],
+        correct: 0,
+        explanation: `The demarc separates provider and customer responsibility, so testing there divides the problem in half.`,
+      },
+    ],
+    mini: {
+      prompt: `A company wants predictable low latency between three offices with QoS for voice, and also wants a cheap internet backup.`,
+      task: `Suggest a primary and a backup technology and justify each.`,
+    },
+    recap: `DSL uses copper, cable uses shared coax, fiber with PON is fast and symmetric, satellite has latency, and cellular is a flexible backup. Leased lines, MPLS, and metro Ethernet are provider private services, and the demarc divides responsibility.`,
+    classroom: `"DSL: tanso, cable: shared, fiber: PON, GEO: mabagal ang sagot. Subukan muna sa demarc bago sisihin ang provider."`,
+  });
+
+  NetReady.LESSONS['8-12'] = NetReady.lesson(8, {
+    id: '8-12',
+    slug: 'route-summarization-redistribution-and-loop-prevention',
+    title: 'Route Summarization, Redistribution, and Routing Loop Prevention',
+    minutes: 16,
+    outcomes: [
+      `Summarize contiguous networks into one route.`,
+      `Explain longest prefix match and administrative distance together.`,
+      `Describe route redistribution and its risks.`,
+      `Explain split horizon, route poisoning, hold-down timers, and TTL as loop prevention.`,
+    ],
+    why: `Routing questions go beyond naming protocols. You must know how a router chooses between overlapping routes, how summaries shrink routing tables, and how loops are prevented. These ideas also show up in troubleshooting scenarios.`,
+    simple: `A router picks the most specific matching route (longest prefix), and when two routing sources offer the same prefix it picks the one with the lowest administrative distance. Summarization replaces many small routes with one bigger route, which keeps tables small and hides instability. Redistribution shares routes between different routing protocols. Several rules stop routes from circling forever.`,
+    taglish: `Pinipili ng router ang pinaka-tiyak na tugmang route (longest prefix), at kapag magkapareho ang prefix, ang pinakamababang administrative distance ang panalo. Ang summarization ay pagsasama ng maraming maliit na route sa isang malaking route. Ang redistribution ay pagbabahagi ng routes sa pagitan ng magkaibang protocol. May mga patakaran para hindi paikot-ikot ang routes.`,
+    analogy: {
+      title: 'Direksyon sa mapa',
+      text: `Sa halip na sabihing "Kalye 1, Kalye 2, Kalye 3, Kalye 4" ang sasabihin mo ay "lahat ng kalye sa Barangay Silangan". Pero kung may mas tiyak na karatula para sa Kalye 3, iyon ang susundin. Ang redistribution ay tagasalin ng direksyon sa pagitan ng dalawang lungsod na magkaiba ng wika.`,
+    },
+    steps: [
+      `Route selection order: first longest prefix match (the most specific route that contains the destination), then lowest administrative distance (AD) when different sources offer the same prefix, then lowest metric within the same protocol. A /28 route beats a /24 route even if the /24 has a better AD.`,
+      `Common administrative distances: connected 0, static 1, EIGRP 90, OSPF 110, IS-IS 115, RIP 120, external EIGRP 170, eBGP 20, iBGP 200. A floating static route has a higher AD than the dynamic route (for example 200) so it only appears if the dynamic route disappears.`,
+      `Summarization (route aggregation): combine contiguous networks that share leading bits into one prefix. 10.1.0.0/24 to 10.1.3.0/24 (four networks) summarize to 10.1.0.0/22. Method: write the third octets in binary (0, 1, 2, 3 = 00000000 to 00000011), find the common bits (the first 6 of 8), and the prefix length becomes 16 + 6 = 22.`,
+      `Benefits of summarization: smaller routing tables, faster convergence, less memory and CPU, and flaps inside the summarized area are hidden from the rest of the network. Risk: a summary can attract traffic for addresses that do not exist (black hole). A null route (a static route to Null0 for the summary) prevents loops from this.`,
+      `Default route (0.0.0.0/0 or ::/0) is the shortest possible prefix and matches everything not otherwise listed. A stub site usually only needs a default route toward the core.`,
+      `Redistribution: exchanging routes between routing protocols or from static and connected routes into a protocol (for example OSPF into EIGRP at a merger). Each protocol uses different metrics, so you must assign a seed metric. Risks: routing loops when redistributing in both directions at more than one point (use route tags and filters), suboptimal paths, and big tables. Use it sparingly and filter it.`,
+      `Distance vector loop prevention: split horizon (never advertise a route back out the interface it was learned on), route poisoning (advertise a failed route with an infinite metric, 16 hops in RIP), poison reverse, hold-down timers (ignore worse info about a recently failed route for a time), and a maximum hop count (RIP counts 15 as the maximum).`,
+      `Link-state protocols (OSPF, IS-IS) avoid loops because every router holds the same topology map and runs SPF (Dijkstra). At Layer 3 the IP TTL field also prevents endless forwarding, and at Layer 2 Spanning Tree prevents switching loops, and the Layer 2 header has no TTL.`,
+      `Convergence: the time for all routers to agree after a change. Link-state protocols converge quickly, RIP is slow. BFD (bidirectional forwarding detection) detects link failures in milliseconds. Passive interfaces stop sending routing updates toward users and are a security best practice.`,
+    ],
+    deepDive: [
+      {
+        title: 'Summarizing four /24 networks, step by step',
+        text: `Summarize 192.168.4.0/24, 192.168.5.0/24, 192.168.6.0/24, and 192.168.7.0/24. Only the third octet differs: 4, 5, 6, 7. In binary that is 00000100, 00000101, 00000110, 00000111. The first six bits (000001) are common, and the last two bits vary. The summary mask has 16 + 6 = 22 bits.`,
+        code: `192.168.4.0  = 11000000.10101000.000001|00.00000000
+192.168.5.0  = 11000000.10101000.000001|01.00000000
+192.168.6.0  = 11000000.10101000.000001|10.00000000
+192.168.7.0  = 11000000.10101000.000001|11.00000000
+                                 common 22 bits
+Summary: 192.168.4.0/22  (255.255.252.0)`,
+        note: `The first address must fall on a block boundary: 192.168.4.0/22 works because 4 is a multiple of 4. Networks 5, 6, 7, 8 cannot be summarized in a single /22 because they cross the boundary.`,
+      },
+      {
+        title: 'Longest prefix match with three routes',
+        text: `A packet is going to 10.1.2.77. The routing table has three matching entries. The router chooses the /26 route because it is the most specific, regardless of AD or metric.`,
+        code: `S    10.0.0.0/8      via 192.0.2.1
+O    10.1.2.0/24     via 192.0.2.2     [110/20]
+D    10.1.2.64/26    via 192.0.2.3     [90/30720]
+
+Destination 10.1.2.77 matches all three. 10.1.2.64/26 covers .64 to .127,
+so the /26 wins (longest prefix).`,
+      },
+    ],
+    table: {
+      label: 'How a router picks a route and prevents loops',
+      head: ['Concept', 'Rule', 'Example'],
+      rows: [
+        ['Longest prefix match', 'Most specific route wins first', '/26 beats /24 beats /8'],
+        ['Administrative distance', 'Lowest AD wins between sources', 'Static 1, OSPF 110, RIP 120'],
+        ['Metric', 'Lowest metric wins inside one protocol', 'OSPF cost, RIP hops'],
+        ['Summarization', 'Many contiguous routes become one', '10.1.0.0/24-10.1.3.0/24 = 10.1.0.0/22'],
+        ['Split horizon', 'No advertising back where learned', 'Distance vector loop prevention'],
+        ['Route poisoning', 'Failed route advertised as unreachable', 'RIP metric 16'],
+        ['Redistribution', 'Import routes from another source', 'Needs seed metric and filtering'],
+      ],
+      caption: 'Specific first, then trusted source, then best metric.',
+    },
+    example: `A company merges with another that runs EIGRP while the main network runs OSPF. At one border router, OSPF routes are redistributed into EIGRP with a seed metric and filtered by route tags. Each campus is also summarized into one /20 toward the core, so a flapping access link in one building no longer causes updates everywhere.`,
+    tips: [
+      `Always apply longest prefix first, then AD, then metric.`,
+      `For summarization, the networks must be contiguous and aligned on a power-of-two boundary.`,
+      `Redistribute at one point if possible, and always filter and tag.`,
+    ],
+    exam: `Know administrative distance values, that longest prefix match comes first, how to summarize networks, what redistribution does, and loop prevention methods: split horizon, poisoning, hold-down, and TTL.`,
+    mistakes: [
+      `Picking a route by AD without checking prefix length first.`,
+      `Summarizing networks that are not aligned, which includes addresses that belong elsewhere.`,
+      `Redistributing in both directions at two routers without filtering, creating loops.`,
+    ],
+    terms: [
+      { term: 'Longest prefix match', def: `Rule that the route with the longest matching mask is chosen.` },
+      { term: 'Administrative distance', def: `Trust value of a routing source; lower is preferred.` },
+      { term: 'Route summarization', def: `Combining multiple contiguous routes into a single, shorter-prefix route.` },
+      { term: 'Redistribution', def: `Injecting routes learned from one routing source into another.` },
+      { term: 'Split horizon', def: `Do not advertise a route out the interface on which it was learned.` },
+      { term: 'Route poisoning', def: `Advertising a failed route with an unreachable metric.` },
+      { term: 'Convergence', def: `State in which all routers have consistent routing information.` },
+    ],
+    commands: [
+      { os: 'Cisco IOS', cmd: 'show ip route 10.1.2.77', desc: `Shows which route the router would use for a destination.` },
+      { os: 'Cisco IOS', cmd: 'ip route 10.1.0.0 255.255.252.0 Null0', desc: `Creates a null route for a summary to prevent black-hole loops.` },
+      { os: 'Cisco IOS', cmd: 'ip route 0.0.0.0 0.0.0.0 203.0.113.2 200', desc: `Creates a floating static default route with AD 200.` },
+      { os: 'Cisco IOS', cmd: 'show ip protocols', desc: `Shows active routing protocols, timers, and redistribution settings.` },
+    ],
+    checks: [
+      {
+        prompt: `A router has 10.0.0.0/8 learned from a static route and 10.5.5.0/24 learned from OSPF. A packet is destined for 10.5.5.9. Which route is used?`,
+        options: [`10.0.0.0/8 because static has lower AD`, `10.5.5.0/24 because it is the longest prefix match`, `Both, load balanced`, `Neither, the packet is dropped`],
+        correct: 1,
+        explanation: `Longest prefix match is applied first. The /24 is more specific, so AD is not even compared.`,
+      },
+      {
+        prompt: `Which summary route covers 172.16.8.0/24 through 172.16.11.0/24 exactly?`,
+        options: [`172.16.8.0/21`, `172.16.8.0/22`, `172.16.8.0/23`, `172.16.0.0/20`],
+        correct: 1,
+        explanation: `Third octets 8 to 11 share the first six bits, so the prefix is 16 + 6 = 22: 172.16.8.0/22.`,
+      },
+      {
+        prompt: `Which loop prevention method stops a distance-vector router from advertising a route back out the interface where it learned it?`,
+        options: [`Hold-down timer`, `Split horizon`, `Route redistribution`, `BFD`],
+        correct: 1,
+        explanation: `Split horizon blocks advertising a route back toward its source.`,
+      },
+    ],
+    mini: {
+      prompt: `You must summarize 10.20.16.0/24, 10.20.17.0/24, 10.20.18.0/24, and 10.20.19.0/24 for the core.`,
+      task: `Write the summary route and explain how you found the prefix length.`,
+    },
+    recap: `Routers choose by longest prefix, then lowest administrative distance, then lowest metric. Summarize contiguous aligned blocks to shrink tables, redistribute carefully with filters, and rely on split horizon, poisoning, hold-down, link-state maps, and TTL to avoid loops.`,
+    classroom: `"Pinakatiyak muna, pagkatapos AD, pagkatapos metric. Sa summary, hanapin ang magkaparehong bits."`,
+  });
+
 }(window.NetReady));

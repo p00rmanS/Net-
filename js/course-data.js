@@ -52,7 +52,7 @@
       title: 'OSI and TCP/IP Models',
       blurb: 'Ang "restaurant kitchen" ng networking — bawat layer may trabaho.',
       status: 'available',
-      lessonIds: ['2-1', '2-2', '2-3', '2-4', '2-5'],
+      lessonIds: ['2-1', '2-2', '2-3', '2-4', '2-5', '2-6'],
     },
     {
       id: 3,
@@ -68,7 +68,7 @@
       title: 'IPv4 Addressing and Subnetting',
       blurb: 'Subnetting without the panic — step-by-step, may calculator ka pa.',
       status: 'available',
-      lessonIds: ['4-1', '4-2', '4-3', '4-4', '4-5', '4-6'],
+      lessonIds: ['4-1', '4-2', '4-3', '4-4', '4-5', '4-6', '4-7'],
     },
     {
       id: 5,
@@ -100,7 +100,7 @@
       title: 'Routing and Wide Area Networking',
       blurb: 'Paano naghahanap ng ruta ang data papunta sa ibang network.',
       status: 'available',
-      lessonIds: ['8-1', '8-2', '8-3', '8-4', '8-5', '8-6', '8-7', '8-8', '8-9', '8-10'],
+      lessonIds: ['8-1', '8-2', '8-3', '8-4', '8-5', '8-6', '8-7', '8-8', '8-9', '8-10', '8-11', '8-12'],
     },
     {
       id: 9,
@@ -108,7 +108,7 @@
       title: 'Wireless Networking',
       blurb: 'Wi-Fi standards, channels, at pagpaplano ng coverage.',
       status: 'available',
-      lessonIds: ['9-1', '9-2', '9-3', '9-4', '9-5', '9-6', '9-7', '9-8', '9-9', '9-10', '9-11', '9-12', '9-13'],
+      lessonIds: ['9-1', '9-2', '9-3', '9-4', '9-5', '9-6', '9-7', '9-8', '9-9', '9-10', '9-11', '9-12', '9-13', '9-14', '9-15', '9-16'],
     },
     {
       id: 10,
@@ -124,7 +124,7 @@
       title: 'Network Operations and Documentation',
       blurb: 'Diagrams, baselines, change management, disaster recovery.',
       status: 'available',
-      lessonIds: ['11-1', '11-2', '11-3', '11-4', '11-5', '11-6', '11-7', '11-8', '11-9', '11-10', '11-11', '11-12'],
+      lessonIds: ['11-1', '11-2', '11-3', '11-4', '11-5', '11-6', '11-7', '11-8', '11-9', '11-10', '11-11', '11-12', '11-13'],
     },
     {
       id: 12,
@@ -132,7 +132,7 @@
       title: 'Network Security',
       blurb: 'CIA triad, AAA, firewalls, at karaniwang atake.',
       status: 'available',
-      lessonIds: ['12-1', '12-2', '12-3', '12-4', '12-5', '12-6', '12-7', '12-8', '12-9', '12-10', '12-11', '12-12', '12-13', '12-14', '12-15', '12-16', '12-17'],
+      lessonIds: ['12-1', '12-2', '12-3', '12-4', '12-5', '12-6', '12-7', '12-8', '12-9', '12-10', '12-11', '12-12', '12-13', '12-14', '12-15', '12-16', '12-17', '12-18', '12-19'],
     },
     {
       id: 13,
