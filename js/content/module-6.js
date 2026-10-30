@@ -1211,4 +1211,118 @@
     recap: `VoIP uses SIP for signaling and RTP for media, runs on a PBX or cloud UC platform, and depends on PoE, voice VLANs, QoS, and low latency, jitter, and loss.`,
     classroom: `"SIP ang tumatawag, RTP ang boses. Kung konektado pero walang tunog, hanapin mo ang RTP."`,
   });
+
+  NetReady.LESSONS['6-13'] = NetReady.lesson(6, {
+    id: '6-13',
+    slug: 'qos-in-depth-marking-queuing-shaping-and-policing',
+    title: 'QoS in Depth: Marking, Queuing, Shaping, and Policing',
+    minutes: 16,
+    outcomes: [
+      `Explain why QoS is needed and which traffic is sensitive.`,
+      `Read DSCP and CoS markings and the idea of a trust boundary.`,
+      `Compare queuing methods and congestion avoidance.`,
+      `Distinguish traffic shaping from traffic policing.`,
+    ],
+    why: `Voice and video break when the network is busy, while file downloads do not. Quality of Service lets a network treat traffic differently. The exam tests the vocabulary (DSCP, CoS, shaping, policing, queuing) and the symptoms of poor QoS (jitter, latency, and loss).`,
+    simple: `When a link is not full, every packet gets through quickly and QoS does nothing. When a link is congested, QoS decides who waits and who is dropped. Devices first classify and mark packets (for example voice gets a high-priority tag). Then queues send the high-priority packets first. Shaping smooths traffic by delaying extra packets, and policing enforces a limit by dropping or re-marking extra packets.`,
+    taglish: `Kapag hindi puno ang link, walang silbi ang QoS. Kapag siksikan, QoS ang magpapasya kung sino ang mauuna at sino ang ihuhulog. Una, minamarkahan ang packets (halimbawa, voice = mataas na priyoridad). Pagkatapos, inuuna ng queue ang mataas na priyoridad. Ang shaping ay nagpapabagal ng sobra; ang policing ay naghuhulog o nagma-mark ng sobra.`,
+    analogy: {
+      title: 'Daan na may bus lane at ambulansya',
+      text: `Kapag walang trapiko, lahat ay mabilis. Kapag trapik, may bus lane at daanan ng ambulansya (priority queue). Ang traffic enforcer na nagpapahinto ng sobrang sasakyan para pantay ang daloy ay shaping; ang pulis na nagpapa-ticket at pinapaalis ang sobra ay policing.`,
+    },
+    steps: [
+      `Why QoS: real-time traffic such as VoIP and video conferencing needs low latency (one-way delay under about 150 ms for voice), low jitter (variation in delay, under about 30 ms), and very low packet loss (under about 1 percent). Bulk traffic such as backups and software updates tolerates delay.`,
+      `Classification and marking: the device identifies traffic (by port, protocol, address, or application) and writes a priority value. At Layer 3 the value is DSCP, the 6 bits of the Type of Service (ToS) byte in the IP header, with 64 possible values. At Layer 2 it is CoS (class of service, IEEE 802.1p), 3 bits in the 802.1Q VLAN tag, values 0 to 7.`,
+      `Common DSCP values: EF (Expedited Forwarding, 46) for voice, AF classes (Assured Forwarding, for example AF41 = 34 for interactive video), CS values (class selector, backwards compatible with IP precedence), and default/best effort (0).`,
+      `Trust boundary: the point where a switch decides whether to believe the markings it receives. Phones that mark their own voice traffic can be trusted. User PCs should not be trusted, since anyone can mark everything as high priority. Re-mark untrusted traffic at the edge.`,
+      `Queuing (what to send next when the link is busy): FIFO (first in, first out, no priority), priority queuing (strict, can starve other queues), weighted fair queuing and CBWFQ (class-based weighted fair queuing, each class gets a guaranteed share), and LLQ (low-latency queuing, a strict priority queue for voice plus CBWFQ for the rest).`,
+      `Congestion management and avoidance: tail drop discards every packet when a queue is full, which makes TCP flows slow down and speed up together (global synchronization). RED and WRED (weighted random early detection) start dropping a few packets before the queue is full, dropping lower-priority traffic first, to avoid that problem.`,
+      `Traffic shaping: buffers and delays excess traffic so the output rate conforms to a limit. It smooths bursts, works on outbound traffic, and adds delay but avoids drops. Use it when sending into a slower service, such as a 100 Mbps committed rate on a 1 Gbps port.`,
+      `Traffic policing: measures traffic against a limit and drops or re-marks anything over it, with no buffering. It can be applied inbound or outbound, causes no added delay, but TCP sees drops. Use it to enforce a contract or to limit a user.`,
+      `Related terms: bandwidth is the capacity of the link, throughput is the actual data rate achieved, and goodput is the useful application data after removing headers and retransmissions. Bandwidth management, rate limiting, and traffic prioritization are all QoS tools. Remember that QoS cannot create bandwidth: if a link is permanently full, you need more capacity.`,
+    ],
+    deepDive: [
+      {
+        title: 'A VoIP phone on a congested WAN link',
+        text: `A branch has a 20 Mbps WAN link. The phone marks voice as DSCP EF (46) and the access switch trusts the phone. The WAN router places EF packets in the LLQ priority queue, limits that queue to a defined share (for example 30 percent) so it cannot starve other traffic, and places other classes in weighted queues. A nightly backup now cannot ruin phone calls.`,
+        code: `class-map VOICE        match dscp ef
+class-map VIDEO        match dscp af41
+policy-map WAN-OUT
+  class VOICE          priority percent 30      (LLQ)
+  class VIDEO          bandwidth percent 25     (CBWFQ)
+  class class-default  fair-queue               (everything else)
+interface Gi0/0
+  service-policy output WAN-OUT`,
+        note: `The priority queue is policed to its percentage. Without that cap, a flood of EF-marked traffic could use the whole link.`,
+      },
+      {
+        title: 'Shaping versus policing: a 100 Mbps contract',
+        text: `The provider gives you 100 Mbps on a 1 Gbps port. If you send 400 Mbps for a moment, a policer at the provider drops the excess and TCP slows down abruptly. If you shape to 100 Mbps on your own router first, the burst is buffered and released at 100 Mbps, so the provider's policer rarely drops anything.`,
+        code: `Policing:  400 Mbps in  ->  100 Mbps out, 300 Mbps DROPPED (or re-marked)
+Shaping:   400 Mbps in  ->  100 Mbps out, excess BUFFERED, then sent later
+           (delay goes up, loss stays low)`,
+      },
+    ],
+    table: {
+      label: 'QoS tools and what each one does',
+      head: ['Term', 'What it does', 'Remember'],
+      rows: [
+        ['DSCP', 'Layer 3 marking, 6 bits in the IP ToS byte', 'EF 46 is voice'],
+        ['CoS / 802.1p', 'Layer 2 marking, 3 bits in the 802.1Q tag', 'Values 0 to 7'],
+        ['LLQ', 'Strict priority queue plus weighted queues', 'Best for voice'],
+        ['WRED', 'Early random drops before the queue fills', 'Avoids global synchronization'],
+        ['Shaping', 'Buffers and delays excess traffic', 'Outbound, smooths bursts'],
+        ['Policing', 'Drops or re-marks excess traffic', 'No delay, TCP sees loss'],
+      ],
+      caption: 'Mark first, queue second, then shape or police to match the link.',
+    },
+    example: `A clinic's video visits freeze every morning at 9:00 when workstations download updates. The administrator marks video as AF41, trusts the codec endpoints, puts it in a guaranteed class on the WAN router, and limits the update traffic to a lower class. Video calls stay smooth while updates finish a little later.`,
+    tips: [
+      `Voice needs low delay, low jitter, and low loss. If a user hears choppy audio, suspect jitter or loss, not bandwidth alone.`,
+      `QoS only matters during congestion. If the link is idle, markings change nothing.`,
+      `Markings must be consistent end to end. One device that clears DSCP breaks the chain.`,
+    ],
+    exam: `Know DSCP versus CoS (Layer 3 versus Layer 2), that shaping delays and policing drops, what jitter and latency are, and that QoS prioritizes traffic but does not add capacity.`,
+    mistakes: [
+      `Trusting markings from user PCs, which lets anyone claim top priority.`,
+      `Assuming QoS fixes a link that is always full. It only chooses who suffers.`,
+      `Mixing up shaping and policing: shaping buffers, policing drops.`,
+    ],
+    terms: [
+      { term: 'QoS', def: `Quality of Service: methods that prioritize some traffic over other traffic.` },
+      { term: 'DSCP', def: `Differentiated Services Code Point, a 6-bit Layer 3 priority marking in the IP header.` },
+      { term: 'CoS', def: `Class of Service, a 3-bit Layer 2 priority marking in the 802.1Q tag (802.1p).` },
+      { term: 'Jitter', def: `Variation in packet delay, harmful to voice and video.` },
+      { term: 'Traffic shaping', def: `Delaying excess traffic with buffers so the rate stays within a limit.` },
+      { term: 'Traffic policing', def: `Dropping or re-marking traffic that exceeds a limit.` },
+      { term: 'Goodput', def: `Useful application data rate after overhead and retransmissions.` },
+    ],
+    checks: [
+      {
+        prompt: `Which QoS tool buffers excess packets and sends them later so the outgoing rate stays within a limit?`,
+        options: [`Traffic policing`, `Traffic shaping`, `Tail drop`, `Port mirroring`],
+        correct: 1,
+        explanation: `Shaping delays excess traffic in a buffer. Policing drops or re-marks it instead.`,
+      },
+      {
+        prompt: `Users report choppy, robotic VoIP calls even though the link is only 40 percent utilized on average. Which measurement most likely explains this?`,
+        options: [`High jitter or burst loss`, `Low CPU on the phone`, `A long DHCP lease`, `A wrong DNS suffix`],
+        correct: 0,
+        explanation: `Voice quality depends on delay variation (jitter) and loss, which can be poor during short bursts even when the average utilization is low.`,
+      },
+      {
+        prompt: `Where is the 3-bit CoS value carried?`,
+        options: [`In the IP header ToS byte`, `In the TCP options`, `In the 802.1Q VLAN tag`, `In the DNS header`],
+        correct: 2,
+        explanation: `CoS (802.1p) uses 3 bits in the 802.1Q tag. DSCP is in the IP header.`,
+      },
+    ],
+    mini: {
+      prompt: `A guest laptop marks all of its traffic as DSCP EF and starts getting priority treatment on the switch.`,
+      task: `What QoS design mistake allowed this and how do you fix it?`,
+    },
+    recap: `QoS classifies and marks traffic (DSCP at Layer 3, CoS at Layer 2), queues it with methods such as LLQ, avoids tail drop with WRED, and enforces limits with shaping (delay) or policing (drop). It matters only during congestion and cannot add bandwidth.`,
+    classroom: `"I-mark, i-queue, saka i-shape o i-police. Voice: mababang delay, mababang jitter, halos walang loss."`,
+  });
+
 }(window.NetReady));

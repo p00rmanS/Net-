@@ -1420,4 +1420,361 @@ Per-command authorization Limited                        Yes`,
     recap: `Authentication proves identity, authorization grants permissions, and accounting records activity. Use least privilege and RBAC, add geofencing and time-based limits, use SSO with MFA, choose RADIUS or TACACS+ appropriately, rely on Kerberos tickets with synchronized time, and manage the joiner-mover-leaver lifecycle.`,
     classroom: `"Kaunti lang ang access na kailangan, para sa tamang tao, sa tamang lugar, sa tamang oras — at laging may log."`,
   });
+
+  NetReady.LESSONS['12-15'] = NetReady.lesson(12, {
+    id: '12-15',
+    slug: 'network-attacks-in-depth-how-they-work-and-how-to-stop-them',
+    title: 'Network Attacks in Depth: How They Work and How to Stop Them',
+    minutes: 18,
+    outcomes: [
+      `Explain DoS, DDoS, SYN flood, and amplification attacks.`,
+      `Describe Layer 2 attacks: ARP poisoning, MAC flooding, VLAN hopping, and rogue DHCP.`,
+      `Describe DNS, on-path, and wireless attacks.`,
+      `Match each attack to its best mitigation.`,
+    ],
+    why: `Security questions on the exam usually give you a symptom and ask for the attack, or give an attack and ask for the control. If you understand how each attack works, the mitigation becomes obvious.`,
+    simple: `Most network attacks abuse trust. ARP, DHCP, and DNS all believe whatever they are told, so an attacker lies to them. Flood attacks overwhelm a resource until it fails. Wireless attacks trick a client into joining a fake network. Each defense is a control that checks or limits the thing being abused.`,
+    taglish: `Karamihan ng atake ay nagsasamantala sa tiwala. Naniniwala ang ARP, DHCP, at DNS sa anumang sinabi sa kanila, kaya nagsisinungaling ang attacker. Ang flood ay nagpapabagsak sa resource. Ang bawat depensa ay kontrol na nagsusuri o naglilimita sa inaabuso.`,
+    analogy: {
+      title: 'Pekeng karatula at siksikan sa pinto',
+      text: `Ang ARP poisoning ay pagpapalit ng karatula ng kalye para mapunta sa iyo ang mga sasakyan. Ang DDoS ay libu-libong tao na sabay-sabay na pumasok sa maliit na tindahan para wala nang makapasok. Ang evil twin ay pekeng tindahan na kamukha ng totoo.`,
+    },
+    steps: [
+      `DoS and DDoS: a denial-of-service attack exhausts bandwidth, connection tables, or CPU. DDoS comes from many compromised machines (a botnet). Mitigation: rate limiting, upstream scrubbing or a CDN/DDoS protection service, anycast, SYN cookies, and firewall/IPS rules.`,
+      `SYN flood: the attacker sends many TCP SYN packets, often with spoofed source addresses, and never completes the handshake. The server keeps half-open connections until its table is full. Mitigation: SYN cookies, shorter timeouts, larger backlog, and rate limiting.`,
+      `Reflection and amplification: the attacker spoofs the victim's source IP and sends small requests to open servers (DNS, NTP, memcached, SSDP) that send large replies to the victim. Mitigation: disable open resolvers and unneeded services, rate-limit responses, and apply BCP 38 ingress filtering to block spoofed sources.`,
+      `ARP poisoning (spoofing): the attacker sends false ARP replies so that the gateway's IP maps to the attacker's MAC, creating an on-path (man-in-the-middle) position. Mitigation: Dynamic ARP Inspection (DAI) using the DHCP snooping table, static ARP for critical hosts, port security.`,
+      `MAC flooding: the attacker sends thousands of frames with fake source MACs to fill the switch's CAM table so it floods traffic out of all ports like a hub. Mitigation: port security with a maximum MAC count and violation action.`,
+      `VLAN hopping: switch spoofing negotiates a trunk using DTP, giving access to all VLANs. Double tagging puts two 802.1Q tags on a frame, where the first (native VLAN) tag is stripped by the first switch and the inner tag delivers it to another VLAN (one-way). Mitigation: disable DTP and set access ports to static access mode, do not use VLAN 1 as the native VLAN, put a unique unused VLAN as native, shut down unused ports.`,
+      `Rogue DHCP and DHCP starvation: a fake DHCP server hands out the attacker's gateway or DNS. Starvation exhausts the legitimate pool. Mitigation: DHCP snooping (trusted ports only for real servers) and port security.`,
+      `DNS attacks: cache poisoning inserts false records into a resolver, and pharming redirects users to a fake site by changing DNS or the hosts file. Mitigation: DNSSEC, patched resolvers with randomized source ports, and DNS filtering. DNS tunneling hides data in DNS queries; detect it with unusual query volume or length.`,
+      `Wireless attacks: an evil twin is a rogue AP copying a legitimate SSID; deauthentication frames force clients off; war driving looks for networks; Bluejacking sends unsolicited Bluetooth messages and bluesnarfing steals data from Bluetooth devices. Mitigation: WPA3, 802.1X with certificate validation, Protected Management Frames (802.11w), wireless IPS, and disabling Bluetooth discoverability.`,
+      `Social engineering and password attacks: phishing, spear phishing, whaling, vishing (voice), smishing (SMS), tailgating, shoulder surfing, and dumpster diving; brute force, dictionary, password spraying, and credential stuffing. Mitigation: training, MFA, lockout and rate limits, badge readers, mantraps, and shredding.`,
+    ],
+    deepDive: [
+      {
+        title: 'Double tagging, step by step',
+        text: `The attacker sits on an access port in VLAN 1, which is also the trunk's native VLAN. They send a frame with two 802.1Q tags: outer VLAN 1, inner VLAN 20. Switch A sees that the outer tag matches the native VLAN and strips it, because native frames are sent untagged on the trunk. Switch B receives the frame with only the VLAN 20 tag and delivers it to VLAN 20. The attack only works one way (no replies return) and needs the native VLAN to match the attacker's VLAN.`,
+        code: `Attacker (VLAN 1) -> [VLAN1][VLAN20][data]
+Switch A strips tag 1 (native)  -> [VLAN20][data] over trunk
+Switch B forwards into VLAN 20 -> victim
+
+Fix:
+interface Gi0/24
+  switchport trunk native vlan 999     (unused VLAN)
+interface range Gi0/1 - 20
+  switchport mode access
+  switchport nonegotiate`,
+        note: `Two settings stop both VLAN hopping variants: no DTP negotiation, and a native VLAN that no user port belongs to.`,
+      },
+      {
+        title: 'Defending Layer 2 with DHCP snooping and DAI',
+        text: `DHCP snooping builds a table of IP to MAC to port bindings from legitimate DHCP replies, and drops replies from untrusted ports. Dynamic ARP Inspection then checks every ARP packet against that table and drops lies. Together they stop rogue DHCP servers and ARP poisoning.`,
+        code: `ip dhcp snooping
+ip dhcp snooping vlan 10
+interface Gi0/24                  (uplink to the real DHCP server)
+  ip dhcp snooping trust
+ip arp inspection vlan 10
+show ip dhcp snooping binding`,
+      },
+    ],
+    table: {
+      label: 'Attacks matched to their best mitigation',
+      head: ['Attack', 'How it works', 'Best mitigation'],
+      rows: [
+        ['SYN flood', 'Half-open TCP connections fill the table', 'SYN cookies, rate limiting'],
+        ['DNS or NTP amplification', 'Spoofed small request, large reply to victim', 'Close open resolvers, BCP 38'],
+        ['ARP poisoning', 'Fake ARP replies redirect traffic', 'Dynamic ARP Inspection'],
+        ['MAC flooding', 'Fills the CAM table', 'Port security'],
+        ['VLAN hopping', 'DTP spoofing or double tagging', 'Disable DTP, change native VLAN'],
+        ['Rogue DHCP', 'Fake server gives bad gateway or DNS', 'DHCP snooping'],
+        ['DNS poisoning', 'False records in a cache', 'DNSSEC'],
+        ['Evil twin', 'Fake AP with the same SSID', 'WPA3, 802.1X, wireless IPS'],
+      ],
+      caption: 'Learn the pair: attack on the left, control on the right.',
+    },
+    example: `Users at a coffee shop connect to a free Wi-Fi network named like the shop's, and their banking sessions fail certificate checks. The "network" is an evil twin run from a laptop. The shop's real fix is WPA3 or a captive portal with verified certificates, plus user awareness to heed certificate warnings.`,
+    tips: [
+      `Symptom "random MACs, switch behaves like a hub" equals MAC flooding. Symptom "gateway MAC changed" equals ARP poisoning.`,
+      `Double tagging works one way only and needs the native VLAN to match the attacker's.`,
+      `Rate limiting does not stop a large DDoS by itself. Upstream scrubbing does.`,
+    ],
+    exam: `Match symptoms to attacks and attacks to controls: DAI for ARP poisoning, DHCP snooping for rogue DHCP, port security for MAC flooding, native VLAN and DTP changes for VLAN hopping, SYN cookies for SYN floods, DNSSEC for DNS poisoning.`,
+    mistakes: [
+      `Leaving unused ports enabled in the default VLAN.`,
+      `Using VLAN 1 as the native VLAN on trunks.`,
+      `Marking user ports as trusted for DHCP snooping.`,
+    ],
+    terms: [
+      { term: 'SYN flood', def: `DoS attack that leaves many half-open TCP connections.` },
+      { term: 'Amplification attack', def: `Reflection attack where a small spoofed request creates a large reply to the victim.` },
+      { term: 'ARP poisoning', def: `Sending false ARP replies to redirect traffic through the attacker.` },
+      { term: 'VLAN hopping', def: `Reaching a VLAN you should not access, by switch spoofing or double tagging.` },
+      { term: 'Evil twin', def: `Rogue access point impersonating a legitimate wireless network.` },
+      { term: 'DAI', def: `Dynamic ARP Inspection, a switch feature that validates ARP packets.` },
+      { term: 'DHCP snooping', def: `Switch feature that blocks DHCP replies from untrusted ports.` },
+    ],
+    checks: [
+      {
+        prompt: `A switch suddenly floods all traffic out of every port, and its MAC table is full of unknown addresses. Which attack is happening and what limits it?`,
+        options: [`ARP poisoning, DAI`, `MAC flooding, port security`, `Rogue DHCP, DNSSEC`, `Evil twin, WPA3`],
+        correct: 1,
+        explanation: `Filling the CAM table with fake MACs is MAC flooding. Port security limits the number of MACs per port.`,
+      },
+      {
+        prompt: `Clients on one VLAN receive a default gateway that belongs to an unknown device. Which control prevents this?`,
+        options: [`DHCP snooping`, `Jumbo frames`, `Link aggregation`, `A longer lease`],
+        correct: 0,
+        explanation: `DHCP snooping drops DHCP offers from ports that are not trusted.`,
+      },
+      {
+        prompt: `An attacker sends frames with two 802.1Q tags to reach another VLAN. Which configuration change best prevents this?`,
+        options: [`Use VLAN 1 as the native VLAN`, `Set the native VLAN to an unused VLAN and disable DTP`, `Enable PoE`, `Raise the MTU`],
+        correct: 1,
+        explanation: `A dedicated unused native VLAN and no trunk negotiation stop double tagging and switch spoofing.`,
+      },
+    ],
+    mini: {
+      prompt: `Users report certificate warnings at the same time the default gateway MAC in their ARP tables changes.`,
+      task: `Name the attack and two switch features that stop it.`,
+    },
+    recap: `Flood attacks use SYN cookies, rate limiting, and upstream scrubbing. Layer 2 attacks are stopped by port security, DHCP snooping, DAI, DTP shutdown, and an unused native VLAN. DNS uses DNSSEC, wireless uses WPA3/802.1X, and people are defended with MFA and training.`,
+    classroom: `"ARP poisoning: DAI. Rogue DHCP: snooping. MAC flood: port security. VLAN hopping: patayin ang DTP at palitan ang native VLAN."`,
+  });
+
+  NetReady.LESSONS['12-16'] = NetReady.lesson(12, {
+    id: '12-16',
+    slug: 'vulnerability-management-penetration-testing-and-risk',
+    title: 'Vulnerability Management, Penetration Testing, and Risk Response',
+    minutes: 15,
+    outcomes: [
+      `Describe the vulnerability management cycle.`,
+      `Read CVE and CVSS and explain zero-day.`,
+      `Compare a vulnerability scan with a penetration test.`,
+      `Choose a risk response: mitigate, transfer, accept, or avoid.`,
+    ],
+    why: `Security is about finding weaknesses before attackers do. The exam covers vulnerability scanning, patching, penetration testing, risk, and insider threats, and often asks which activity fits a given situation.`,
+    simple: `A vulnerability scan is an automated check that lists known weaknesses. A penetration test is a person (with permission) actually trying to break in and prove the impact. Both feed a repeating process: find assets, scan, rank by risk, fix or patch, verify, repeat. For risks you cannot remove, you decide whether to reduce, insure, accept, or avoid them.`,
+    taglish: `Ang vulnerability scan ay awtomatikong pagsusuri ng kilalang butas. Ang penetration test ay tao na may pahintulot na sumubok pumasok at magpatunay ng epekto. Paulit-ulit na proseso: hanapin ang assets, i-scan, i-rank, ayusin, i-verify. Sa panganib na hindi maalis, pipili: bawasan, ilipat, tanggapin, o iwasan.`,
+    analogy: {
+      title: 'Inspeksyon ng bahay at pekeng magnanakaw',
+      text: `Ang scan ay inspektor na may listahan ng karaniwang sira. Ang pen test ay inupahang magnanakaw (may kontrata) na talagang susubukang pumasok at sasabihin kung saan siya nakapasok. Ang insurance ay paglilipat ng panganib.`,
+    },
+    steps: [
+      `Vulnerability management cycle: discover assets, scan, prioritize, remediate (patch, reconfigure, or mitigate), verify with a rescan, and report. Without an accurate asset inventory, you cannot know what to scan.`,
+      `Scanning types: credentialed scans log in and find missing patches and weak settings with fewer false positives; non-credentialed scans see only what an outsider sees. Internal scans find insider-risk weaknesses; external scans test the perimeter. Tools include Nessus, OpenVAS, and Qualys. Port scanners such as nmap discover open ports and services.`,
+      `CVE (Common Vulnerabilities and Exposures) is the public ID for a known flaw (for example CVE-2021-44228). CVSS (Common Vulnerability Scoring System) rates severity from 0 to 10: 0.1 to 3.9 low, 4.0 to 6.9 medium, 7.0 to 8.9 high, 9.0 to 10.0 critical. Severity must be combined with exposure and asset value to set priority.`,
+      `Zero-day: a vulnerability unknown to the vendor, with no patch available. Mitigations are defense in depth, segmentation, IPS virtual patching, least privilege, and monitoring. False positives are reports of problems that do not exist; false negatives are real problems the scan missed.`,
+      `Patch management: test patches in a lab or pilot group, schedule through change management with a rollback plan, deploy, and verify. Firmware and end-of-life devices count too: unsupported equipment cannot be patched and should be replaced or isolated.`,
+      `Penetration testing: authorized simulated attack with a written scope and rules of engagement. Phases: planning, reconnaissance, scanning, exploitation, post-exploitation, and reporting. Types: black box (no knowledge), white box (full knowledge), and gray box (partial). Pen tests prove exploitability; scans only list possibilities.`,
+      `Teams: red team attacks, blue team defends, and a purple team shares knowledge between them. A bug bounty pays outside researchers for responsible disclosure.`,
+      `Insider threats: employees or contractors who misuse access, accidentally or deliberately. Controls: least privilege, separation of duties, job rotation, mandatory vacations, logging and UEBA, and DLP (data loss prevention) tools that block sensitive data leaving by email, USB, or cloud upload. A honeypot (decoy system) detects attackers and insiders poking around.`,
+      `Risk response: risk is likelihood times impact. Mitigate (apply controls), transfer (insurance or outsourcing), accept (documented, within tolerance), or avoid (stop the risky activity). Residual risk is what remains after controls.`,
+    ],
+    deepDive: [
+      {
+        title: 'Prioritizing three findings',
+        text: `A scan returns three findings. A CVSS 9.8 flaw on a lab server with no internet access, a CVSS 7.5 flaw on the public web server, and a CVSS 5.3 flaw on the domain controller. The 9.8 is critical in score but isolated. The public server is exposed to the internet, so it is probably patched first. The domain controller is valuable and gets a planned patch soon. Context decides priority.`,
+        code: `Finding         CVSS  Exposure   Asset value   Priority
+Lab server       9.8  none       low           3
+Public web       7.5  internet   high          1
+Domain ctrl      5.3  internal   very high     2`,
+        note: `The exam likes this idea: do not rank only by score.`,
+      },
+      {
+        title: 'Rules of engagement checklist',
+        text: `Before any pen test starts, get written authorization. Without it, the same actions are illegal. The agreement defines what is in scope and what is not.`,
+        code: `Scope:            10.20.0.0/16, app.example.com (production excluded after 18:00)
+Out of scope:     payroll database, third-party hosted services
+Allowed methods:  scanning, exploitation, no denial of service, no social engineering
+Contacts:         24x7 emergency contact on both sides
+Dates:            2026-11-02 to 2026-11-13
+Deliverable:      report with findings, evidence, and fixes`,
+      },
+    ],
+    table: {
+      label: 'Vulnerability scan versus penetration test',
+      head: ['Aspect', 'Vulnerability scan', 'Penetration test'],
+      rows: [
+        ['Goal', 'List known weaknesses', 'Exploit weaknesses to prove impact'],
+        ['Method', 'Automated tool', 'Human skills plus tools'],
+        ['Frequency', 'Regular (weekly or monthly)', 'Periodic (yearly or after big changes)'],
+        ['Risk to systems', 'Low', 'Higher, needs rules of engagement'],
+        ['Output', 'Long list with scores', 'Narrative with proven attack paths'],
+      ],
+      caption: 'Scans find, pen tests prove.',
+    },
+    example: `A hospital runs weekly credentialed scans and patches critical findings within 14 days through change control. Once a year, an outside firm performs a gray-box pen test under written rules of engagement. The report shows a weak VPN password policy that no scan flagged, and the hospital adds MFA.`,
+    tips: [
+      `Scan equals automated and broad. Pen test equals manual, authorized, and proves exploitation.`,
+      `Written authorization always comes first.`,
+      `Accepting a risk is a documented decision, not ignoring it.`,
+    ],
+    exam: `Know CVE versus CVSS, zero-day, credentialed versus non-credentialed scans, false positive and false negative, the pen test types (black, white, gray box), red and blue teams, and the four risk responses.`,
+    mistakes: [
+      `Running a pen test or aggressive scan without written approval.`,
+      `Patching production without testing or a rollback plan.`,
+      `Ranking only by CVSS score without considering exposure.`,
+    ],
+    terms: [
+      { term: 'CVE', def: `Public identifier for a specific known vulnerability.` },
+      { term: 'CVSS', def: `Scoring system from 0 to 10 for vulnerability severity.` },
+      { term: 'Zero-day', def: `Vulnerability with no available vendor patch, often already exploited.` },
+      { term: 'Penetration test', def: `Authorized simulated attack that exploits weaknesses to show impact.` },
+      { term: 'Rules of engagement', def: `Written scope and limits for a security test.` },
+      { term: 'DLP', def: `Data loss prevention: tools that stop sensitive data from leaving.` },
+      { term: 'Residual risk', def: `Risk remaining after controls are applied.` },
+    ],
+    commands: [
+      { os: 'Linux', cmd: 'nmap -sV 10.20.0.0/24', desc: `Scans a subnet and tries to detect service versions (only on networks you are authorized to test).` },
+      { os: 'Linux', cmd: 'nmap -p 1-1024 -sS host', desc: `Runs a SYN scan of the well-known ports on one host.` },
+    ],
+    checks: [
+      {
+        prompt: `A vulnerability has no vendor patch and is already being exploited. What is it called?`,
+        options: [`A false positive`, `A zero-day`, `Residual risk`, `A honeypot`],
+        correct: 1,
+        explanation: `A zero-day is unknown to the vendor or unpatched, so defenders rely on layered controls until a fix exists.`,
+      },
+      {
+        prompt: `A company buys cyber insurance to cover ransomware losses. Which risk response is this?`,
+        options: [`Avoidance`, `Acceptance`, `Transfer`, `Mitigation`],
+        correct: 2,
+        explanation: `Insurance transfers the financial impact of the risk to another party.`,
+      },
+      {
+        prompt: `Which activity proves a weakness can actually be exploited and requires written rules of engagement?`,
+        options: [`A credentialed vulnerability scan`, `A penetration test`, `A baseline review`, `A syslog review`],
+        correct: 1,
+        explanation: `A pen test goes beyond listing weaknesses by exploiting them under an authorized scope.`,
+      },
+    ],
+    mini: {
+      prompt: `A scan reports a critical flaw on an old switch that the vendor no longer supports and no patch exists.`,
+      task: `Which risk responses are available and which would you choose?`,
+    },
+    recap: `Manage vulnerabilities in a cycle of discover, scan, prioritize, remediate, verify. CVSS scores severity but context sets priority. Scans list, pen tests prove, and both need authorization. Respond to risk by mitigating, transferring, accepting, or avoiding, and control insiders with least privilege and DLP.`,
+    classroom: `"Scan ay naghahanap, pen test ay nagpapatunay. Laging may nakasulat na pahintulot. Mitigate, transfer, accept, avoid."`,
+  });
+
+  NetReady.LESSONS['12-17'] = NetReady.lesson(12, {
+    id: '12-17',
+    slug: 'remote-access-vpn-types-jump-hosts-and-out-of-band-management',
+    title: 'Remote Access: VPN Types, Jump Hosts, and Out-of-Band Management',
+    minutes: 15,
+    outcomes: [
+      `Compare client-to-site and site-to-site VPNs.`,
+      `Explain full tunnel, split tunnel, and clientless VPN.`,
+      `Describe SSH, RDP, VNC, and why Telnet is avoided.`,
+      `Explain jump boxes and out-of-band management.`,
+    ],
+    why: `Administrators and employees work remotely, and an exposed management path is one of the most attacked parts of a network. The exam asks you to pick the right remote access method and the secure way to manage devices.`,
+    simple: `A VPN creates an encrypted tunnel across an untrusted network. Client-to-site connects one user to the office; site-to-site connects two offices. You can send all traffic through the tunnel (full) or only office traffic (split). For admins, use SSH instead of Telnet, reach servers through a hardened jump box, and keep a separate out-of-band path that still works when the main network is down.`,
+    taglish: `Ang VPN ay naka-encrypt na tunnel sa hindi ligtas na network. Ang client-to-site ay isang user papunta sa opisina; ang site-to-site ay dalawang opisina. Full tunnel ang lahat ng traffic, split tunnel ang opisina lang. Para sa admin: SSH, hindi Telnet; dumaan sa jump box; at may out-of-band na daan kapag patay ang main network.`,
+    analogy: {
+      title: 'Lagusan, guwardiya sa gate, at pintuan sa likod',
+      text: `Ang VPN ay saradong lagusan sa pagitan ng dalawang gusali. Ang jump box ay guwardiya sa gate: lahat ng admin ay dumadaan doon at naka-log. Ang out-of-band ay pintuan sa likod na gumagana kahit nakasara ang harapan.`,
+    },
+    steps: [
+      `Client-to-site (remote access) VPN: one user's laptop connects to a VPN gateway at the office. Site-to-site VPN: two networks are joined permanently by gateways, usually with IPsec, and users are unaware of it. Always-on VPN connects automatically before login.`,
+      `Full tunnel sends all traffic through the VPN so the company can inspect it, but it uses more bandwidth. Split tunnel sends only corporate traffic through the VPN and the rest directly to the internet. It saves bandwidth but bypasses corporate security controls.`,
+      `IPsec VPN uses ESP (protocol 50) and IKE (UDP 500, plus UDP 4500 for NAT traversal), works at Layer 3, and usually requires a client. SSL/TLS VPN uses TCP 443 and can be clientless (reached by a browser portal, giving access to specific web apps) or full-tunnel with a client. DTLS, WireGuard, and OpenVPN are other options.`,
+      `Remote administration protocols: SSH (TCP 22) is encrypted and replaces Telnet (TCP 23, cleartext) and rlogin. RDP (TCP 3389) gives a Windows graphical session. VNC (TCP 5900) is a cross-platform remote screen. Secure them with MFA and network level authentication, and never expose RDP directly to the internet.`,
+      `SSH good practice: key-based authentication, disable password login and root login, use non-default ports only as a minor measure, restrict source addresses, and use SCP or SFTP (also on port 22) for file transfer.`,
+      `Jump box (jump host, bastion host): a hardened, monitored server placed between the user and the protected network. Admins connect to the jump box first and then to internal devices. This gives one place to apply MFA, restrict access, and record sessions.`,
+      `Out-of-band (OOB) management: a separate path to manage devices that does not depend on the production network, such as a console server with serial ports on a dedicated management network or a cellular modem. Console cable: RJ-45 to serial, typically 9600 baud, 8 data bits, no parity, 1 stop bit (8N1). In-band management uses the same network that it manages, such as SSH over the LAN.`,
+      `Other methods: VDI and virtual desktop (the desktop runs in the data center), API access with tokens, and zero trust network access (ZTNA), which grants per-application access after verifying identity and device health instead of putting the user on the whole network.`,
+      `Authentication: use MFA for all remote access, RADIUS or TACACS+ for centralized authentication of network device logins, and logging of every administrative session.`,
+    ],
+    deepDive: [
+      {
+        title: 'Comparing split and full tunnel',
+        text: `A remote worker opens a video call and the file server at the same time. With full tunnel, both flows go to the office and back out, using the office internet link twice. With split tunnel, only the file server traffic uses the VPN, and the video call goes direct. Split tunnel has better performance, but a malware infection on the laptop could use the open internet path to reach the corporate network through the VPN.`,
+        code: `Full tunnel:   0.0.0.0/0          -> VPN
+Split tunnel:  10.0.0.0/8, 172.16.0.0/12 -> VPN
+               everything else          -> local internet`,
+        note: `Security policy often forces full tunnel for high-risk roles and allows split tunnel for approved cloud apps.`,
+      },
+      {
+        title: 'Reaching a switch through a jump box',
+        text: `The switches accept SSH only from the jump box address. Admins authenticate to the jump box with MFA, then hop to the switch. Every session is recorded centrally. If a laptop is stolen, the attacker cannot reach the switches directly.`,
+        code: `ssh -J admin@jump.example.com admin@sw-core-01
+(connects first to the jump box, then forwards to the switch)
+
+Switch ACL:
+access-list 10 permit host 10.0.99.5     (jump box)
+line vty 0 4
+  access-class 10 in
+  transport input ssh`,
+      },
+    ],
+    table: {
+      label: 'Remote access methods compared',
+      head: ['Method', 'Port or protocol', 'Notes'],
+      rows: [
+        ['SSH', 'TCP 22', 'Encrypted CLI, SFTP, and SCP; replaces Telnet'],
+        ['Telnet', 'TCP 23', 'Cleartext, do not use'],
+        ['RDP', 'TCP 3389', 'Windows desktop; never expose directly'],
+        ['VNC', 'TCP 5900', 'Cross-platform screen sharing'],
+        ['SSL/TLS VPN', 'TCP 443', 'Browser (clientless) or client'],
+        ['IPsec VPN', 'UDP 500 / 4500, ESP 50', 'Site-to-site and client'],
+        ['Console / OOB', 'Serial 9600 8N1', 'Works when the network is down'],
+      ],
+      caption: 'Use encrypted, authenticated, logged paths, with a second path for emergencies.',
+    },
+    example: `A retail chain manages 300 store routers through a jump box with MFA and session recording. Each router also has a cellular out-of-band console. When a bad config knocked a store offline, the engineer used the cellular console to roll back without driving to the store.`,
+    tips: [
+      `Clientless VPN equals a browser portal over TLS 443.`,
+      `Out-of-band is the answer when the question says "the network is down and I still need to manage the device".`,
+      `Split tunnel is a performance choice that weakens security inspection.`,
+    ],
+    exam: `Know client-to-site versus site-to-site, split versus full tunnel, clientless SSL VPN, SSH (22) versus Telnet (23), RDP 3389, VNC 5900, jump box purpose, and out-of-band management.`,
+    mistakes: [
+      `Exposing RDP or Telnet directly to the internet.`,
+      `Using only passwords for VPN and admin accounts.`,
+      `Managing devices only in-band, so a misconfiguration locks everyone out.`,
+    ],
+    terms: [
+      { term: 'Client-to-site VPN', def: `VPN that connects one remote user to the corporate network.` },
+      { term: 'Site-to-site VPN', def: `VPN that permanently connects two networks.` },
+      { term: 'Split tunnel', def: `Only selected traffic uses the VPN; the rest goes directly to the internet.` },
+      { term: 'Clientless VPN', def: `Browser-based SSL/TLS VPN that needs no installed client.` },
+      { term: 'Jump box', def: `Hardened host used as the single entry point for administration.` },
+      { term: 'Out-of-band management', def: `Management path separate from production traffic.` },
+      { term: 'ZTNA', def: `Zero trust network access: per-application access after verifying user and device.` },
+    ],
+    commands: [
+      { os: 'Linux', cmd: 'ssh -i ~/.ssh/id_ed25519 admin@10.0.0.1', desc: `Connects using key-based SSH authentication.` },
+      { os: 'Linux', cmd: 'ssh -J jump@jumpbox admin@10.0.0.1', desc: `Connects to an internal host through a jump box.` },
+      { os: 'Windows', cmd: 'mstsc /v:server01', desc: `Opens a Remote Desktop session to a server.` },
+      { os: 'Linux', cmd: 'screen /dev/ttyUSB0 9600', desc: `Opens a console session over a USB serial cable at 9600 baud.` },
+    ],
+    checks: [
+      {
+        prompt: `A technician needs to manage a core switch even when its production uplinks are down. What should be used?`,
+        options: [`In-band SSH`, `Out-of-band management through a console server`, `Split tunnel VPN`, `RDP`],
+        correct: 1,
+        explanation: `Out-of-band management uses a separate path, such as a serial console, that does not rely on the production network.`,
+      },
+      {
+        prompt: `Which remote access method is encrypted and replaces Telnet?`,
+        options: [`SSH`, `VNC`, `TFTP`, `SNMPv1`],
+        correct: 0,
+        explanation: `SSH on TCP 22 provides encrypted terminal access, while Telnet sends everything in cleartext.`,
+      },
+      {
+        prompt: `Which VPN design sends only traffic for the corporate subnets through the tunnel?`,
+        options: [`Full tunnel`, `Split tunnel`, `Site-to-site`, `GRE`],
+        correct: 1,
+        explanation: `Split tunneling sends selected destinations through the VPN and the rest directly out the local connection.`,
+      },
+    ],
+    mini: {
+      prompt: `An RDP server is open to the internet and shows thousands of failed logins.`,
+      task: `Describe how to secure it using a VPN, a jump box, and MFA.`,
+    },
+    recap: `Use client-to-site or site-to-site VPNs, choose full or split tunnel by policy, and prefer SSH over Telnet. Administer through a jump box with MFA and logging, and keep out-of-band access for outages. Never expose RDP or Telnet directly.`,
+    classroom: `"SSH hindi Telnet. Dumaan sa jump box. May out-of-band para kapag patay ang network, may pasukan ka pa rin."`,
+  });
+
 }(window.NetReady));

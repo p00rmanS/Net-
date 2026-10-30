@@ -1135,4 +1135,129 @@
     recap: `Keep the VLAN database consistent (and guard against VTP overwrites), route VLANs with router-on-a-stick or SVIs, elect the root intentionally using bridge priority, and protect edge ports with PortFast and BPDU Guard.`,
     classroom: `"Ang pinakamababang bridge ID ang hari ng STP — kaya ikaw ang magtakda kung sino."`,
   });
+
+  NetReady.LESSONS['7-12'] = NetReady.lesson(7, {
+    id: '7-12',
+    slug: 'link-aggregation-port-mirroring-stacking-and-first-hop-redundancy',
+    title: 'Link Aggregation, Port Mirroring, Stacking, and First Hop Redundancy',
+    minutes: 17,
+    outcomes: [
+      `Explain how LACP bundles links and how traffic is balanced across them.`,
+      `Use port mirroring (SPAN) and network TAPs to capture traffic.`,
+      `Describe switch stacking.`,
+      `Compare HSRP, VRRP, and GLBP for default gateway redundancy.`,
+    ],
+    why: `Switch features for redundancy and visibility appear throughout the exam: link aggregation (802.3ad / 802.1AX), port mirroring, and first hop redundancy protocols (FHRP). They solve three everyday problems: not enough bandwidth on one link, no way to see the traffic, and a single default gateway that can fail.`,
+    simple: `Link aggregation joins several physical cables into one logical link for more bandwidth and for backup. Port mirroring copies traffic from one port to another so an analyzer can inspect it. Stacking makes several switches behave as one. First hop redundancy gives two routers one shared virtual gateway address, so if one router fails, clients keep working without changing settings.`,
+    taglish: `Ang link aggregation ay pinagsasama ang ilang cable bilang isang logical link para sa mas malaking bandwidth at backup. Ang port mirroring ay kinokopya ang traffic sa ibang port para masuri. Ang stacking ay ginagawang isang switch ang marami. Ang FHRP ay nagbibigay ng isang virtual gateway address sa dalawang router para tuloy ang trabaho kahit mamatay ang isa.`,
+    analogy: {
+      title: 'Tulay na maraming lane at dalawang guwardiya',
+      text: `Ang link aggregation ay pagdaragdag ng lane sa tulay. Ang port mirroring ay CCTV na kumukuha ng kopya ng dumadaan. Ang FHRP ay dalawang guwardiya na iisa ang pangalan sa gate: kapag nag-day off ang isa, tuloy ang pagpasok.`,
+    },
+    steps: [
+      `Link aggregation combines 2 to 8 physical links into one logical port channel (also called EtherChannel, LAG, or bonding). Benefits: more bandwidth and redundancy; STP sees one link, so no ports are blocked. All member links must match in speed, duplex, VLAN or trunk settings.`,
+      `LACP (Link Aggregation Control Protocol, IEEE 802.1AX, formerly 802.3ad) negotiates the bundle between vendors. Modes are active (starts negotiating) and passive (waits). At least one side must be active. Cisco PAgP is the older proprietary alternative (desirable and auto modes). "On" forms a static bundle without negotiation, and a mismatch can cause loops.`,
+      `Load balancing: traffic is distributed per flow using a hash of source and destination MAC, IP address, or ports. One flow stays on one link, so a single large transfer cannot exceed the speed of one member link. Four 1 Gbps links give 4 Gbps in total but a single session still tops out at 1 Gbps.`,
+      `Port mirroring (SPAN, Switched Port Analyzer): the switch copies traffic from source ports or VLANs to a destination port where a protocol analyzer or IDS is connected. RSPAN carries the copy across Layer 2 to a remote switch; ERSPAN carries it across Layer 3 using GRE. Mirroring uses switch resources and can drop frames if the destination is oversubscribed.`,
+      `Network TAP (Test Access Point): a passive hardware device placed inline in a link that copies all traffic, including errors, to a monitoring port. It does not drop frames under load and is invisible to the network. SPAN is cheaper but a TAP is more accurate.`,
+      `Stacking: several physical switches are joined by special stack cables and act as one logical switch with one management IP address, one configuration, and one control plane. It simplifies management and allows a port channel across switches (cross-stack). It is different from chassis or modular switches and from stacking links in a daisy chain.`,
+      `First hop redundancy protocols (FHRP) remove the default gateway as a single point of failure. Two or more routers share a virtual IP address and a virtual MAC address. Clients use the virtual IP as the gateway.`,
+      `HSRP (Hot Standby Router Protocol) is Cisco proprietary: one active router and one standby router, default priority 100, highest priority wins, preemption must be enabled to retake the role. Hello messages go to multicast 224.0.0.2 (version 1) or 224.0.0.102 (version 2).`,
+      `VRRP (Virtual Router Redundancy Protocol) is an open standard: one master and one or more backup routers, default priority 100, the router that owns the virtual IP has priority 255. Advertisements use multicast 224.0.0.18. GLBP (Gateway Load Balancing Protocol) is Cisco proprietary and also load-balances by giving different clients different virtual MAC addresses.`,
+    ],
+    deepDive: [
+      {
+        title: 'Configuring an LACP bundle',
+        text: `Two switches are joined with two 1 Gbps cables. Both sides use LACP, and the port channel is a trunk. The member ports get the same settings. Check that the status shows (P) bundled in port-channel.`,
+        code: `SW1(config)# interface range Gi0/1 - 2
+SW1(config-if-range)# channel-group 1 mode active
+SW1(config)# interface port-channel 1
+SW1(config-if)# switchport mode trunk
+
+SW1# show etherchannel summary
+Group  Port-channel  Protocol   Ports
+1      Po1(SU)       LACP       Gi0/1(P)  Gi0/2(P)`,
+        note: `S means Layer 2 and U means in use. A port marked (I) is stand-alone and (D) is down. A mismatch of VLANs, speed, or duplex between members keeps a port out of the bundle.`,
+      },
+      {
+        title: 'HSRP failover step by step',
+        text: `R1 (priority 110) and R2 (priority 100) share the virtual IP 10.1.1.1. R1 is active. Clients ARP for 10.1.1.1 and get the virtual MAC 0000.0c07.ac01 (HSRP version 1 group 1). When R1 stops sending hellos, R2 stops hearing them, waits for the hold time (10 seconds by default), and becomes active. Clients keep the same IP and the same MAC, so nothing changes on the PCs.`,
+        code: `R1(config-if)# standby 1 ip 10.1.1.1
+R1(config-if)# standby 1 priority 110
+R1(config-if)# standby 1 preempt
+
+R1# show standby brief
+Interface   Grp  Pri P State   Active   Standby   Virtual IP
+Gi0/0       1    110 P Active  local    10.1.1.3  10.1.1.1`,
+      },
+    ],
+    table: {
+      label: 'Redundancy and visibility features compared',
+      head: ['Feature', 'Purpose', 'Key facts'],
+      rows: [
+        ['LACP', 'Bundle links for bandwidth and redundancy', 'IEEE 802.1AX, active or passive, per-flow hashing'],
+        ['Port mirroring (SPAN)', 'Copy traffic to an analyzer', 'Can drop frames when oversubscribed'],
+        ['Network TAP', 'Passive full copy of a link', 'Accurate, includes errors'],
+        ['Stacking', 'Many switches act as one', 'One management IP and configuration'],
+        ['HSRP', 'Gateway redundancy, Cisco', 'Active and standby, 224.0.0.2 / 224.0.0.102'],
+        ['VRRP', 'Gateway redundancy, open standard', 'Master and backup, 224.0.0.18'],
+        ['GLBP', 'Gateway redundancy plus load balancing', 'Cisco, several virtual MAC addresses'],
+      ],
+      caption: 'Aggregation adds capacity, mirroring adds visibility, FHRP adds gateway failover.',
+    },
+    example: `A school connects its access switches to the distribution switch with two-cable LACP bundles, so a cut cable causes no outage. Two distribution routers run HSRP for each VLAN gateway. The network team uses a TAP on the firewall link to feed an intrusion detection system.`,
+    tips: [
+      `LACP needs at least one active side. Two passive sides never form a bundle.`,
+      `Open standard FHRP equals VRRP. Cisco only equals HSRP or GLBP. Load balancing equals GLBP.`,
+      `A single TCP session never goes faster than one member link of a port channel.`,
+    ],
+    exam: `Know LACP/802.3ad for link aggregation, SPAN for mirroring versus a TAP, stacking for one logical switch, and that HSRP, VRRP, and GLBP provide default gateway redundancy through a virtual IP.`,
+    mistakes: [
+      `Expecting 4 Gbps for a single file copy over a four-link bundle.`,
+      `Configuring different VLAN or speed settings on bundle members.`,
+      `Forgetting preempt, so a recovered high-priority router does not retake the active role.`,
+    ],
+    terms: [
+      { term: 'LACP', def: `Standard protocol (802.1AX) that negotiates link aggregation bundles.` },
+      { term: 'Port channel', def: `Logical interface formed from several bundled physical links.` },
+      { term: 'SPAN', def: `Port mirroring: a copy of traffic sent to a monitoring port.` },
+      { term: 'Network TAP', def: `Passive inline device that copies all traffic to a monitor.` },
+      { term: 'Stacking', def: `Joining physical switches so they operate as one logical unit.` },
+      { term: 'FHRP', def: `First hop redundancy protocol, such as HSRP, VRRP, or GLBP.` },
+      { term: 'Virtual IP', def: `Shared gateway address owned by the active or master router.` },
+    ],
+    commands: [
+      { os: 'Cisco IOS', cmd: 'show etherchannel summary', desc: `Shows port channels, protocol, and which member ports are bundled.` },
+      { os: 'Cisco IOS', cmd: 'monitor session 1 source interface Gi0/5', desc: `Defines the SPAN source port to mirror.` },
+      { os: 'Cisco IOS', cmd: 'monitor session 1 destination interface Gi0/24', desc: `Defines the SPAN destination where the analyzer connects.` },
+      { os: 'Cisco IOS', cmd: 'show standby brief', desc: `Shows HSRP groups, priority, state, and the virtual IP.` },
+    ],
+    checks: [
+      {
+        prompt: `Two switches are connected with four 1 Gbps links in an LACP bundle. A user copies one large file between two servers. What is the maximum speed of that single transfer?`,
+        options: [`4 Gbps`, `2 Gbps`, `1 Gbps`, `8 Gbps`],
+        correct: 2,
+        explanation: `Traffic is hashed per flow, so one session uses one member link, which is 1 Gbps.`,
+      },
+      {
+        prompt: `Which FHRP is an open standard and uses a master and backup router?`,
+        options: [`HSRP`, `GLBP`, `VRRP`, `LACP`],
+        correct: 2,
+        explanation: `VRRP is the IETF standard. HSRP and GLBP are Cisco proprietary.`,
+      },
+      {
+        prompt: `A security team wants a copy of every frame, including errored ones, with no risk of drops during peaks. What should they deploy?`,
+        options: [`A network TAP`, `A SPAN session`, `A second default gateway`, `A stack cable`],
+        correct: 0,
+        explanation: `A passive TAP copies everything at line rate. SPAN can drop frames when the destination is oversubscribed.`,
+      },
+    ],
+    mini: {
+      prompt: `Two switches both have their port-channel members set to LACP passive, and the bundle never forms.`,
+      task: `Why, and what is the smallest change that fixes it?`,
+    },
+    recap: `LACP bundles links for capacity and redundancy using per-flow hashing. SPAN or a TAP gives visibility. Stacking makes several switches one. HSRP, VRRP, and GLBP share a virtual gateway IP so a router failure does not break clients.`,
+    classroom: `"LACP para sa dagdag na bandwidth, SPAN o TAP para makita ang traffic, at HSRP o VRRP para hindi mamatay ang gateway."`,
+  });
+
 }(window.NetReady));

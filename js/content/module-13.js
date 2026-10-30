@@ -1546,4 +1546,138 @@ Device will not power, power-deny             PoE budget exceeded or wrong PoE s
     recap: `Read line status and line protocol together, know err-disabled, suspended, and administratively down, use CRC, runt, giant, collision, and drop counters to find causes, check encapsulation, and diagnose PoE faults by the power budget and the standard. Clear counters and watch for new errors.`,
     classroom: `"Status muna, counters pangalawa, log pangatlo. At bago i-on ulit ang port, ayusin ang sanhi."`,
   });
+
+  NetReady.LESSONS['13-15'] = NetReady.lesson(13, {
+    id: '13-15',
+    slug: 'command-line-utilities-in-depth-netstat-pathping-nmap-and-more',
+    title: 'Command-Line Utilities in Depth: netstat, pathping, nmap, and More',
+    minutes: 17,
+    outcomes: [
+      `Choose the right utility for a symptom.`,
+      `Read output from ipconfig, arp, netstat, route, nslookup, and tracert.`,
+      `Use nmap, tcpdump, and iperf for ports, packets, and throughput.`,
+      `Know the Linux equivalents of Windows commands.`,
+    ],
+    why: `The exam gives a symptom and a list of tools and asks which to run, or shows output and asks what it means. Knowing exactly what each command reports saves time and points.`,
+    simple: `Each utility answers one question. ipconfig and ip addr: what are my settings? ping: can I reach it? tracert and traceroute: where does the path stop? pathping and mtr: where is loss happening? nslookup and dig: does name resolution work? arp: what MAC goes with that IP? netstat and ss: what connections and ports are open on this machine? nmap: what ports are open on that machine? tcpdump and Wireshark: what is actually on the wire? iperf: how fast can this link go?`,
+    taglish: `Isang tanong ang sinasagot ng bawat utility. ipconfig: ano ang settings ko? ping: maabot ba? tracert: saan nahihinto? pathping/mtr: saan nawawala ang packets? nslookup/dig: gumagana ba ang DNS? arp: anong MAC ang kasama ng IP? netstat: anong ports ang bukas dito? nmap: anong ports ang bukas doon? tcpdump: ano talaga ang dumadaan? iperf: gaano kabilis ang link?`,
+    analogy: {
+      title: 'Gamit ng doktor',
+      text: `Thermometer, stethoscope, X-ray, at blood test: iba-iba ang tanong na sinasagot ng bawat gamit. Ang magaling na doktor ay hindi nag-X-ray para sa lagnat. Pareho sa network: piliin ang tamang tool para sa sintomas.`,
+    },
+    steps: [
+      `ipconfig /all (Windows) shows IP, mask, gateway, DNS servers, DHCP server, lease times, and MAC address. ipconfig /release and /renew refresh a DHCP lease, /flushdns clears the DNS cache, and /displaydns shows it. Linux and macOS use ip addr, ip route, ifconfig (older), and resolvectl.`,
+      `ping tests reachability and round-trip time using ICMP echo. Useful options: -t (continuous, Windows), -n or -c (count), -l or -s (packet size), -f -l 1472 (do not fragment, to test MTU), and -4 or -6. A reply means Layers 1 to 3 work to that host, but some hosts block ICMP.`,
+      `tracert (Windows) and traceroute (Linux, UDP by default) send packets with increasing TTL (time to live). Each router that decrements TTL to zero returns an ICMP Time Exceeded, which reveals the hop. Asterisks mean no reply, which can be a firewall that blocks ICMP and not an actual failure. tracepath avoids needing root.`,
+      `pathping (Windows) combines ping and tracert: it traces the route, then measures loss and delay at each hop over a period. mtr (Linux and macOS) does the same continuously. Use them to find the hop where loss starts.`,
+      `nslookup and dig query DNS directly. nslookup example.com 8.8.8.8 asks a specific server. dig +short, dig MX example.com, dig -x 8.8.8.8 (reverse lookup), and dig +trace show records and the delegation path. host is a simple lookup. Compare the answer from the local resolver and a public resolver to find DNS problems.`,
+      `arp -a shows the ARP cache (IP to MAC mappings) and helps detect duplicate IPs or poisoning. ip neigh does this on Linux. arp -d clears entries.`,
+      `netstat shows connections, listening ports, and statistics. Common: netstat -an (all, numeric), netstat -ano (adds the owning process ID, Windows), netstat -b (executable name, needs admin), netstat -r (routing table), netstat -s (per-protocol statistics), netstat -e (Ethernet statistics). On Linux the modern tool is ss -tulpn (TCP/UDP listening with process).`,
+      `route print (Windows) and ip route or route -n (Linux) show the routing table. route add and ip route add create static routes; the default route is 0.0.0.0/0.`,
+      `nmap discovers hosts and open ports. -sS is a SYN scan, -sU scans UDP, -sV detects versions, -O guesses the operating system, -p chooses ports, -Pn skips host discovery. Open means a service is listening, closed means reachable but nothing listening, and filtered means a firewall drops the probe. Only scan systems you are authorized to test.`,
+      `Packet capture: tcpdump (Linux) and Wireshark (GUI) record traffic. Capture filters (BPF) such as host 10.1.1.5 and port 53 limit what is saved, and display filters in Wireshark (for example ip.addr == 10.1.1.5 and dns) limit what is shown. Use a mirror port or TAP for traffic that is not addressed to your machine.`,
+      `Throughput and other tools: iperf3 measures TCP/UDP bandwidth between two endpoints (one runs as server with -s, one as client with -c). curl and wget test HTTP. telnet or nc (netcat) test whether a TCP port accepts connections. whois looks up domain registration. Wake-on-LAN uses a magic packet to power on a machine.`,
+    ],
+    deepDive: [
+      {
+        title: 'Reading netstat -ano',
+        text: `The output lists protocol, local address, foreign address, state, and PID. Listening shows services waiting for connections. ESTABLISHED shows active sessions. A PID can be matched to a process in Task Manager or with tasklist. An unexpected listener on an unusual port is a lead for malware or an unauthorized service.`,
+        code: `C:\\> netstat -ano
+Proto  Local Address        Foreign Address      State          PID
+TCP    0.0.0.0:3389         0.0.0.0:0            LISTENING      1204
+TCP    10.1.1.25:51514      203.0.113.9:443      ESTABLISHED    6620
+TCP    10.1.1.25:51520      203.0.113.9:443      TIME_WAIT      0
+UDP    0.0.0.0:5353         *:*                                 2880
+
+C:\\> tasklist /fi "PID eq 6620"`,
+        note: `0.0.0.0 means "all interfaces". TIME_WAIT and CLOSE_WAIT are normal short states; a huge number of SYN_RECEIVED can signal a SYN flood.`,
+      },
+      {
+        title: 'Reading pathping to find the lossy hop',
+        text: `pathping first lists hops, then measures for about 25 seconds each hop. Loss that appears at one hop and continues at every hop after it is real loss at that link. Loss at one hop only, with 0 percent after, is usually a router that deprioritizes ICMP replies and is not a problem.`,
+        code: `Hop  RTT   Lost/Sent = Pct  Address
+  0                           PC [10.1.1.25]
+                0/ 100 =  0%   |
+  1    2ms     0/ 100 =  0%   gw [10.1.1.1]
+                8/ 100 =  8%   |
+  2   41ms     8/ 100 =  8%   isp-edge [198.51.100.1]
+                0/ 100 =  0%   |
+  3   44ms     8/ 100 =  8%   core [198.51.100.9]`,
+        note: `Loss starts between hop 1 and hop 2 and continues, so the problem is the link to the ISP edge.`,
+      },
+    ],
+    table: {
+      label: 'Which command answers which question',
+      head: ['Question', 'Windows', 'Linux / macOS'],
+      rows: [
+        ['What are my IP settings?', 'ipconfig /all', 'ip addr, ifconfig'],
+        ['Is the host reachable?', 'ping', 'ping'],
+        ['Where does the path stop?', 'tracert', 'traceroute, tracepath'],
+        ['Where is the loss?', 'pathping', 'mtr'],
+        ['Does DNS work?', 'nslookup', 'dig, host'],
+        ['IP to MAC mapping?', 'arp -a', 'ip neigh, arp -a'],
+        ['What ports are open here?', 'netstat -ano', 'ss -tulpn, netstat'],
+        ['Routing table?', 'route print', 'ip route'],
+        ['What ports are open there?', 'nmap', 'nmap'],
+        ['What is on the wire?', 'Wireshark', 'tcpdump, Wireshark'],
+      ],
+      caption: 'Pick the tool by the question it answers.',
+    },
+    example: `A user can browse by IP address but not by name. The technician runs nslookup against the company DNS server and against 8.8.8.8, sees the first times out, and checks ipconfig /all, which shows the wrong DNS server. After correcting the DHCP scope option and running ipconfig /flushdns, names resolve.`,
+    tips: [
+      `Asterisks in tracert may be a firewall, not a failure. Check whether later hops reply.`,
+      `Loss that continues to all later hops is real; loss at a single hop is often ICMP rate limiting.`,
+      `netstat tells you about this host. nmap tells you about another host.`,
+    ],
+    exam: `Know what each command shows and its Linux equivalent. Be able to read netstat output, understand tracert TTL behavior, recognize open, closed, and filtered nmap states, and pick pathping or mtr to find where loss occurs.`,
+    mistakes: [
+      `Assuming no ping reply means the host is down; ICMP may be blocked.`,
+      `Using nmap on networks without permission.`,
+      `Reading loss at one intermediate hop as the root cause.`,
+    ],
+    terms: [
+      { term: 'TTL', def: `Time to live: a counter decremented by each router, used by traceroute to reveal hops.` },
+      { term: 'pathping', def: `Windows tool that combines traceroute with per-hop loss statistics.` },
+      { term: 'netstat', def: `Command showing connections, listening ports, and statistics.` },
+      { term: 'nmap', def: `Port scanner that reports open, closed, and filtered ports.` },
+      { term: 'tcpdump', def: `Command-line packet capture tool.` },
+      { term: 'iperf', def: `Tool that measures TCP or UDP throughput between two hosts.` },
+    ],
+    commands: [
+      { os: 'Windows', cmd: 'netstat -ano', desc: `Lists connections and listening ports with the process ID.` },
+      { os: 'Windows', cmd: 'pathping -q 50 8.8.8.8', desc: `Traces the route and measures loss per hop with 50 queries each.` },
+      { os: 'Windows', cmd: 'ping -f -l 1472 8.8.8.8', desc: `Tests whether a 1500-byte packet passes without fragmentation (path MTU test).` },
+      { os: 'Linux', cmd: 'ss -tulpn', desc: `Lists listening TCP and UDP ports with the owning process.` },
+      { os: 'Linux', cmd: 'dig +short MX example.com', desc: `Shows only the mail exchanger records for a domain.` },
+      { os: 'Linux', cmd: 'sudo tcpdump -i eth0 port 53', desc: `Captures DNS traffic on eth0.` },
+      { os: 'Linux', cmd: 'iperf3 -c 10.1.1.50', desc: `Measures throughput to an iperf3 server.` },
+    ],
+    checks: [
+      {
+        prompt: `Which Windows command combines route tracing with packet loss statistics for each hop?`,
+        options: [`ipconfig`, `pathping`, `arp`, `nbtstat`],
+        correct: 1,
+        explanation: `pathping traces the route and then measures loss and latency to each hop over time.`,
+      },
+      {
+        prompt: `An nmap scan reports a port as filtered. What does this mean?`,
+        options: [`A service is listening and responding`, `A firewall or filter prevented nmap from determining its state`, `The host is powered off`, `The port uses UDP only`],
+        correct: 1,
+        explanation: `Filtered means probes were dropped or blocked, so nmap cannot tell whether the port is open or closed.`,
+      },
+      {
+        prompt: `A technician needs to find which process is listening on TCP port 3389 on a Windows server. Which command is best?`,
+        options: [`netstat -ano`, `tracert`, `nslookup`, `route print`],
+        correct: 0,
+        explanation: `netstat -ano lists listening ports with the process ID, which can be matched in Task Manager.`,
+      },
+    ],
+    mini: {
+      prompt: `A user reports slow video calls. A pathping shows 0 percent loss through hop 2 and 12 percent loss from hop 3 to the destination.`,
+      task: `Where is the problem and who do you contact?`,
+    },
+    recap: `Use ipconfig, ping, tracert, pathping, nslookup, arp, netstat, and route on Windows, and ip, traceroute, mtr, dig, ss, and tcpdump on Linux. nmap checks remote ports (open, closed, filtered), tcpdump and Wireshark capture packets, and iperf measures throughput.`,
+    classroom: `"Isang tanong, isang tool. netstat para sa sarili ko, nmap para sa iba, pathping para sa nawawalang packets."`,
+  });
+
 }(window.NetReady));

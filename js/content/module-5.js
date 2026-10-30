@@ -484,4 +484,122 @@
     recap: `IPv6 addresses combine a prefix and a 64-bit interface ID. EUI-64 builds the ID from the MAC with FFFE and a flipped bit; privacy extensions randomize it. Plan /64 subnets from a /48 or /56.`,
     classroom: `"Prefix galing sa router, interface ID galing sa host — at kung ayaw mong masundan, random."`,
   });
+
+  NetReady.LESSONS['5-6'] = NetReady.lesson(5, {
+    id: '5-6',
+    slug: 'ipv6-transition-dual-stack-tunneling-and-nat64',
+    title: 'IPv6 Transition: Dual Stack, Tunneling, and NAT64',
+    minutes: 15,
+    outcomes: [
+      `Explain why IPv4 and IPv6 must coexist during the transition.`,
+      `Compare dual stack, tunneling, and translation.`,
+      `Name 6to4, Teredo, ISATAP, and 6in4 and what each does.`,
+      `Explain how NAT64 and DNS64 let IPv6-only clients reach IPv4 servers.`,
+    ],
+    why: `Almost no network switches to IPv6 overnight. For years, IPv4 and IPv6 run side by side, and the exam expects you to know the three ways to make that work: run both (dual stack), carry one inside the other (tunneling), or translate between them (NAT64).`,
+    simple: `IPv4 and IPv6 are two different languages that cannot talk directly. During the transition you can teach every device both languages (dual stack), wrap IPv6 packets inside IPv4 packets so they can cross an old IPv4-only network (tunneling), or hire a translator in the middle (NAT64 with DNS64). Dual stack is the preferred method because it is simple and has no translation problems.`,
+    taglish: `Magkaibang wika ang IPv4 at IPv6. Habang lumilipat, may tatlong paraan: turuan ang device ng dalawang wika (dual stack), ibalot ang IPv6 sa loob ng IPv4 para makatawid sa lumang network (tunneling), o maglagay ng tagasalin sa gitna (NAT64). Dual stack ang pinakamainam at pinakasimple.`,
+    analogy: {
+      title: 'Bilingual na empleyado at tagasalin',
+      text: `Ang dual stack ay empleyadong marunong ng Filipino at English. Ang tunneling ay liham sa Filipino na inilagay sa sobreng may English na address para makarating sa bayang English lang ang alam. Ang NAT64 ay tagasalin sa pinto na ginagawang English ang Filipino at kabaliktaran.`,
+    },
+    steps: [
+      `Dual stack: every host and router runs IPv4 and IPv6 at the same time, with an address of each family. The host picks IPv6 when the destination has a AAAA record and IPv6 works (Happy Eyeballs races both and uses the faster one). It is the recommended method, but you must secure, monitor, and manage two protocols.`,
+      `Tunneling: IPv6 packets are encapsulated inside IPv4 packets and carried across an IPv4-only network. The outer IPv4 header uses protocol number 41. At the far end the IPv4 wrapper is removed. Tunnels add overhead (20 extra bytes, so the MTU of the tunnel is smaller) and are harder to troubleshoot and to inspect with firewalls.`,
+      `6in4: a manually configured, static tunnel between two known IPv4 endpoints, using protocol 41. Tunnel brokers (such as Hurricane Electric) use it to give you IPv6 connectivity through an ISP that offers none.`,
+      `6to4: an automatic tunnel that builds the IPv6 prefix from the public IPv4 address, inside 2002::/16. It needs a public IPv4 address and relay routers, and it is deprecated today.`,
+      `Teredo: tunnels IPv6 inside UDP (port 3544) so it can cross IPv4 NAT. It is used by hosts behind a NAT device and the prefix is 2001::/32. It is also deprecated, but it is a favorite exam answer for IPv6 across NAT.`,
+      `ISATAP: an automatic tunnel inside an IPv4 intranet that makes the IPv4 network act as the Layer 2 link for IPv6. It is rarely used now.`,
+      `Translation (NAT64): a gateway translates between IPv6-only clients and IPv4-only servers. DNS64 helps by synthesizing an AAAA record from the server's A record, using the well-known prefix 64:ff9b::/96 with the IPv4 address in the last 32 bits. The client sends IPv6 to that synthetic address, and NAT64 rewrites the packet to IPv4. NAT64 is stateful, like NAT/PAT.`,
+      `464XLAT: used by mobile carriers. A client-side translator (CLAT) converts IPv4-only apps to IPv6, and the carrier NAT64 (PLAT) converts back to IPv4. It lets IPv4-only apps run on an IPv6-only network.`,
+      `Other points: NAT66 and NPTv6 exist but are discouraged because IPv6 was designed to remove the need for NAT. The older SIIT idea (stateless translation) is the basis of NAT64.`,
+    ],
+    deepDive: [
+      {
+        title: 'Following an IPv6-only client to an IPv4-only website',
+        text: `An IPv6-only phone asks DNS64 for www.example.com. The real record is only A 203.0.113.10. DNS64 invents an AAAA record by placing the IPv4 address in the last 32 bits of the NAT64 prefix. The phone sends IPv6 to that address, the packet reaches the NAT64 gateway, and the gateway replies on the phone's behalf using its own IPv4 address.`,
+        code: `Real DNS record:     www.example.com  A     203.0.113.10
+DNS64 synthesizes:   www.example.com  AAAA  64:ff9b::cb00:710a
+                                              (203.0.113.10 = cb.00.71.0a in hex)
+
+Phone (2001:db8:5::25)  --IPv6-->  NAT64  --IPv4-->  203.0.113.10
+                                  src 198.51.100.7 (gateway pool)`,
+        note: `The phone never knows the server is IPv4. A client that uses a literal IPv4 address (for example a hard-coded 203.0.113.10) will not work through DNS64, which is why 464XLAT was invented.`,
+      },
+      {
+        title: 'Why tunnels reduce the MTU',
+        text: `A 6in4 tunnel adds a 20-byte IPv4 header to every IPv6 packet. With a standard 1500-byte Ethernet MTU, the largest IPv6 packet that fits is 1480 bytes. IPv6 requires a minimum link MTU of 1280 bytes, and routers do not fragment, so the sender has to learn the smaller size through Path MTU Discovery (ICMPv6 Packet Too Big). If a firewall blocks ICMPv6, large transfers hang while small ones work, a classic tunnel symptom.`,
+        code: `Ethernet MTU                1500
+- IPv4 outer header (6in4)    -20
+= Largest IPv6 packet        1480`,
+      },
+    ],
+    table: {
+      label: 'Comparison of IPv4 to IPv6 transition methods',
+      head: ['Method', 'How it works', 'Key facts'],
+      rows: [
+        ['Dual stack', 'Run IPv4 and IPv6 together', 'Preferred, no translation, two protocols to manage'],
+        ['6in4', 'Static tunnel, IPv6 in IPv4', 'IP protocol 41, tunnel brokers'],
+        ['6to4', 'Automatic tunnel from public IPv4', 'Prefix 2002::/16, deprecated'],
+        ['Teredo', 'IPv6 inside UDP, crosses NAT', 'UDP 3544, prefix 2001::/32'],
+        ['ISATAP', 'Automatic tunnel inside an intranet', 'IPv4 network acts as the IPv6 link'],
+        ['NAT64 + DNS64', 'Translate IPv6 clients to IPv4 servers', 'Prefix 64:ff9b::/96'],
+        ['464XLAT', 'Client translator plus carrier NAT64', 'Used by mobile carriers'],
+      ],
+      caption: 'Three families: run both, wrap one in the other, or translate.',
+    },
+    example: `A company moves its branch offices to IPv6 but its data center still has IPv4-only legacy servers. The branches run dual stack with the head office, and a NAT64 gateway with DNS64 lets IPv6-only guest Wi-Fi devices reach the legacy web application until the servers are upgraded.`,
+    tips: [
+      `Dual stack is the answer when the question says "preferred", "simplest", or "no translation".`,
+      `Teredo equals UDP 3544 and NAT traversal. 6to4 equals 2002::/16. Protocol 41 equals IPv6 in IPv4.`,
+      `If large packets hang through a tunnel but small ones work, suspect MTU and blocked ICMPv6.`,
+    ],
+    exam: `Match the method to its description: dual stack (both protocols), tunneling (encapsulation inside IPv4), and translation (NAT64). Know Teredo uses UDP and crosses NAT, 6to4 uses 2002::/16, and that DNS64 pairs with NAT64.`,
+    mistakes: [
+      `Confusing tunneling with translation: tunnels keep the IPv6 packet intact, translation rewrites it.`,
+      `Forgetting to firewall and monitor both IPv4 and IPv6 on a dual-stack network, leaving IPv6 wide open.`,
+      `Blocking all ICMPv6, which breaks neighbor discovery and Path MTU Discovery.`,
+    ],
+    terms: [
+      { term: 'Dual stack', def: `Running IPv4 and IPv6 at the same time on the same devices.` },
+      { term: 'Tunneling', def: `Carrying one protocol inside another, such as IPv6 inside IPv4.` },
+      { term: 'Teredo', def: `IPv6 over UDP 3544 that can cross IPv4 NAT devices.` },
+      { term: '6to4', def: `Automatic tunnel that derives an IPv6 prefix in 2002::/16 from a public IPv4 address.` },
+      { term: 'NAT64', def: `Translation gateway between IPv6-only clients and IPv4-only servers.` },
+      { term: 'DNS64', def: `DNS service that synthesizes AAAA records for IPv4-only names.` },
+    ],
+    commands: [
+      { os: 'Windows', cmd: 'ipconfig /all', desc: `Shows whether the host has both IPv4 and IPv6 addresses (dual stack) and any tunnel adapters.` },
+      { os: 'Windows', cmd: 'netsh interface teredo show state', desc: `Shows whether the Teredo tunnel is active.` },
+      { os: 'Windows', cmd: 'ping -6 www.example.com', desc: `Forces an IPv6 ping to test IPv6 reachability.` },
+      { os: 'Linux', cmd: 'ping -4 www.example.com', desc: `Forces IPv4 so you can compare with the IPv6 result.` },
+    ],
+    checks: [
+      {
+        prompt: `Which transition method runs IPv4 and IPv6 at the same time on every device with no translation?`,
+        options: [`NAT64`, `Dual stack`, `Teredo`, `6to4`],
+        correct: 1,
+        explanation: `Dual stack gives each device both an IPv4 and an IPv6 address, so no tunneling or translation is needed.`,
+      },
+      {
+        prompt: `A user behind a NAT router needs IPv6 connectivity across an IPv4-only network. Which technology tunnels IPv6 inside UDP packets?`,
+        options: [`ISATAP`, `Teredo`, `DNS64`, `6to4`],
+        correct: 1,
+        explanation: `Teredo encapsulates IPv6 in UDP (port 3544) so it can pass through NAT devices.`,
+      },
+      {
+        prompt: `An IPv6-only client must reach a server that has only an IPv4 address. Which pair of services makes this possible?`,
+        options: [`DHCPv6 and SLAAC`, `NAT64 and DNS64`, `OSPFv3 and BGP`, `6in4 and ISATAP`],
+        correct: 1,
+        explanation: `DNS64 synthesizes an AAAA record and NAT64 translates the IPv6 packets to IPv4.`,
+      },
+    ],
+    mini: {
+      prompt: `Large file transfers over a new 6in4 tunnel stall, but pings and small web pages work.`,
+      task: `What is the likely cause and what do you check first?`,
+    },
+    recap: `Dual stack runs both protocols and is preferred. Tunnels (6in4, 6to4, Teredo, ISATAP) wrap IPv6 in IPv4 and reduce the MTU. NAT64 with DNS64 translates between IPv6-only clients and IPv4 servers, and 464XLAT does this for mobile carriers.`,
+    classroom: `"Dual stack ang pinakamainam. Tunnel ay balot, translation ay palit ng laman. Teredo, UDP 3544, tumatawid ng NAT."`,
+  });
+
 }(window.NetReady));

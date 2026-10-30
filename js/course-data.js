@@ -76,7 +76,7 @@
       title: 'IPv6 Addressing',
       blurb: 'Ang "malaking address space" na kapalit ng IPv4.',
       status: 'available',
-      lessonIds: ['5-1', '5-2', '5-3', '5-4', '5-5'],
+      lessonIds: ['5-1', '5-2', '5-3', '5-4', '5-5', '5-6'],
     },
     {
       id: 6,
@@ -84,7 +84,7 @@
       title: 'Ports, Protocols, and Network Services',
       blurb: 'DNS, DHCP, HTTP/S, at ang mga "language" ng internet.',
       status: 'available',
-      lessonIds: ['6-1', '6-2', '6-3', '6-4', '6-5', '6-6', '6-7', '6-8', '6-9', '6-10', '6-11', '6-12'],
+      lessonIds: ['6-1', '6-2', '6-3', '6-4', '6-5', '6-6', '6-7', '6-8', '6-9', '6-10', '6-11', '6-12', '6-13'],
     },
     {
       id: 7,
@@ -92,7 +92,7 @@
       title: 'Switching, VLANs, and Layer 2',
       blurb: 'Paano nag-uusap ang mga device sa parehong network.',
       status: 'available',
-      lessonIds: ['7-1', '7-2', '7-3', '7-4', '7-5', '7-6', '7-7', '7-8', '7-9', '7-10', '7-11'],
+      lessonIds: ['7-1', '7-2', '7-3', '7-4', '7-5', '7-6', '7-7', '7-8', '7-9', '7-10', '7-11', '7-12'],
     },
     {
       id: 8,
@@ -116,7 +116,7 @@
       title: 'Cloud, Virtualization, and Modern Architecture',
       blurb: 'IaaS/PaaS/SaaS, SDN, at ang "network sa cloud".',
       status: 'available',
-      lessonIds: ['10-1', '10-2', '10-3', '10-4', '10-5', '10-6', '10-7', '10-8', '10-9', '10-10', '10-11', '10-12', '10-13'],
+      lessonIds: ['10-1', '10-2', '10-3', '10-4', '10-5', '10-6', '10-7', '10-8', '10-9', '10-10', '10-11', '10-12', '10-13', '10-14', '10-15', '10-16'],
     },
     {
       id: 11,
@@ -132,7 +132,7 @@
       title: 'Network Security',
       blurb: 'CIA triad, AAA, firewalls, at karaniwang atake.',
       status: 'available',
-      lessonIds: ['12-1', '12-2', '12-3', '12-4', '12-5', '12-6', '12-7', '12-8', '12-9', '12-10', '12-11', '12-12', '12-13', '12-14'],
+      lessonIds: ['12-1', '12-2', '12-3', '12-4', '12-5', '12-6', '12-7', '12-8', '12-9', '12-10', '12-11', '12-12', '12-13', '12-14', '12-15', '12-16', '12-17'],
     },
     {
       id: 13,
@@ -140,7 +140,7 @@
       title: 'Troubleshooting Methodology and Tools',
       blurb: 'Ang tamang proseso kapag may sirang network.',
       status: 'available',
-      lessonIds: ['13-1', '13-2', '13-3', '13-4', '13-5', '13-6', '13-7', '13-8', '13-9', '13-10', '13-11', '13-12', '13-13', '13-14'],
+      lessonIds: ['13-1', '13-2', '13-3', '13-4', '13-5', '13-6', '13-7', '13-8', '13-9', '13-10', '13-11', '13-12', '13-13', '13-14', '13-15'],
     },
     {
       id: 14,

@@ -1335,4 +1335,337 @@ Documentation and runbooks            Generated output that can be rebuilt`,
     recap: `Git stores every configuration and automation file with history, branching, review, and rollback. Work on branches, review through pull requests, merge to main, resolve conflicts carefully, revert bad changes, and keep secrets out.`,
     classroom: `"Branch bago baguhin, review bago i-merge, at kapag sablay, revert — hindi burahin ang history."`,
   });
+
+  NetReady.LESSONS['10-14'] = NetReady.lesson(10, {
+    id: '10-14',
+    slug: 'data-center-architecture-spine-leaf-and-facilities',
+    title: 'Data Center Architecture: Three-Tier, Spine-Leaf, and Facilities',
+    minutes: 16,
+    outcomes: [
+      `Compare the three-tier and spine-leaf designs.`,
+      `Define north-south and east-west traffic.`,
+      `Describe top-of-rack and end-of-row cabling.`,
+      `Explain cooling, power, and fire protection in a data center.`,
+    ],
+    why: `Network+ expects you to recognize data center designs and their physical requirements. Spine-leaf, east-west traffic, top-of-rack switching, hot and cold aisles, and fire suppression are all vocabulary the exam uses.`,
+    simple: `Traditional campus networks use three layers: core, distribution, and access. Modern data centers mostly send traffic between servers, so they use spine-leaf: every leaf switch connects to every spine switch, so any two servers are the same distance apart. Racks are arranged in hot and cold aisles to manage heat, and the room needs redundant power and gas-based fire suppression that will not destroy equipment.`,
+    taglish: `Ang lumang disenyo ay tatlong layer: core, distribution, access. Sa modernong data center, madalas ay server-to-server ang daloy, kaya spine-leaf: bawat leaf ay konektado sa bawat spine, kaya pantay ang layo ng alinmang dalawang server. May hot at cold aisle para sa init, at gas na pamatay-apoy na hindi sisira sa kagamitan.`,
+    analogy: {
+      title: 'Mall na may escalator papunta sa bawat palapag',
+      text: `Sa three-tier, para pumunta sa kabilang tindahan, akyat ka muna sa itaas at baba ulit. Sa spine-leaf, may direktang tulay mula sa bawat tindahan papunta sa bawat sentral na lobby, kaya pareho ang layo ng lahat.`,
+    },
+    steps: [
+      `Three-tier model: access layer (connects servers and endpoints), distribution layer (aggregates access switches, applies policy, routing between VLANs), and core layer (fast backbone). A collapsed core combines distribution and core into one layer for smaller networks.`,
+      `North-south traffic goes in and out of the data center (clients to servers, servers to the internet). East-west traffic moves between servers inside the data center (web to app to database, VM migration, storage). Virtualization and microservices made east-west the majority of traffic.`,
+      `Spine-leaf: leaf switches connect to servers, spine switches connect only to leaves, and every leaf has a link to every spine. Servers on different leaves are always two hops apart (leaf, spine, leaf). It scales by adding leaves or spines, uses equal-cost multipath (ECMP) routing across all links, avoids Spanning Tree blocking, and gives predictable latency. Overlays such as VXLAN stretch Layer 2 segments across the fabric.`,
+      `Top of rack (ToR): each rack holds its own switch, so servers use short patch cables and only uplinks leave the rack. End of row (EoR): servers connect over longer cables to a switch at the end of the row. Middle of row (MoR) is similar. ToR needs more switches but less cabling.`,
+      `Rack basics: standard 19-inch rack, height in rack units (1U = 1.75 inches). Equipment mounts front and back with rails. Cable management arms and labeled patch panels keep airflow clear and make troubleshooting faster.`,
+      `Cooling: arrange racks in hot aisle / cold aisle rows. Cold air enters the front of the equipment from the cold aisle, and hot air exhausts to the back into the hot aisle. Containment (a physical barrier) prevents mixing. Typical guidance is 64 to 80 degrees Fahrenheit (18 to 27 Celsius) at the intake and roughly 40 to 60 percent relative humidity. Too dry causes static electricity; too humid causes condensation and corrosion. Switch airflow direction (front to back or back to front) must match the aisle layout.`,
+      `Power: redundant feeds (A and B) to dual power supplies, UPS (battery) for short outages, a generator for long ones, and PDUs in racks. Clean, monitored power prevents corruption and surprise reboots.`,
+      `Fire protection: water sprinklers can destroy equipment, so data centers use clean agent gas systems (such as FM-200 or inert gas) or pre-action dry-pipe sprinklers that need two events (smoke detection and heat) before water flows. Detection includes smoke and very early smoke detection (VESDA).`,
+      `Colocation (colo) rents space, power, cooling, and connectivity in someone else's data center. Related: SLA, cross-connects, and meet-me rooms. Tiers (Uptime Institute I to IV) describe redundancy; Tier IV is fault tolerant.`,
+    ],
+    deepDive: [
+      {
+        title: 'Why spine-leaf has predictable latency',
+        text: `In a four-leaf, two-spine fabric, every leaf connects to both spines. A server on leaf 1 reaching a server on leaf 4 takes exactly leaf 1, spine, leaf 4 = three switches, and both spines give equal-cost paths. Losing one spine halves the cross-leaf capacity but does not break connectivity. Adding a third spine adds capacity with no redesign.`,
+        code: `        Spine1        Spine2
+        / | \ \      / | \ \
+    Leaf1 Leaf2 Leaf3 Leaf4     (every leaf -> every spine)
+     |      |     |     |
+   servers servers servers servers
+
+Any leaf to any leaf: Leaf -> Spine -> Leaf (same path length)
+Leaf-to-leaf links: none. Spine-to-spine links: none.`,
+        note: `Leaves do not link to each other, and spines do not link to each other. If you see leaf-to-leaf links, it is not a pure spine-leaf design.`,
+      },
+      {
+        title: 'Calculating oversubscription',
+        text: `A leaf has 48 server ports at 10 Gbps (480 Gbps) and 4 uplinks at 100 Gbps (400 Gbps). The ratio of downlink to uplink capacity is 480 to 400, or 1.2 to 1. Ratios of about 3 to 1 are common for general servers, while storage or AI clusters often need 1 to 1.`,
+        code: `downlink = 48 x 10 Gbps  = 480 Gbps
+uplink   =  4 x 100 Gbps = 400 Gbps
+oversubscription = 480 / 400 = 1.2 : 1`,
+      },
+    ],
+    table: {
+      label: 'Three-tier versus spine-leaf design',
+      head: ['Feature', 'Three-tier', 'Spine-leaf'],
+      rows: [
+        ['Best for', 'Campus, north-south traffic', 'Data center, east-west traffic'],
+        ['Layers', 'Core, distribution, access', 'Spine and leaf only'],
+        ['Path between servers', 'Varies, may go up to the core', 'Always leaf, spine, leaf'],
+        ['Loop prevention', 'STP blocks redundant links', 'Routed fabric with ECMP, all links used'],
+        ['Scaling', 'Upgrade the upper layers', 'Add leaves or spines'],
+      ],
+      caption: 'Spine-leaf is flat, predictable, and built for server-to-server traffic.',
+    },
+    example: `A hospital's new data center uses top-of-rack switches that uplink to two spines, with hot and cold aisle containment, dual A/B power feeds with a UPS and generator, and a clean agent fire system. Because patient systems move between virtual hosts constantly, east-west traffic is the majority.`,
+    tips: [
+      `East-west plus virtualization points to spine-leaf. Campus plus users points to three-tier.`,
+      `Match switch airflow to the aisle. A switch that pulls hot air will overheat.`,
+      `Water is the wrong answer for fire suppression in a server room unless it is a pre-action system.`,
+    ],
+    exam: `Be able to identify spine-leaf from its description (every leaf to every spine), define east-west versus north-south traffic, and choose appropriate fire suppression, cooling layout, and power redundancy.`,
+    mistakes: [
+      `Connecting leaf switches to each other and calling it spine-leaf.`,
+      `Mounting equipment with intake and exhaust facing the wrong aisle.`,
+      `Using wet sprinklers over live racks without pre-action control.`,
+    ],
+    terms: [
+      { term: 'Spine-leaf', def: `Two-layer fabric where every leaf switch connects to every spine switch.` },
+      { term: 'East-west traffic', def: `Traffic moving between servers inside the data center.` },
+      { term: 'North-south traffic', def: `Traffic entering or leaving the data center.` },
+      { term: 'Top of rack', def: `Design with a switch in each rack that uplinks to the fabric.` },
+      { term: 'Hot aisle / cold aisle', def: `Rack layout that separates cold intake air from hot exhaust air.` },
+      { term: 'Clean agent', def: `Gas fire suppression that leaves no residue on equipment.` },
+      { term: 'Colocation', def: `Renting rack space, power, and connectivity in a provider data center.` },
+    ],
+    checks: [
+      {
+        prompt: `Which architecture connects every leaf switch to every spine switch so that any two servers are the same distance apart?`,
+        options: [`Three-tier`, `Spine-leaf`, `Collapsed core`, `Star bus hybrid`],
+        correct: 1,
+        explanation: `Spine-leaf provides uniform, predictable paths and is built for east-west traffic.`,
+      },
+      {
+        prompt: `Traffic between a web server VM and its database VM inside the same data center is called what?`,
+        options: [`North-south traffic`, `East-west traffic`, `Out-of-band traffic`, `Backhaul traffic`],
+        correct: 1,
+        explanation: `Server-to-server traffic that stays inside the data center is east-west.`,
+      },
+      {
+        prompt: `Which fire protection is best for protecting live server racks from damage by the extinguishing agent?`,
+        options: [`Wet-pipe sprinklers over each rack`, `A clean agent gas system`, `A foam hose`, `Portable water extinguishers only`],
+        correct: 1,
+        explanation: `Clean agents such as FM-200 extinguish fire without water or residue that would damage equipment.`,
+      },
+    ],
+    mini: {
+      prompt: `A technician installs a switch whose fans pull air from the hot aisle, and it keeps overheating.`,
+      task: `Explain the problem and give two ways to fix it.`,
+    },
+    recap: `Three-tier suits campus north-south traffic. Spine-leaf suits east-west data center traffic with equal paths and ECMP. Use ToR or EoR cabling, hot and cold aisles, redundant A/B power with UPS and generator, and clean agent fire suppression.`,
+    classroom: `"Spine-leaf: bawat leaf sa bawat spine. East-west ang server sa server. Clean agent ang apoy, hindi tubig."`,
+  });
+
+  NetReady.LESSONS['10-15'] = NetReady.lesson(10, {
+    id: '10-15',
+    slug: 'storage-networking-das-nas-san-iscsi-and-fibre-channel',
+    title: 'Storage Networking: DAS, NAS, SAN, iSCSI, and Fibre Channel',
+    minutes: 15,
+    outcomes: [
+      `Compare DAS, NAS, and SAN.`,
+      `Explain the difference between file-level and block-level storage.`,
+      `Describe iSCSI, Fibre Channel, and FCoE.`,
+      `Explain zoning, LUN masking, and multipathing.`,
+    ],
+    why: `Servers need storage, and how that storage is attached drives network design. The exam tests the difference between NAS and SAN, the names of the protocols, and which medium or port each uses.`,
+    simple: `Direct-attached storage (DAS) is a disk inside or cabled to one server. A NAS is a file server on the network that shares folders. A SAN is a separate high-speed network that gives servers raw disk blocks, which the server formats as if the disk were local. SANs run over Fibre Channel or over Ethernet with iSCSI or FCoE.`,
+    taglish: `Ang DAS ay disk na nakakabit sa isang server lang. Ang NAS ay file server sa network na nagse-share ng folders. Ang SAN ay hiwalay na mabilis na network na nagbibigay ng raw na disk blocks na ifo-format ng server na parang lokal na disk. Fibre Channel, iSCSI, o FCoE ang gamit.`,
+    analogy: {
+      title: 'Bodega, aparador, at bukas na lote',
+      text: `Ang DAS ay aparador sa sarili mong kwarto. Ang NAS ay shared na aparador na may label ang bawat folder at may tagapamahala. Ang SAN ay bakanteng lote na ikaw mismo ang magtatayo ng estante: ikaw ang magpapasya kung paano gagamitin ang bawat bloke.`,
+    },
+    steps: [
+      `DAS (direct-attached storage): internal or external drives connected by SATA, SAS, or USB to one host. Simple and fast but not shared.`,
+      `NAS (network-attached storage): a device with its own operating system that shares files over a normal Ethernet network using file protocols: SMB/CIFS (Windows, TCP 445), NFS (UNIX and Linux, TCP/UDP 2049), and sometimes FTP or AFP. It provides file-level access: clients ask for a file by path.`,
+      `SAN (storage area network): a dedicated network that provides block-level access. The server sees a LUN (logical unit number) as a local disk and puts its own file system on it. Used for databases and virtual machine storage because of speed and low latency.`,
+      `Fibre Channel (FC): a dedicated, lossless storage network using FC switches, fiber cables, and HBAs (host bus adapters) in servers. Speeds of 8, 16, 32, 64 Gbps and up. Devices are identified by a WWN (World Wide Name); each port has a WWPN. It does not use IP.`,
+      `iSCSI: carries SCSI commands inside TCP/IP (port 3260) over standard Ethernet. Cheaper than FC because it reuses Ethernet switches and cables. The server is the initiator and the storage array is the target, identified by an IQN (iSCSI Qualified Name). Best practice: a dedicated VLAN or network, jumbo frames (MTU 9000), and 10 Gbps or faster links.`,
+      `FCoE (Fibre Channel over Ethernet): carries FC frames directly over Ethernet (EtherType 0x8906), not through IP, so it is not routable. It needs a lossless Ethernet fabric (Data Center Bridging with PFC) and a CNA (converged network adapter). It lets one cable carry LAN and SAN traffic.`,
+      `Zoning (FC) is configured on the switch to control which initiators can see which targets. LUN masking is configured on the storage array to control which hosts can access which LUNs. Together they prevent one server from corrupting another's disk.`,
+      `Multipathing (MPIO): two or more independent paths (separate adapters, switches, and controllers) between server and storage, for redundancy and load balancing. Loss of one path does not interrupt access.`,
+      `Other terms: object storage (for example Amazon S3, accessed over HTTP APIs, used for backups and cloud data), InfiniBand (very high-speed low-latency link for clusters and HPC), and thin provisioning (allocating more logical space than physically exists).`,
+    ],
+    deepDive: [
+      {
+        title: 'The same file two ways',
+        text: `With NAS, a user opens \\\\nas01\\finance\\budget.xlsx. The NAS owns the file system, permissions, and locking. With a SAN LUN, the server sees a blank 2 TB disk, formats it NTFS, and handles the files itself. The NAS cannot be used as a boot disk for a database the same way a LUN can.`,
+        code: `NAS  (file level):   client -> SMB/NFS -> NAS file system -> disks
+SAN  (block level):  server -> iSCSI/FC -> LUN (raw blocks) -> server's own file system`,
+        note: `Remember: NAS = files, SAN = blocks. The exam often phrases it as "the host sees it as a local disk" for SAN.`,
+      },
+      {
+        title: 'Why iSCSI traffic needs its own VLAN',
+        text: `iSCSI is sensitive to delay and loss. If it shares a VLAN and uplink with user traffic, a large download can stall a database. Best practice puts iSCSI on its own VLAN with jumbo frames end to end, dedicated NICs, and two independent paths for multipathing. A mismatch in MTU anywhere on the path causes fragmentation or silent drops.`,
+        code: `interface Gi1/0/10
+  switchport access vlan 50       (iSCSI VLAN)
+  mtu 9000                        (jumbo frames, set end to end)
+  spanning-tree portfast`,
+      },
+    ],
+    table: {
+      label: 'Storage types compared',
+      head: ['Type', 'Access level', 'Network and protocols'],
+      rows: [
+        ['DAS', 'Block, one host', 'SATA, SAS, USB'],
+        ['NAS', 'File level', 'Ethernet, SMB (445), NFS (2049)'],
+        ['SAN with Fibre Channel', 'Block level', 'Dedicated FC fabric, HBAs, WWN'],
+        ['SAN with iSCSI', 'Block level', 'Ethernet, TCP 3260, IQN'],
+        ['SAN with FCoE', 'Block level', 'Lossless Ethernet, CNA, EtherType 0x8906'],
+      ],
+      caption: 'NAS shares files; SAN presents disks.',
+    },
+    example: `A company runs its virtual machines on a SAN reached with iSCSI over a dedicated 25 Gbps VLAN with two paths for MPIO, and shares department folders from a NAS over SMB. Backups go to object storage in the cloud.`,
+    tips: [
+      `File-level equals NAS. Block-level equals SAN. A "LUN" is always a SAN term.`,
+      `iSCSI uses TCP port 3260 and is routable. FCoE is not routable.`,
+      `Zoning is on the FC switch. LUN masking is on the storage array.`,
+    ],
+    exam: `Distinguish NAS (file, SMB/NFS) from SAN (block), know iSCSI port 3260, Fibre Channel components (HBA, WWN), FCoE needs lossless Ethernet, and multipathing provides redundancy.`,
+    mistakes: [
+      `Calling a NAS a SAN because both are on a network.`,
+      `Forgetting jumbo frames must match on every device along the iSCSI path.`,
+      `Letting any server see all LUNs without masking.`,
+    ],
+    terms: [
+      { term: 'NAS', def: `Network-attached storage that shares files over the network.` },
+      { term: 'SAN', def: `Storage area network that provides block-level storage to servers.` },
+      { term: 'LUN', def: `Logical unit number identifying a block volume presented to a server.` },
+      { term: 'iSCSI', def: `Protocol that carries SCSI commands over TCP/IP, port 3260.` },
+      { term: 'HBA', def: `Host bus adapter that connects a server to a Fibre Channel network.` },
+      { term: 'WWN', def: `World Wide Name, the unique identifier of a Fibre Channel device or port.` },
+      { term: 'Multipathing', def: `Using multiple independent paths to storage for failover and load sharing.` },
+    ],
+    checks: [
+      {
+        prompt: `A server must see storage as a locally attached disk that it can format with its own file system. Which technology provides this?`,
+        options: [`NAS using SMB`, `SAN using block-level LUNs`, `An FTP server`, `A DNS server`],
+        correct: 1,
+        explanation: `A SAN provides block-level storage, which the server treats as a local disk.`,
+      },
+      {
+        prompt: `Which TCP port does iSCSI use by default?`,
+        options: [`445`, `2049`, `3260`, `3389`],
+        correct: 2,
+        explanation: `iSCSI uses TCP 3260. SMB is 445 and NFS is 2049.`,
+      },
+      {
+        prompt: `Which technology lets one converged adapter carry both LAN and Fibre Channel traffic over Ethernet without using IP?`,
+        options: [`iSCSI`, `NFS`, `FCoE`, `SMB`],
+        correct: 2,
+        explanation: `FCoE puts FC frames directly in Ethernet and requires a lossless fabric and a CNA.`,
+      },
+    ],
+    mini: {
+      prompt: `Two new servers can both see and mount the same LUN, and the file system gets corrupted.`,
+      task: `Which two controls were missing, and where is each configured?`,
+    },
+    recap: `DAS is local, NAS shares files (SMB, NFS), and SAN delivers block storage over Fibre Channel, iSCSI (TCP 3260), or FCoE. Zoning and LUN masking restrict access, and multipathing provides redundancy.`,
+    classroom: `"NAS ay files, SAN ay blocks. iSCSI ay port 3260 sa Ethernet. Zoning sa switch, masking sa storage."`,
+  });
+
+  NetReady.LESSONS['10-16'] = NetReady.lesson(10, {
+    id: '10-16',
+    slug: 'containers-kubernetes-serverless-and-virtual-networking',
+    title: 'Containers, Kubernetes, Serverless, and Virtual Networking',
+    minutes: 16,
+    outcomes: [
+      `Compare virtual machines and containers.`,
+      `Explain how containers and Kubernetes pods get network connectivity.`,
+      `Describe serverless computing.`,
+      `Explain virtual switches, NIC teaming, and microsegmentation.`,
+    ],
+    why: `Modern networks carry traffic between containers, virtual machines, and cloud functions as often as between physical machines. The exam expects you to understand how virtual networking works and what each cloud-native term means.`,
+    simple: `A virtual machine includes a whole operating system and runs on a hypervisor. A container shares the host's kernel and holds only the app and its libraries, so it starts in seconds and uses little memory. Kubernetes automates running many containers across many hosts. Serverless goes one step further: you upload a function and the provider runs it only when called. Inside the host, a virtual switch connects the virtual network cards to the physical network.`,
+    taglish: `Ang VM ay may buong operating system. Ang container ay gumagamit ng kernel ng host kaya magaan at mabilis. Ang Kubernetes ang nag-aautomate ng maraming container. Ang serverless ay function lang na pinapatakbo ng provider kapag tinawag. Ang virtual switch ang nag-uugnay sa virtual NIC at sa pisikal na network.`,
+    analogy: {
+      title: 'Bahay, apartment unit, at hotel room service',
+      text: `Ang VM ay buong bahay na may sariling pundasyon at kuryente. Ang container ay unit sa apartment na iisa ang pundasyon at tubo ng gusali. Ang serverless ay room service: umoorder ka lang kapag kailangan at nagbabayad ka lang sa nakonsumo.`,
+    },
+    steps: [
+      `Hypervisors: Type 1 (bare metal, such as VMware ESXi, Microsoft Hyper-V, KVM) runs directly on hardware and is used in data centers. Type 2 (hosted, such as VirtualBox or VMware Workstation) runs on top of an operating system and is used on desktops.`,
+      `Virtual switch (vSwitch): software switch in the hypervisor that connects virtual NICs (vNICs) to each other and to the physical NICs (uplinks). It supports VLANs through port groups, and a distributed switch spans many hosts for consistent policy. Traffic between two VMs on the same host and same VLAN never leaves the host.`,
+      `Virtual network modes: bridged (VM appears on the physical LAN with its own IP), NAT (VM shares the host's address), host-only (VMs and host only), and internal. Choose by what must reach the VM.`,
+      `Containers: packaged with an image, run by an engine such as Docker or containerd. They share the host kernel, so they are lighter than VMs but isolated less strongly. Docker network drivers: bridge (default, private network on the host with NAT), host (shares the host network stack), overlay (spans several hosts), and none.`,
+      `Kubernetes (K8s): an orchestrator that schedules containers in pods across worker nodes. Each pod gets its own IP address. A Service gives a stable virtual IP and DNS name to a changing set of pods and load-balances across them. An Ingress controller exposes HTTP and HTTPS services to the outside. A CNI plugin provides pod networking, and network policies act as a firewall between pods.`,
+      `Serverless / function as a service (FaaS), such as AWS Lambda, Azure Functions: code runs in response to events (an HTTP call, a file upload), scales automatically, and is billed per execution. There are no servers to patch, but you have limits on run time and rely on an API gateway for network access.`,
+      `Microsegmentation: fine-grained firewall rules between workloads (even between two VMs on the same subnet), enforced in the hypervisor or the container network. It limits an attacker's lateral movement. It is a core part of zero trust.`,
+      `NIC teaming / bonding: combining several physical NICs on a server for redundancy and bandwidth, similar to link aggregation. SR-IOV lets a physical NIC present virtual functions directly to VMs, bypassing the vSwitch for high performance. VNFs and NFV (network functions virtualization) run firewalls, routers, and load balancers as software on standard servers.`,
+    ],
+    deepDive: [
+      {
+        title: 'Following a request through Kubernetes',
+        text: `A user opens https://shop.example.com. DNS points to the cloud load balancer in front of the Ingress controller. The Ingress forwards the request to the shop Service, which holds a stable virtual IP. The Service picks one of three healthy pods and sends the request to its pod IP. If a pod dies, the Service stops sending to it and Kubernetes starts a replacement with a new IP, but clients never notice.`,
+        code: `Internet -> Load balancer -> Ingress controller
+         -> Service "shop" (ClusterIP 10.96.12.5)
+              -> Pod shop-a (10.244.1.7)
+              -> Pod shop-b (10.244.2.4)
+              -> Pod shop-c (10.244.1.9)`,
+        note: `Pod IP addresses are temporary. That is why a Service gives a stable address and why you should never hard-code a pod IP.`,
+      },
+      {
+        title: 'Docker bridge network and port publishing',
+        text: `By default, containers join the docker0 bridge on a private subnet such as 172.17.0.0/16 and are not reachable from outside. Publishing a port with -p 8080:80 creates a NAT rule on the host that forwards host port 8080 to container port 80.`,
+        code: `docker run -d --name web -p 8080:80 nginx
+docker ps
+CONTAINER ID  IMAGE  PORTS                   NAMES
+a1b2c3d4e5f6  nginx  0.0.0.0:8080->80/tcp    web`,
+      },
+    ],
+    table: {
+      label: 'Virtual machines, containers, and serverless compared',
+      head: ['Model', 'Includes', 'Start time and cost'],
+      rows: [
+        ['Virtual machine', 'Full guest OS on a hypervisor', 'Minutes, pay for the running VM'],
+        ['Container', 'App and libraries, shares host kernel', 'Seconds, light on resources'],
+        ['Serverless function', 'Only your code, provider runs it', 'Milliseconds, pay per execution'],
+      ],
+      caption: 'Moving right removes more of the stack you have to manage.',
+    },
+    example: `A retailer moves its web shop to Kubernetes. Three pods run behind a Service and an Ingress. Network policies allow only the shop pods to reach the payment database pod. Image resizing runs as a serverless function triggered by uploads to cloud storage.`,
+    tips: [
+      `Shares the host kernel equals container. Own kernel equals VM.`,
+      `A Service gives a stable address; a pod IP is temporary.`,
+      `Microsegmentation limits east-west attacks even inside one subnet.`,
+    ],
+    exam: `Be able to contrast VMs and containers, name Type 1 and Type 2 hypervisors, describe a vSwitch and port groups, define serverless and microsegmentation, and recognize NIC teaming and SR-IOV.`,
+    mistakes: [
+      `Thinking containers are fully isolated like VMs. They share the host kernel.`,
+      `Hard-coding a pod IP address that changes when the pod restarts.`,
+      `Forgetting that two VMs on one host can talk without the physical network, bypassing physical firewalls.`,
+    ],
+    terms: [
+      { term: 'Hypervisor', def: `Software that creates and runs virtual machines.` },
+      { term: 'vSwitch', def: `Software switch that connects virtual NICs to each other and to the physical network.` },
+      { term: 'Container', def: `Lightweight packaged app that shares the host operating system kernel.` },
+      { term: 'Kubernetes', def: `Platform that deploys, scales, and networks containers across many hosts.` },
+      { term: 'Serverless', def: `Model where the provider runs your function on demand and bills per execution.` },
+      { term: 'Microsegmentation', def: `Fine-grained workload-to-workload firewall policy.` },
+      { term: 'SR-IOV', def: `Technology that gives VMs direct access to slices of a physical NIC.` },
+    ],
+    commands: [
+      { os: 'Linux', cmd: 'docker network ls', desc: `Lists Docker networks such as bridge, host, and none.` },
+      { os: 'Linux', cmd: 'kubectl get pods -o wide', desc: `Shows pods, their node, and their pod IP addresses.` },
+      { os: 'Linux', cmd: 'kubectl get svc', desc: `Lists Services and their cluster IP and ports.` },
+      { os: 'Linux', cmd: 'ip link show', desc: `Shows virtual interfaces and bridges such as docker0 and veth devices.` },
+    ],
+    checks: [
+      {
+        prompt: `Which statement about containers is correct?`,
+        options: [`Each has its own full guest operating system kernel`, `They share the host operating system kernel`, `They require a Type 2 hypervisor`, `They cannot use networking`],
+        correct: 1,
+        explanation: `Containers share the host kernel, which makes them lightweight but less isolated than VMs.`,
+      },
+      {
+        prompt: `In Kubernetes, what provides a stable IP address and DNS name in front of a changing set of pods?`,
+        options: [`A Service`, `A node`, `A ConfigMap`, `A Dockerfile`],
+        correct: 0,
+        explanation: `A Service load-balances across matching pods and keeps a constant address as pods come and go.`,
+      },
+      {
+        prompt: `Which technique restricts traffic between two workloads even if they are on the same subnet and host?`,
+        options: [`Port mirroring`, `Microsegmentation`, `Link aggregation`, `Jumbo frames`],
+        correct: 1,
+        explanation: `Microsegmentation applies firewall policy between individual workloads, limiting lateral movement.`,
+      },
+    ],
+    mini: {
+      prompt: `A team hard-coded the IP of a database pod in their application. After a node restarted, the app broke.`,
+      task: `What happened and what is the correct design?`,
+    },
+    recap: `VMs carry a full OS on a hypervisor, containers share the host kernel, and serverless runs code on demand. A vSwitch connects virtual NICs to uplinks; Kubernetes uses pods, Services, Ingress, and CNI networking. Microsegmentation limits lateral movement, and NIC teaming and SR-IOV improve host connectivity.`,
+    classroom: `"Container ay nakikihati sa kernel. Service ang matatag na address ng mga pod. Microsegmentation ang harang sa gilid-gilid."`,
+  });
+
 }(window.NetReady));
